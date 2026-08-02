@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{PAGE_TITLE}}</title>
+    <link rel="stylesheet" href="assets/css/fonts.css" />
+    <link rel="stylesheet" href="assets/css/menu.css" />
+    <script>
+      (function () {
+        try {
+          var savedTheme = localStorage.getItem("denj-theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "light" ? "light" : "dark";
+        } catch (e) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <header>
+      <button
+        class="mobile-menu-toggle"
+        id="mobileMenuToggle"
+        type="button"
+        aria-label="باز کردن منو"
+        aria-expanded="false"
+      >
+        <i></i><i></i><i></i>
+      </button>
+      <div class="mobile-menu-backdrop" id="mobileMenuBackdrop"></div>
+      <aside class="mobile-menu-drawer" id="mobileMenuDrawer">
+        <div class="mobile-menu-head">
+          <b>کافه دنج</b
+          ><button id="mobileMenuClose" type="button" aria-label="بستن">
+            ×
+          </button>
+        </div>
+        <div class="mobile-menu-actions">{{ACCOUNT_ACTIONS}}</div>
+      </aside>
+      <nav class="account-actions" aria-label="حساب کاربری">
+        {{ACCOUNT_ACTIONS}}
+      </nav>
+      <button
+        class="theme-switch"
+        id="themeSwitch"
+        type="button"
+        aria-label="تغییر به حالت روشن"
+        aria-pressed="false"
+      >
+        <span class="theme-switch-icon theme-sun" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+            /></svg
+        ></span>
+        <span class="theme-switch-thumb" aria-hidden="true"></span>
+        <span class="theme-switch-icon theme-moon" aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <path d="M20.7 15.1A9 9 0 0 1 8.9 3.3 9 9 0 1 0 20.7 15.1Z" /></svg
+        ></span>
+      </button>
+      <div class="logo-mark">
+        <svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 640 640"
+  width="100%"
+  height="100%"
+  role="img"
+  aria-labelledby="coffee-cup-title coffee-cup-desc"
+  preserveAspectRatio="xMidYMid meet"
+  style="
+    --primary-color: #c9a24d;
+    --primary-light: #e3c978;
+    --coffee-dark: #291a14;
+    --coffee-mid: #5b3827;
+    --coffee-light: #8b5a3c;
+    --cream: #f5ead8;
+    --cream-light: #fffaf1;
+    --beige: #d9c4a5;
+    --neutral: #756d63;
+    --shadow: rgba(31, 22, 17, .22);
+  "
+>
+  <title id="coffee-cup-title">Luxury steaming coffee cup</title>
+  <desc id="coffee-cup-desc">
+    Premium minimalist coffee cup with espresso, curved handle, golden accents, subtle highlights, shadows, and rising steam.
+  </desc>
+
+  <defs>
+    <linearGradient id="ceramic-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--cream-light)"/>
+      <stop offset="38%" stop-color="var(--cream)"/>
+      <stop offset="72%" stop-color="var(--beige)"/>
+      <stop offset="100%" stop-color="#a98d6d"/>
+    </linearGradient>
+
+    <linearGradient id="ceramic-highlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fffdf8" stop-opacity=".92"/>
+      <stop offset="52%" stop-color="#fff8eb" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#fff8eb" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="coffee-gradient" cx="42%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="var(--coffee-light)"/>
+      <stop offset="48%" stop-color="var(--coffee-mid)"/>
+      <stop offset="100%" stop-color="var(--coffee-dark)"/>
+    </radialGradient>
+
+    <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--primary-light)"/>
+      <stop offset="45%" stop-color="var(--primary-color)"/>
+      <stop offset="100%" stop-color="#9d762d"/>
+    </linearGradient>
+
+    <linearGradient id="steam-gradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="var(--primary-light)" stop-opacity=".82"/>
+      <stop offset="55%" stop-color="var(--cream-light)" stop-opacity=".56"/>
+      <stop offset="100%" stop-color="var(--cream-light)" stop-opacity=".08"/>
+    </linearGradient>
+
+    <radialGradient id="ground-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="var(--shadow)"/>
+      <stop offset="65%" stop-color="var(--shadow)" stop-opacity=".08"/>
+      <stop offset="100%" stop-color="var(--shadow)" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="soft-blur" x="-30%" y="-50%" width="160%" height="200%">
+      <feGaussianBlur stdDeviation="11"/>
+    </filter>
+
+    <filter id="small-blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+
+    <clipPath id="cup-body-clip">
+      <path d="M143 284H497V400C497 479 428 530 320 530S143 479 143 400V284Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Ground shadow -->
+  <g id="shadows" aria-hidden="true">
+    <ellipse
+      cx="320"
+      cy="545"
+      rx="190"
+      ry="27"
+      fill="url(#ground-shadow)"
+      filter="url(#soft-blur)"
+    />
+
+    <ellipse
+      cx="320"
+      cy="535"
+      rx="143"
+      ry="12"
+      fill="var(--coffee-dark)"
+      opacity=".08"
+      filter="url(#small-blur)"
+    />
+  </g>
+
+  <!-- Steam -->
+  <g id="steam" fill="none" stroke="url(#steam-gradient)" stroke-linecap="round">
+    <path
+      class="steam-wave steam-wave-left"
+      d="M244 245C218 219 224 190 248 164C271 139 272 112 249 84"
+      stroke-width="12"
+    />
+
+    <path
+      class="steam-wave steam-wave-center"
+      d="M320 232C294 204 301 174 326 147C350 121 351 92 328 63"
+      stroke-width="14"
+    />
+
+    <path
+      class="steam-wave steam-wave-right"
+      d="M397 245C371 218 378 190 402 165C426 140 428 112 405 85"
+      stroke-width="11"
+    />
+  </g>
+
+  <!-- Handle -->
+  <g id="handle">
+    <path
+      class="handle-body"
+      d="
+        M466 306
+        C508 285 551 297 567 330
+        C586 369 568 420 528 443
+        C505 456 481 453 459 438
+        L459 397
+        C477 412 494 415 509 405
+        C531 390 538 358 527 338
+        C517 321 493 320 468 333
+        Z
+      "
+      fill="url(#ceramic-gradient)"
+    />
+
+    <path
+      class="handle-highlight"
+      d="
+        M475 326
+        C498 315 519 321 527 338
+        C538 359 531 390 509 405
+        C493 416 477 412 459 397
+      "
+      fill="none"
+      stroke="var(--cream-light)"
+      stroke-width="7"
+      stroke-linecap="round"
+      opacity=".7"
+    />
+
+    <path
+      class="handle-inner-shadow"
+      d="
+        M486 340
+        C504 332 518 337 522 350
+        C528 368 519 389 503 398
+      "
+      fill="none"
+      stroke="#8d6c4d"
+      stroke-width="5"
+      stroke-linecap="round"
+      opacity=".5"
+    />
+
+    <path
+      class="handle-gold-detail"
+      d="M468 326C481 319 493 317 504 319"
+      fill="none"
+      stroke="var(--primary-color)"
+      stroke-width="3"
+      stroke-linecap="round"
+      opacity=".75"
+    />
+  </g>
+
+  <!-- Cup -->
+  <g id="cup">
+    <!-- Main body shadow -->
+    <path
+      class="cup-shadow"
+      d="M143 284H497V400C497 479 428 530 320 530S143 479 143 400V284Z"
+      fill="var(--coffee-dark)"
+      opacity=".14"
+      transform="translate(0 8)"
+      filter="url(#soft-blur)"
+    />
+
+    <!-- Ceramic body -->
+    <path
+      class="cup-body"
+      d="M143 284H497V400C497 479 428 530 320 530S143 479 143 400V284Z"
+      fill="url(#ceramic-gradient)"
+    />
+
+    <!-- Main ceramic highlight -->
+    <path
+      class="cup-surface-highlight"
+      d="
+        M143 294H497V399
+        C497 463 453 505 389 522
+        C417 493 430 449 430 393V294Z
+      "
+      fill="url(#ceramic-highlight)"
+      opacity=".72"
+    />
+
+    <!-- Gold side accent -->
+    <path
+      class="cup-gold-accent"
+      d="
+        M158 318V396
+        C158 444 180 476 214 497
+      "
+      fill="none"
+      stroke="url(#gold-gradient)"
+      stroke-width="5"
+      stroke-linecap="round"
+      opacity=".78"
+    />
+
+    <!-- Soft body reflection -->
+    <path
+      class="cup-reflection"
+      d="
+        M184 332
+        C207 351 221 358 244 364
+        C228 407 231 451 252 482
+        C213 465 190 435 184 393Z
+      "
+      fill="var(--cream-light)"
+      opacity=".15"
+      clip-path="url(#cup-body-clip)"
+    />
+
+    <!-- Lower ceramic shading -->
+    <path
+      class="cup-lower-shade"
+      d="
+        M163 423
+        C195 484 254 515 320 516
+        C388 516 447 484 478 421
+        C459 489 402 526 320 530
+        C239 530 182 492 163 423Z
+      "
+      fill="#805a3f"
+      opacity=".12"
+    />
+  </g>
+
+  <!-- Coffee -->
+  <g id="coffee">
+    <!-- Outer coffee rim -->
+    <ellipse
+      class="coffee-rim"
+      cx="320"
+      cy="286"
+      rx="177"
+      ry="61"
+      fill="var(--cream)"
+    />
+
+    <!-- Coffee surface -->
+    <ellipse
+      class="coffee-surface"
+      cx="320"
+      cy="282"
+      rx="157"
+      ry="46"
+      fill="url(#coffee-gradient)"
+    />
+
+    <!-- Espresso crema -->
+    <g
+      class="coffee-crema"
+      fill="none"
+      stroke-linecap="round"
+    >
+      <path
+        d="M211 279C241 254 283 250 319 264C350 276 382 276 414 259"
+        stroke="#b8784c"
+        stroke-width="8"
+        opacity=".72"
+      />
+
+      <path
+        d="M242 295C270 276 307 271 336 283C361 294 384 291 401 281"
+        stroke="#9b603c"
+        stroke-width="6"
+        opacity=".62"
+      />
+
+      <path
+        d="M281 253C302 245 324 246 345 254"
+        stroke="#d39a68"
+        stroke-width="5"
+        opacity=".75"
+      />
+    </g>
+
+    <!-- Espresso highlight -->
+    <path
+      class="coffee-highlight"
+      d="M222 263C249 244 282 239 315 244"
+      fill="none"
+      stroke="var(--primary-light)"
+      stroke-width="5"
+      stroke-linecap="round"
+      opacity=".5"
+    />
+
+    <!-- Front rim -->
+    <path
+      class="coffee-front-rim"
+      d="
+        M143 284
+        C146 313 224 336 320 336
+        C416 336 494 313 497 284
+      "
+      fill="none"
+      stroke="var(--cream-light)"
+      stroke-width="11"
+      stroke-linecap="round"
+      opacity=".82"
+    />
+
+    <!-- Gold rim accent -->
+    <path
+      class="coffee-gold-rim"
+      d="
+        M157 286
+        C170 309 235 326 320 326
+        C405 326 470 309 483 286
+      "
+      fill="none"
+      stroke="url(#gold-gradient)"
+      stroke-width="3.5"
+      stroke-linecap="round"
+      opacity=".9"
+    />
+
+    <!-- Subtle crema reflection -->
+    <ellipse
+      cx="320"
+      cy="282"
+      rx="126"
+      ry="30"
+      fill="none"
+      stroke="var(--cream-light)"
+      stroke-width="2"
+      opacity=".08"
+    />
+  </g>
+
+  <!-- Premium highlights -->
+  <g id="highlights" aria-hidden="true">
+    <path
+      class="highlight-main"
+      d="M203 351V401C203 431 214 454 234 471"
+      fill="none"
+      stroke="var(--cream-light)"
+      stroke-width="9"
+      stroke-linecap="round"
+      opacity=".25"
+    />
+
+    <path
+      class="highlight-gold"
+      d="M391 473C409 460 422 443 429 424"
+      fill="none"
+      stroke="var(--primary-light)"
+      stroke-width="4"
+      stroke-linecap="round"
+      opacity=".46"
+    />
+
+    <circle
+      class="gold-detail"
+      cx="458"
+      cy="458"
+      r="3"
+      fill="var(--primary-light)"
+      opacity=".75"
+    />
+  </g>
+</svg>
+      </div>
+      <h1>کافه دنج</h1>
+      <p>D E N J &nbsp; C A F É</p>
+    </header>
+    <div class="controls">
+      <div class="search-box">
+        <input id="searchInput" type="text" placeholder="جستجو در منو..." /><svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </div>
+      <div class="categories" id="categoryBar">
+        <button class="cat-btn active" data-cat="all">همه</button
+        ><!-- BEGIN:CATEGORY_ITEM --><button
+          class="cat-btn"
+          data-cat="{{SLUG}}"
+        >
+          {{NAME}}</button
+        ><!-- END:CATEGORY_ITEM -->
+      </div>
+    </div>
+    <div class="menu-grid" id="menuGrid">
+      <!-- BEGIN:PRODUCT_ITEM -->
+      <article
+        class="item-card"
+        data-cat="{{CATEGORY_SLUG}}"
+        data-name="{{NAME}}"
+      >
+        <div class="thumb">
+          {{THUMB_HTML}}<span class="availability"><i></i> آماده سفارش</span>
+        </div>
+        <div class="item-body">
+          <div class="item-card-meta">
+            <span class="item-kicker">انتخاب دنج</span>{{BADGE_HTML}}
+          </div>
+          <h2 class="item-title">{{NAME}}</h2>
+          {{DESCRIPTION_HTML}}
+          <div class="item-pricing">
+            <div>
+              <small>قیمت</small><span class="price">{{PRICE_HTML}}</span>
+            </div>
+            {{DISCOUNT_BADGE_HTML}}
+          </div>
+          {{CART_ACTION}}
+        </div>
+      </article>
+      <!-- END:PRODUCT_ITEM -->
+    </div>
+    <div class="empty-state" id="emptyState">
+      چیزی با این عنوان در منو پیدا نشد
+    </div>
+    <footer>© کافه دنج — تمام حقوق محفوظ است</footer>
+    <footer>
+      ساخته و توسعه داده شده توسط
+      <a class="developer-name" href="www.rezaforghi.ir">
+        رضا فروغی
+      </a>
+      
+    </footer>
+    <!-- BEGIN:EVENT_POPUP -->
+    <div class="event-overlay" id="eventOverlay">
+      <div class="event-modal">
+        <button class="event-close" id="eventCloseBtn" aria-label="بستن">
+          ×
+        </button>
+        <h3>{{EVENT_TITLE}}</h3>
+        <p>{{EVENT_CONTENT}}</p>
+      </div>
+    </div>
+    <!-- END:EVENT_POPUP -->
+    <script src="assets/js/menu.js"></script>
+  </body>
+</html>

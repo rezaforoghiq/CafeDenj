@@ -1,0 +1,2 @@
+-- Migration: add payment_method to orders (safe, idempotent if MySQL version supports IF NOT EXISTS)
+ALTER TABLE `orders` ADD COLUMN IF NOT EXISTS `payment_method` ENUM('card','cash','transfer') NULL DEFAULT NULL;

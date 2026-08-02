@@ -1,0 +1,59 @@
+/* public_html/assets/css/fonts.css
+ * -----------------------------------------------------------------------
+ * فونت‌های سایت به‌صورت لوکال (نه از Google Fonts). این فایل جایگزین
+ * لینک‌های قبلی fonts.googleapis.com شده.
+ *
+ * فایل‌های واقعی فونت (.woff2) باید داخل همین پوشه‌ها قرار بگیرن:
+ *   public_html/assets/fonts/vazirmatn/
+ *   public_html/assets/fonts/noto-naskh-arabic/
+ * (دستورالعمل دقیق دانلود در RESILIENCE.md هست)
+ *
+ * تا وقتی فایل‌های واقعی رو نذاشتید، مرورگر خودکار میره سراغ فونت‌های
+ * جایگزین (Tahoma / Segoe UI / سیستم) — یعنی سایت هیچ‌وقت خراب یا
+ * بدون متن نمی‌شه، فقط فونتش فرق می‌کنه. این یعنی Graceful Degradation.
+ * -----------------------------------------------------------------------
+ */
+
+@font-face{
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/vazirmatn/Vazirmatn-Regular.woff2') format('woff2');
+}
+@font-face{
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/vazirmatn/Vazirmatn-Medium.woff2') format('woff2');
+}
+@font-face{
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/vazirmatn/Vazirmatn-SemiBold.woff2') format('woff2');
+}
+@font-face{
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/vazirmatn/Vazirmatn-Bold.woff2') format('woff2');
+}
+
+@font-face{
+  font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/noto-naskh-arabic/noto-naskh-arabic-500.woff2') format('woff2');
+}
+@font-face{
+  font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/noto-naskh-arabic/noto-naskh-arabic-700.woff2') format('woff2');
+}

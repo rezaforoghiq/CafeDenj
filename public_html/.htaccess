@@ -1,0 +1,67 @@
+# public_html/.htaccess
+# -----------------------------------------------------------------------
+# تنظیمات امنیتی/بهینه‌سازی برای هاست اشتراکی لینوکسی (Apache/LiteSpeed).
+# همهٔ بخش‌ها داخل <IfModule> هستند تا اگر ماژولی روی هاست غیرفعال بود،
+# کل سایت با خطای 500 پایین نیاید.
+# -----------------------------------------------------------------------
+
+# غیرفعال‌سازی نمایش لیست فایل‌های پوشه
+Options -Indexes
+
+# مخفی‌کردن نسخهٔ Apache/PHP از هدر پاسخ (بیشتر هاست‌ها اجازهٔ این خط را نمی‌دهند؛
+# اگر خطای 500 داد، همین خط را کامنت کنید)
+# ServerSignature Off
+
+# جلوگیری از دسترسی مستقیم به فایل‌های حساس/پنهان در صورتی که به‌اشتباه
+# داخل public_html آپلود شوند (.env، .git، .htpasswd و ...)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+<FilesMatch "\.(sql|log|md|env)$">
+    Require all denied
+</FilesMatch>
+
+# هدرهای امنیتی پایه
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# فشرده‌سازی Gzip برای فایل‌های متنی (سرعت بارگذاری بهتر روی موبایل)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+    AddOutputFilterByType DEFLATE application/javascript application/json
+</IfModule>
+
+# کش مرورگر برای فایل‌های ثابت (تصاویر، CSS، JS)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg  "access plus 1 month"
+    ExpiresByType image/png   "access plus 1 month"
+    ExpiresByType image/webp  "access plus 1 month"
+    ExpiresByType text/css    "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType font/woff2  "access plus 1 month"
+    ExpiresByType font/woff   "access plus 1 month"
+</IfModule>
+
+# -----------------------------------------------------------------------
+# مسیرهای تمیز (Clean URLs) — حذف پسوند .php از آدرس‌ها
+# مثال: /admin/dashboard به‌جای /admin/dashboard.php
+# اگر فایلی با همین اسم + .php وجود داشته باشد، به‌صورت داخلی serve می‌شود؛
+# در غیر این صورت (فایل استاتیک، پوشه یا مسیر ناموجود) دست‌نخورده می‌ماند.
+# -----------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.*)$ $1.php [L]
+</IfModule>
+
+# اجبار HTTPS — بعد از فعال‌سازی SSL روی دامنه، کامنت این دو خط را بردارید
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteCond %{HTTPS} off
+#   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# </IfModule>
