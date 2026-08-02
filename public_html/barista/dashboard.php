@@ -86,6 +86,9 @@ if ($viewOrderId > 0) {
         </tbody>
       </table>
     </div>
+    <?php if (!empty($viewOrder['discount_amount']) && (float)$viewOrder['discount_amount'] > 0): ?>
+      <div class="mb-2">تخفیف (کوپن <?= htmlspecialchars($viewOrder['coupon_code'] ?? '', ENT_QUOTES, 'UTF-8') ?>): <strong><?= number_format((float)$viewOrder['discount_amount']) ?> تومان</strong></div>
+    <?php endif; ?>
     <div class="mt-3">مبلغ کل: <strong><?= number_format((float) $viewOrder['total_price']) ?> تومان</strong></div>
     <div class="mb-2">روش پرداخت: <strong><?= htmlspecialchars(($viewOrder['payment_method'] === 'card' ? 'کارتخوان' : ($viewOrder['payment_method'] === 'cash' ? 'نقدی' : ($viewOrder['payment_method'] === 'transfer' ? 'کارت به کارت' : '—'))), ENT_QUOTES, 'UTF-8') ?></strong></div>
     <a href="dashboard" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">بستن جزئیات</a>

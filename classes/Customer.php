@@ -96,111 +96,23 @@ class Customer
 
     /**
      * حذف یک مشتری از لیست.
+     * اگر این مشتری سفارش ثبت کرده باشد، حذف انجام نمی‌شود و false برگردانده می‌شود.
      */
     public static function delete(int $id): bool
     {
         $pdo = Database::getConnection();
+        // جلوگیری از خطای کلید خارجی: اگر سفارش مرتبط وجود داشته باشد، حذف نشود
+        $check = $pdo->prepare('SELECT COUNT(*) c FROM orders WHERE customer_id = :id');
+        $check->execute(['id' => $id]);
+        $count = (int) $check->fetchColumn();
+        if ($count > 0) {
+            return false;
+        }
+
         $stmt = $pdo->prepare('DELETE FROM customers WHERE id = :id');
         return $stmt->execute(['id' => $id]);
     }
 
-    // ---------------------------------------------------------------
-    // تخفیف اختصاصی مشتری
-    // -----------------------------------------------------------
-    // هر مشتری حداکثر یک تخفیف اختصاصی فعال دارد؛ setDiscount() هر بار
-    // رکورد قبلی را جایگزین می‌کند تا مدیریت از پنل ادمین ساده بماند.
-    // ---------------------------------------------------------------
-
-    /**
-     * تخفیف فعال یک مشتری (اگر وجود داشته باشد و منقضی نشده باشد)، یا null.
-     */
-    public static function getActiveDiscount(int $customerId): ?array
-    {
-        $pdo = Database::getConnection();
-        $stmt = $pdo->prepare(
-            'SELECT * FROM customer_discounts
-             WHERE customer_id = :customer_id AND is_active = 1
-             ORDER BY created_at DESC LIMIT 1'
-        );
-        $stmt->execute(['customer_id' => $customerId]);
-        $discount = $stmt->fetch();
-
-        if (!$discount) {
-            return null;
-        }
-
-        if (!empty($discount['expires_at']) && $discount['expires_at'] < date('Y-m-d')) {
-            return null; // منقضی شده — خودکار نادیده گرفته می‌شود
-        }
-
-        return $discount;
-    }
-
-    /**
-     * ثبت/جایگزینی تخفیف اختصاصی یک مشتری.
-     *
-     * @param array{discount_type: string, discount_value: float, expires_at?: ?string, is_active?: bool} $data
-     */
-    public static function setDiscount(int $customerId, array $data): void
-    {
-        $pdo = Database::getConnection();
-
-        $pdo->prepare('DELETE FROM customer_discounts WHERE customer_id = :customer_id')
-            ->execute(['customer_id' => $customerId]);
-
-        $stmt = $pdo->prepare(
-            'INSERT INTO customer_discounts (customer_id, discount_type, discount_value, expires_at, is_active)
-             VALUES (:customer_id, :discount_type, :discount_value, :expires_at, :is_active)'
-        );
-        $stmt->execute([
-            'customer_id'    => $customerId,
-            'discount_type'  => $data['discount_type'],
-            'discount_value' => $data['discount_value'],
-            'expires_at'     => $data['expires_at'] ?: null,
-            'is_active'      => !empty($data['is_active']) ? 1 : 0,
-        ]);
-    }
-
-    /**
-     * حذف تخفیف اختصاصی یک مشتری.
-     */
-    public static function removeDiscount(int $customerId): bool
-    {
-        $pdo = Database::getConnection();
-        $stmt = $pdo->prepare('DELETE FROM customer_discounts WHERE customer_id = :customer_id');
-        return $stmt->execute(['customer_id' => $customerId]);
-    }
-
-    /**
-     * اعتبارسنجی سمت سرور دادهٔ فرم تخفیف مشتری.
-     *
-     * @return array<string,string>
-     */
-    public static function validateDiscount(array $data): array
-    {
-        $errors = [];
-
-        $type = $data['discount_type'] ?? '';
-        if (!in_array($type, ['percentage', 'fixed'], true)) {
-            $errors['discount_type'] = 'نوع تخفیف را انتخاب کنید.';
-        }
-
-        $value = $data['discount_value'] ?? '';
-        if ($value === '' || !is_numeric($value) || (float) $value <= 0) {
-            $errors['discount_value'] = 'مقدار تخفیف باید یک عدد مثبت باشد.';
-        } elseif ($type === 'percentage' && (float) $value > 100) {
-            $errors['discount_value'] = 'درصد تخفیف نمی‌تواند بیشتر از ۱۰۰ باشد.';
-        }
-
-        return $errors;
-    }
-
-    /**
-     * محاسبهٔ قیمت نهایی یک مبلغ با توجه به تخفیف مشتری (در صورت وجود).
-     * طبق اولویت خواسته‌شده در پروژه: تخفیف مشتری > تخفیف محصول — یعنی
-     * اگر مشتری تخفیف اختصاصی فعال داشته باشد، به‌جای تخفیف محصول همین
-     * اعمال می‌شود (نه هر دو با هم).
-     */
     public static function applyDiscountToAmount(float $amount, array $discount): float
     {
         $value = (float) $discount['discount_value'];

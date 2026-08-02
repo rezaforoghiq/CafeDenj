@@ -146,3 +146,22 @@ Stack trace:
 #1 C:\xampp\htdocs\cafe\public_html\admin\dashboard.php(31): Order::dashboardCounts()
 #2 {main}
   thrown in C:\xampp\htdocs\cafe\classes\Order.php on line 52
+[02-Aug-2026 03:39:12 Asia/Tehran] PHP Warning:  Undefined array key "payment_method" in C:\xampp\htdocs\cafe-1.1\public_html\admin\orders.php on line 134
+[02-Aug-2026 03:39:12 Asia/Tehran] PHP Warning:  Undefined array key "payment_method" in C:\xampp\htdocs\cafe-1.1\public_html\admin\orders.php on line 134
+[02-Aug-2026 03:39:12 Asia/Tehran] PHP Warning:  Undefined array key "payment_method" in C:\xampp\htdocs\cafe-1.1\public_html\admin\orders.php on line 134
+[02-Aug-2026 13:30:00 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "Database" not found in C:\xampp\htdocs\cafe-1.1\database\run_migration.php:6
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\cafe-1.1\database\run_migration.php on line 6
+[02-Aug-2026 13:32:06 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1451 Cannot delete or update a parent row: a foreign key constraint fails (`cafe_db_1`.`orders`, CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)) in C:\xampp\htdocs\cafe-1.1\classes\Customer.php:104
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.1\classes\Customer.php(104): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\cafe-1.1\public_html\admin\customers.php(28): Customer::delete(1)
+#2 {main}
+  thrown in C:\xampp\htdocs\cafe-1.1\classes\Customer.php on line 104
+[02-Aug-2026 13:32:45 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1451 Cannot delete or update a parent row: a foreign key constraint fails (`cafe_db_1`.`orders`, CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`)) in C:\xampp\htdocs\cafe-1.1\classes\Customer.php:104
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.1\classes\Customer.php(104): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\cafe-1.1\public_html\admin\customers.php(28): Customer::delete(1)
+#2 {main}
+  thrown in C:\xampp\htdocs\cafe-1.1\classes\Customer.php on line 104

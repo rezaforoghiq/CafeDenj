@@ -130,6 +130,9 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
       </tbody>
     </table>
   </div>
+  <?php if (!empty($viewOrder['discount_amount']) && (float)$viewOrder['discount_amount'] > 0): ?>
+    <div class="mb-2">تخفیف (کوپن <?= htmlspecialchars($viewOrder['coupon_code'] ?? '', ENT_QUOTES, 'UTF-8') ?>): <strong><?= number_format((float)$viewOrder['discount_amount']) ?> تومان</strong></div>
+  <?php endif; ?>
   <div class="mt-3">مبلغ کل: <strong><?= number_format((float) $viewOrder['total_price']) ?> تومان</strong></div>
   <div class="mb-2">روش پرداخت: <strong><?= htmlspecialchars(($viewOrder['payment_method'] === 'card' ? 'کارتخوان' : ($viewOrder['payment_method'] === 'cash' ? 'نقدی' : ($viewOrder['payment_method'] === 'transfer' ? 'کارت به کارت' : '—'))), ENT_QUOTES, 'UTF-8') ?></strong></div>
   <a href="orders" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">بستن جزئیات</a>
@@ -166,21 +169,23 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <td style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['created_at']) ?></td>
         <td style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['approved_at'] ?? null) ?></td>
         <td>
-          <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
-          <form method="post" class="d-flex gap-1">
+          <form method="post" class="d-flex gap-1 flex-wrap align-items-center" style="margin:0;">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="action" value="status">
             <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-            <select name="status" class="form-select form-select-sm">
+            <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
+            <select name="status" class="form-select form-select-sm" style="max-width:110px;flex:0 0 auto">
               <?php foreach ($statusLabels as $status => $label): ?><option value="<?= $status ?>" <?= $order['status'] === $status ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?>
             </select>
-            <select name="payment_method" class="form-select form-select-sm" style="min-width:140px">
+            <select name="payment_method" class="form-select form-select-sm" style="max-width:110px;flex:0 0 auto">
               <option value="">روش پرداخت</option>
               <option value="card">کارتخوان</option>
               <option value="cash">نقدی</option>
               <option value="transfer">کارت به کارت</option>
             </select>
-            <button class="btn btn-gold btn-sm">ذخیره</button>
+            <div class="w-100 d-flex justify-content-center mt-2">
+              <button class="btn btn-gold btn-sm">ذخیره</button>
+            </div>
           </form>
         </td>
       </tr>

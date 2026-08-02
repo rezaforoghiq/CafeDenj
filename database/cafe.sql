@@ -92,21 +92,25 @@ CREATE TABLE IF NOT EXISTS `customer_accounts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 -- -------------------------------------------------------------------------
--- تخفیف اختصاصی هر مشتری (مدیریت‌شده از پنل ادمین)
+-- کوپن‌های تخفیف (کدهای قابل استفاده در صفحهٔ پرداخت)
 -- -------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `customer_discounts` (
+CREATE TABLE IF NOT EXISTS `coupons` (
   `id`             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `customer_id`    INT UNSIGNED NOT NULL,
-  `discount_type`  ENUM('percentage','fixed') NOT NULL,
-  `discount_value` DECIMAL(10,2) NOT NULL,
+  `code`           VARCHAR(64) NOT NULL,
+  `percent`        INT NOT NULL,
   `expires_at`     DATE NULL DEFAULT NULL,
   `is_active`      TINYINT(1) NOT NULL DEFAULT 1,
   `created_at`     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  KEY `idx_customer_discounts_customer` (`customer_id`),
-  CONSTRAINT `fk_customer_discounts_customer`
-    FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`)
-    ON DELETE CASCADE ON UPDATE CASCADE
+  UNIQUE KEY `uq_coupons_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
+
+-- -------------------------------------------------------------------------
+-- افزودن اطلاعات کوپن به سفارش‌ها (در صورتی که مشتری از کوپن استفاده کند)
+-- -------------------------------------------------------------------------
+ALTER TABLE `orders`
+  ADD COLUMN IF NOT EXISTS `coupon_code` VARCHAR(64) NULL DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS `coupon_percent` INT NULL DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS `discount_amount` DECIMAL(12,0) UNSIGNED NOT NULL DEFAULT 0;
 
 -- -------------------------------------------------------------------------
 -- تنظیمات عمومی سایت (Key/Value)
