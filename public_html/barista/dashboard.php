@@ -92,6 +92,7 @@ if ($viewOrderId > 0) {
     <div class="mt-3">مبلغ کل: <strong><?= number_format((float) $viewOrder['total_price']) ?> تومان</strong></div>
     <div class="mb-2">روش پرداخت: <strong><?= htmlspecialchars(($viewOrder['payment_method'] === 'card' ? 'کارتخوان' : ($viewOrder['payment_method'] === 'cash' ? 'نقدی' : ($viewOrder['payment_method'] === 'transfer' ? 'کارت به کارت' : '—'))), ENT_QUOTES, 'UTF-8') ?></strong></div>
     <a href="dashboard" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">بستن جزئیات</a>
+    <a href="../print_order.php?id=<?= (int) $viewOrder['id'] ?>" target="_blank" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ سفارش</a>
   </div>
   <?php endif; ?>
 
@@ -108,6 +109,7 @@ if ($viewOrderId > 0) {
           <td style="font-size:12.5px;color:var(--ink-muted)"><?= Jalali::format($order['created_at']) ?></td>
           <td class="d-flex gap-2">
             <a href="dashboard?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
+            <a href="../print_order.php?id=<?= (int) $order['id'] ?>" target="_blank" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ</a>
             <?php if ($order['status'] === 'approved'): ?>
             <form method="POST">
               <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
