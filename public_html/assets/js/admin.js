@@ -52,6 +52,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // control named "submit" and reliably posts the original CSRF fields.
     HTMLFormElement.prototype.submit.call(form);
   });
+  document.querySelectorAll('form[data-order-status-form]').forEach(form => {
+    const statusSelect = form.querySelector('select[name="status"]');
+    const paymentSelect = form.querySelector('select[name="payment_method"]');
+    if (statusSelect && paymentSelect) {
+      const updateRequirement = () => {
+        paymentSelect.required = statusSelect.value === 'completed';
+      };
+      statusSelect.addEventListener('change', updateRequirement);
+      updateRequirement();
+    }
+  });
+
   document.querySelectorAll('form').forEach(form => form.addEventListener('submit', event => {
     // Delete forms are intentionally stopped once to show the confirmation
     // dialog; they must not look like a request has already started.

@@ -165,3 +165,39 @@ Stack trace:
 #1 C:\xampp\htdocs\cafe-1.1\public_html\admin\customers.php(28): Customer::delete(1)
 #2 {main}
   thrown in C:\xampp\htdocs\cafe-1.1\classes\Customer.php on line 104
+[02-Aug-2026 16:24:22 Asia/Tehran] PHP Fatal error:  Uncaught Error: Undefined constant "today" in Command line code:1
+Stack trace:
+#0 {main}
+  thrown in Command line code on line 1
+[02-Aug-2026 17:13:57 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "ZipArchive" not found in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php:167
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php(389): buildXlsx(Array)
+#1 {main}
+  thrown in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 167
+[02-Aug-2026 17:14:08 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "ZipArchive" not found in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php:167
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php(386): buildXlsx(Array)
+#1 {main}
+  thrown in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 167
+[02-Aug-2026 17:14:30 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "ZipArchive" not found in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php:167
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php(386): buildXlsx(Array)
+#1 {main}
+  thrown in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 167
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 1 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 178
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 2 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 181
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 1 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 178
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 2 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 181
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 1 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 178
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 2 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 181
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 1 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 178
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 2 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 181
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 1 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 178
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 2 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 181
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 1 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 178
+[02-Aug-2026 17:18:37 Asia/Tehran] PHP Warning:  pack(): 2 arguments unused in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 181
+[02-Aug-2026 17:48:57 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 197
+[02-Aug-2026 17:49:09 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 197
+[02-Aug-2026 17:56:23 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 197
+[02-Aug-2026 17:57:06 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 197
+[02-Aug-2026 18:01:27 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 197

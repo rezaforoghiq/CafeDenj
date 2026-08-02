@@ -105,7 +105,11 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <option value="amount_asc" <?= $filters['sort'] === 'amount_asc' ? 'selected' : '' ?>>مبلغ کم</option>
       </select>
     </div>
-    <div class="col-12"><button class="btn btn-gold btn-sm">اعمال فیلتر</button> <a href="orders" class="btn btn-outline-light btn-sm">حذف فیلترها</a></div>
+    <div class="col-12 d-flex flex-wrap gap-2">
+      <button class="btn btn-gold btn-sm">اعمال فیلتر</button>
+      <a href="orders" class="btn btn-outline-light btn-sm">حذف فیلترها</a>
+      <a href="export?type=orders&<?= htmlspecialchars(http_build_query($_GET), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light">خروجی اکسل</a>
+    </div>
   </form>
 </div>
 
@@ -169,7 +173,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <td style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['created_at']) ?></td>
         <td style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['approved_at'] ?? null) ?></td>
         <td>
-          <form method="post" class="d-flex gap-1 flex-wrap align-items-center" style="margin:0;">
+          <form method="post" class="d-flex gap-1 flex-wrap align-items-center" data-order-status-form style="margin:0;">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="action" value="status">
             <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">

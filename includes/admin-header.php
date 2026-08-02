@@ -9,6 +9,7 @@ $navItems = [
     'events'     => ['label' => 'رویدادها', 'icon' => 'calendar'],
     'customers'  => ['label' => 'مشتریان', 'icon' => 'users'],
     'orders'     => ['label' => 'سفارش‌ها', 'icon' => 'calendar'],
+    'reports'    => ['label' => 'گزارش‌ها', 'icon' => 'chart'],
     'baristas'   => ['label' => 'باریستاها', 'icon' => 'barista'],
     'activity-log' => ['label' => 'لاگ فعالیت', 'icon' => 'log'],
     'admins'     => ['label' => 'ادمین‌ها', 'icon' => 'users'],
@@ -26,6 +27,7 @@ function adminIcon(string $name): string {
         'chevron' => '<path d="m6 9 6 6 6-6"/>',
         'logout' => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
         'barista' => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/>',
+        'chart' => '<path d="M5 19h14"/><path d="M8 19V11"/><path d="M12 19V7"/><path d="M16 19V15"/>',
         'log' => '<path d="M9 4h11v16H9zM4 4h2v16H4zM4 8h1M4 12h1M4 16h1"/>',
     ];
     return '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' . ($icons[$name] ?? '') . '</svg>';
