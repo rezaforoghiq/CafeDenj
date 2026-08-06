@@ -140,7 +140,6 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
   <div class="mt-3">مبلغ کل: <strong><?= number_format((float) $viewOrder['total_price']) ?> تومان</strong></div>
   <div class="mb-2">روش پرداخت: <strong><?= htmlspecialchars(($viewOrder['payment_method'] === 'card' ? 'کارتخوان' : ($viewOrder['payment_method'] === 'cash' ? 'نقدی' : ($viewOrder['payment_method'] === 'transfer' ? 'کارت به کارت' : '—'))), ENT_QUOTES, 'UTF-8') ?></strong></div>
   <a href="orders" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">بستن جزئیات</a>
-  <a href="../print_order.php?id=<?= (int) $viewOrder['id'] ?>" target="_blank" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ سفارش</a>
 </div>
 <?php endif; ?>
 
@@ -179,7 +178,6 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
             <input type="hidden" name="action" value="status">
             <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
             <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
-            <a href="../print_order.php?id=<?= (int) $order['id'] ?>" target="_blank" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ</a>
             <select name="status" class="form-select form-select-sm" style="max-width:110px;flex:0 0 auto">
               <?php foreach ($statusLabels as $status => $label): ?><option value="<?= $status ?>" <?= $order['status'] === $status ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?>
             </select>

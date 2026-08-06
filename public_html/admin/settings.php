@@ -70,4 +70,22 @@ require __DIR__ . '/../../includes/admin-header.php';
   </form>
 </div>
 
+<!-- Print Bridge quick docs -->
+<div class="card p-3 mt-4" style="max-width:760px;">
+    <h6 class="mb-2">Windows Print Bridge (API) — راه‌اندازی سریع</h6>
+    <p style="color:var(--muted);font-size:13px;">این بخش راهنمای کوتاه و عملی برای اتصال برنامهٔ ویندوزی چاپ به سایت است. برای تنظیم کامل‌تر و راهنمای گام‌به‌گام، فایل‌های سند در پوشهٔ <code>/docs</code> را ببینید.</p>
+    <ul style="font-size:13px;color:var(--muted);">
+      <li><strong>آدرس API:</strong> <code><?= htmlspecialchars((isset($_SERVER['HTTPS'])? 'https':'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'your-site') . '/api/print_bridge.php', ENT_QUOTES, 'UTF-8') ?></code></li>
+      <li><strong>احراز هویت:</strong> توکن دستگاه در تنظیمات (کلید <code>print_bridge_token</code>) — برنامهٔ ویندوز باید هدر <code>X-Device-Token</code> را ارسال کند.</li>
+      <li><strong>Endpoints:</strong>
+        <ul>
+          <li><code>GET ?action=next</code> — گرفتن شغل بعدی</li>
+          <li><code>POST ?action=confirm</code> — تایید چاپ موفق (بدنهٔ JSON {"job_id":123})</li>
+          <li><code>POST ?action=failed</code> — گزارش خطا (بدنهٔ JSON {"job_id":123, "error":"..."})</li>
+        </ul>
+      </li>
+    </ul>
+    <div style="font-size:13px;color:var(--muted);">برای ایمن‌سازی، مقدار کلید <code>print_bridge_token</code> را در جدول <code>settings</code> اضافه یا ویرایش کنید. همچنین می‌توانید تعداد تلاش مجاز چاپ را با کلید <code>print_bridge_max_retries</code> تنظیم کنید (پیش‌فرض 3).</div>
+</div>
+
 <?php require __DIR__ . '/../../includes/admin-footer.php'; ?>

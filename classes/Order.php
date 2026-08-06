@@ -16,6 +16,15 @@ class Order {
   if ($status === 'approved') {
       $sql = 'UPDATE orders SET status=:s, approved_at=NOW() WHERE id=:i';
       Database::getConnection()->prepare($sql)->execute(['s'=>$status,'i'=>$id]);
+      // Attempt to create a print job for approved orders (non-blocking)
+      try {
+          require_once __DIR__ . '/PrintJob.php';
+          // createForOrder returns job id or null if exists / failed
+          \PrintJob::createForOrder($id);
+      } catch (Throwable $e) {
+          // log but do not prevent status change
+          ActivityLog::record('order_status', 'system', null, 'system', $id, 'Print job creation error: '.mb_substr($e->getMessage(),0,200));
+      }
   } elseif ($status === 'completed') {
       // when completing, optionally record payment method
       $sql = 'UPDATE orders SET status=:s, approved_at=NOW(), payment_method=:pm WHERE id=:i';

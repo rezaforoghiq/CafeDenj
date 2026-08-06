@@ -400,6 +400,18 @@ function buildReportsExport(string $range, ?string $fromDate, ?string $toDate): 
         ];
     }
 
+    // Payment methods report (only completed orders, respecting range)
+    $paymentStmt = $pdo->prepare("SELECT o.payment_method, COUNT(*) AS orders_count, COALESCE(SUM(o.total_price), 0) AS total_amount FROM orders o WHERE $whereSql GROUP BY o.payment_method ORDER BY total_amount DESC");
+    $paymentStmt->execute($params);
+    $paymentRows = [[ 'Payment Method', 'Completed Orders', 'Total Amount' ]];
+    while ($row = $paymentStmt->fetch()) {
+        $paymentRows[] = [
+            getPaymentLabel($row['payment_method'] ?? null),
+            (int) $row['orders_count'],
+            (float) $row['total_amount'],
+        ];
+    }
+
     return [
         'Summary' => $summaryRows,
         'Product Sales' => $productSalesRows,
@@ -407,6 +419,7 @@ function buildReportsExport(string $range, ?string $fromDate, ?string $toDate): 
         'Low Selling' => $lowSellersRows,
         'Barista Performance' => $baristaRows,
         'Sales Hours' => $hourlyRows,
+        'Payment Methods' => $paymentRows,
     ];
 }
 

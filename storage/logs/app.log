@@ -201,3 +201,13 @@ Stack trace:
 [02-Aug-2026 17:56:23 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 197
 [02-Aug-2026 17:57:06 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 197
 [02-Aug-2026 18:01:27 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.1\public_html\admin\export.php on line 197
+[05-Aug-2026 13:36:30 Asia/Tehran] PHP Warning:  Undefined array key "discount_type" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 201
+[05-Aug-2026 13:36:30 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 202
+[05-Aug-2026 13:36:30 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 202
+[05-Aug-2026 13:36:30 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 203
+[05-Aug-2026 13:36:30 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 204
+[05-Aug-2026 13:36:36 Asia/Tehran] PHP Warning:  Undefined array key "discount_type" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 201
+[05-Aug-2026 13:36:36 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 202
+[05-Aug-2026 13:36:36 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 202
+[05-Aug-2026 13:36:36 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 203
+[05-Aug-2026 13:36:36 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 204

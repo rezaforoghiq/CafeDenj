@@ -48,11 +48,30 @@ $summaryStmt = $pdo->prepare("SELECT COUNT(*) AS orders_count, COALESCE(SUM(o.to
 $summaryStmt->execute($params);
 $summary = $summaryStmt->fetch() ?: ['orders_count' => 0, 'sales_total' => 0, 'average_order' => 0];
 
+// Best product (uses the same completed + date range filter)
 $bestProductStmt = $pdo->prepare("SELECT oi.product_name, SUM(oi.quantity) AS quantity, SUM(oi.quantity * oi.price) AS revenue FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE $whereSql GROUP BY oi.product_id, oi.product_name ORDER BY quantity DESC, revenue DESC LIMIT 1");
 $bestProductStmt->execute($params);
 $bestProduct = $bestProductStmt->fetch();
 
-$productSalesStmt = $pdo->prepare("SELECT p.id AS product_id, p.name AS product_name, COALESCE(SUM(oi.quantity), 0) AS quantity, COALESCE(SUM(oi.quantity * oi.price), 0) AS revenue, MAX(o.created_at) AS last_order_at FROM products p LEFT JOIN order_items oi ON oi.product_id = p.id LEFT JOIN orders o ON o.id = oi.order_id AND $whereSql GROUP BY p.id, p.name ORDER BY quantity DESC, revenue DESC, p.name ASC");
+// Product sales: aggregate only order_items that belong to completed orders inside the selected date range
+// Use a subquery that joins order_items to orders (INNER JOIN) with the completed + date filters, then left-join the aggregated results to products.
+$productItemsSub = "SELECT oi.product_id, SUM(oi.quantity) AS quantity, SUM(oi.quantity * oi.price) AS revenue, MAX(o.created_at) AS last_order_at
+    FROM order_items oi
+    JOIN orders o ON o.id = oi.order_id
+    WHERE o.status = 'completed'";
+if ($fromDate) {
+    $productItemsSub .= ' AND o.created_at >= :from';
+}
+if ($toDate) {
+    $productItemsSub .= ' AND o.created_at <= :to';
+}
+$productItemsSub .= ' GROUP BY oi.product_id';
+
+$productSalesSql = "SELECT p.id AS product_id, p.name AS product_name, COALESCE(s.quantity, 0) AS quantity, COALESCE(s.revenue, 0) AS revenue, s.last_order_at
+    FROM products p
+    LEFT JOIN (" . $productItemsSub . ") s ON s.product_id = p.id
+    ORDER BY quantity DESC, revenue DESC, p.name ASC";
+$productSalesStmt = $pdo->prepare($productSalesSql);
 $productSalesStmt->execute($params);
 $productSales = $productSalesStmt->fetchAll();
 
@@ -71,17 +90,25 @@ $baristaStmt = $pdo->prepare("SELECT b.id, b.full_name, COUNT(o.id) AS completed
 $baristaStmt->execute($params);
 $baristaPerformance = $baristaStmt->fetchAll();
 
-$lowSellersSql = "SELECT p.id, p.name, COALESCE(SUM(oi.quantity), 0) AS quantity FROM products p LEFT JOIN order_items oi ON oi.product_id = p.id LEFT JOIN orders o ON o.id = oi.order_id AND o.status = 'completed'";
+// Low sellers: aggregate only order_items linked to completed orders in the selected date range, then include products with zero sales
+$lowItemsSub = "SELECT oi.product_id, SUM(oi.quantity) AS quantity FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status = 'completed'";
 if ($fromDate) {
-    $lowSellersSql .= ' AND o.created_at >= :from';
+    $lowItemsSub .= ' AND o.created_at >= :from';
 }
 if ($toDate) {
-    $lowSellersSql .= ' AND o.created_at <= :to';
+    $lowItemsSub .= ' AND o.created_at <= :to';
 }
-$lowSellersSql .= ' GROUP BY p.id, p.name HAVING quantity < 5 ORDER BY quantity ASC, p.name ASC LIMIT 20';
+$lowItemsSub .= ' GROUP BY oi.product_id';
+
+$lowSellersSql = "SELECT p.id, p.name, COALESCE(s.quantity, 0) AS quantity FROM products p LEFT JOIN (" . $lowItemsSub . ") s ON s.product_id = p.id WHERE COALESCE(s.quantity, 0) < 5 ORDER BY quantity ASC, p.name ASC LIMIT 20";
 $lowSellersStmt = $pdo->prepare($lowSellersSql);
 $lowSellersStmt->execute($params);
 $lowSellers = $lowSellersStmt->fetchAll();
+
+// Payment method report (only completed orders, respecting date filters)
+$paymentStmt = $pdo->prepare("SELECT o.payment_method, COUNT(*) AS orders_count, COALESCE(SUM(o.total_price), 0) AS total_amount FROM orders o WHERE $whereSql GROUP BY o.payment_method ORDER BY total_amount DESC");
+$paymentStmt->execute($params);
+$paymentData = $paymentStmt->fetchAll();
 
 function formatMoney(float $value): string
 {
@@ -124,6 +151,46 @@ $selectedRange = $rangeLabels[$range] ?? 'امروز';
   <div class="col-6 col-md-3"><div class="stat-card p-3"><div>سفارش‌های تکمیل‌شده</div><div><?= (int) $summary['orders_count'] ?></div></div></div>
   <div class="col-6 col-md-3"><div class="stat-card p-3"><div>میانگین ارزش سفارش</div><div><?= formatMoney((float) $summary['average_order']) ?></div></div></div>
   <div class="col-6 col-md-3"><div class="stat-card p-3"><div>بهترین محصول</div><div><?= htmlspecialchars($bestProduct['product_name'] ?? '—', ENT_QUOTES, 'UTF-8') ?></div></div></div>
+</div>
+
+<!-- Payment Method Summary Cards -->
+<div class="row g-3 mb-4">
+  <?php
+    $methods = ['card' => 'کارتخوان', 'cash' => 'نقدی', 'transfer' => 'کارت به کارت'];
+    // prepare lookup
+    $paymentLookup = [];
+    foreach ($paymentData as $row) {
+      $paymentLookup[$row['payment_method']] = $row;
+    }
+    foreach ($methods as $key => $label):
+      $row = $paymentLookup[$key] ?? null;
+      $count = $row ? (int) $row['orders_count'] : 0;
+      $total = $row ? (float) $row['total_amount'] : 0.0;
+  ?>
+  <div class="col-6 col-md-4"><div class="stat-card p-3"><div><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></div><div><?= (int) $count ?> سفارش — <?= formatMoney($total) ?></div></div></div>
+  <?php endforeach; ?>
+</div>
+
+<!-- Payment Methods Table -->
+<div class="card p-3 mb-4">
+  <h5 class="mb-3">گزارش روش‌های پرداخت</h5>
+  <div class="table-responsive">
+    <table class="table table-sm">
+      <thead><tr><th>روش پرداخت</th><th>تعداد سفارش‌های تکمیل‌شده</th><th>مبلغ کل</th></tr></thead>
+      <tbody>
+        <?php if (empty($paymentData)): ?>
+          <tr><td colspan="3" class="text-center py-4" style="color:var(--muted);">هیچ سفارش تکمیل‌شده‌ای در بازه انتخاب‌شده وجود ندارد.</td></tr>
+        <?php endif; ?>
+        <?php foreach ($paymentData as $p): ?>
+          <tr>
+            <td><?= htmlspecialchars($methods[$p['payment_method']] ?? ($p['payment_method'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= (int) $p['orders_count'] ?></td>
+            <td><?= formatMoney((float) $p['total_amount']) ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <div class="row g-3 mb-4">
