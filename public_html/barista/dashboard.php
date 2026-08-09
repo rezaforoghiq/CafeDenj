@@ -67,7 +67,7 @@ if ($viewOrderId > 0) {
 
   <?php if ($viewOrder !== null): ?>
   <div class="card p-3 mb-4">
-    <h5 class="mb-3">جزئیات سفارش شماره <?= (int) $viewOrder['id'] ?></h5>
+    <h5 class="mb-3">جزئیات سفارش شماره <?= htmlspecialchars($viewOrder['order_number'], ENT_QUOTES, 'UTF-8') ?></h5>
     <div class="mb-2">شماره سفارش: <strong><?= htmlspecialchars($viewOrder['order_number'], ENT_QUOTES, 'UTF-8') ?></strong></div>
     <div class="mb-2">مشتری: <strong><?= htmlspecialchars($viewOrder['customer_name'] ?? '', ENT_QUOTES, 'UTF-8') ?: htmlspecialchars($viewOrder['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong></div>
     <div class="mb-3">وضعیت: <strong><?= htmlspecialchars($statusLabels[$viewOrder['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></strong></div>
@@ -102,7 +102,7 @@ if ($viewOrderId > 0) {
         <?php if (empty($orders)): ?><tr><td colspan="5" class="text-center py-4" style="color:var(--ink-muted);">هنوز سفارشی به شما اختصاص داده نشده.</td></tr><?php endif; ?>
         <?php foreach ($orders as $order): ?>
         <tr>
-          <td><b>سفارش شماره <?= (int) $order['id'] ?></b></td>
+          <td><b>سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></b></td>
           <td><?= number_format((float) $order['total_price']) ?> تومان</td>
           <td><?= htmlspecialchars($statusLabels[$order['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></td>
           <td style="font-size:12.5px;color:var(--ink-muted)"><?= Jalali::format($order['created_at']) ?></td>

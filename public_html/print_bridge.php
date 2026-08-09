@@ -44,13 +44,41 @@ try {
         }
         // Only expose safe fields to the bridge. Provide print_text and job metadata.
         $payload = $job['payload'] ?? null;
+        $orderNumber = null;
+        $orderStmt = Database::getConnection()->prepare('SELECT order_number FROM orders WHERE id = :id LIMIT 1');
+        $orderStmt->execute(['id' => (int) $job['order_id']]);
+        $currentOrderNumber = $orderStmt->fetchColumn();
+        if ($currentOrderNumber !== false && $currentOrderNumber !== null) {
+            $orderNumber = (string) $currentOrderNumber;
+        } else {
+            $orderNumber = (string) ($job['order_number'] ?? '');
+        }
+        $printText = is_string($payload['print_text'] ?? null) ? $payload['print_text'] : null;
+        if ($printText !== null && $orderNumber !== null) {
+            $lines = preg_split('/\r\n|\r|\n/', $printText);
+            $updated = false;
+            for ($i = 0; $i < count($lines); $i++) {
+                if (trim((string) $lines[$i]) === 'سفارش:') {
+                    if (isset($lines[$i + 1])) {
+                        $lines[$i + 1] = (string) $orderNumber;
+                        $updated = true;
+                    }
+                    break;
+                }
+            }
+            if ($updated) {
+                $printText = implode("\n", $lines);
+            }
+        }
+        $payload['order_number'] = $orderNumber;
+        $payload['print_text'] = $printText;
         $response = [
             'success' => true,
             'job' => [
                 'id' => (int) $job['id'],
                 'order_id' => (int) $job['order_id'],
-                'order_number' => $job['order_number'],
-                'print_text' => $payload['print_text'] ?? null,
+                'order_number' => $orderNumber,
+                'print_text' => $printText,
                 'payload' => $payload // structured payload for advanced bridges (contains prices if needed)
             ]
         ];

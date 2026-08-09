@@ -16,9 +16,7 @@ class CustomerAuth
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
         try {
-            $customerCheck = $pdo->prepare('SELECT id FROM customers WHERE phone = :phone LIMIT 1');
-            $customerCheck->execute(['phone' => $phone]);
-            $customer = $customerCheck->fetch();
+            $customer = self::findCustomerByPhone($pdo, $phone);
             if ($customer) {
                 $accountCheck = $pdo->prepare('SELECT id FROM customer_accounts WHERE customer_id = :customer_id LIMIT 1');
                 $accountCheck->execute(['customer_id' => $customer['id']]);
@@ -56,12 +54,18 @@ class CustomerAuth
         $phone = self::normalizePhone($identity);
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'SELECT ca.id AS account_id, ca.customer_id, ca.password_hash
+            'SELECT ca.id AS account_id, ca.customer_id, ca.password_hash, c.phone
              FROM customer_accounts ca INNER JOIN customers c ON c.id = ca.customer_id
-             WHERE c.phone = :phone LIMIT 1'
+             WHERE c.phone IS NOT NULL'
         );
-        $stmt->execute(['phone' => $phone]);
-        $account = $stmt->fetch();
+        $stmt->execute();
+        $account = null;
+        while ($row = $stmt->fetch()) {
+            if (self::normalizePhone((string) ($row['phone'] ?? '')) === $phone) {
+                $account = $row;
+                break;
+            }
+        }
         if (!$account || !password_verify($password, $account['password_hash'])) {
             return null;
         }
@@ -92,6 +96,36 @@ class CustomerAuth
     }
     public static function normalizePhone(string $phone): string
     {
-        return strtr(trim($phone), ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9','٠'=>'0','١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9']);
+        $normalized = strtr(trim($phone), ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9','٠'=>'0','١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9']);
+        $digits = preg_replace('/\D/u', '', $normalized) ?? '';
+
+        if ($digits === '') {
+            return '';
+        }
+
+        if (str_starts_with($digits, '989') && mb_strlen($digits) === 12) {
+            $digits = '0' . substr($digits, 2);
+        } elseif (str_starts_with($digits, '98') && mb_strlen($digits) === 11) {
+            $digits = '0' . substr($digits, 2);
+        } elseif (str_starts_with($digits, '9') && mb_strlen($digits) === 10) {
+            $digits = '0' . $digits;
+        }
+
+        return $digits;
+    }
+
+    private static function findCustomerByPhone(PDO $pdo, string $phone): ?array
+    {
+        $normalizedPhone = self::normalizePhone($phone);
+        $stmt = $pdo->prepare('SELECT id, phone FROM customers WHERE phone IS NOT NULL');
+        $stmt->execute();
+
+        while ($row = $stmt->fetch()) {
+            if (self::normalizePhone((string) ($row['phone'] ?? '')) === $normalizedPhone) {
+                return $row;
+            }
+        }
+
+        return null;
     }
 }

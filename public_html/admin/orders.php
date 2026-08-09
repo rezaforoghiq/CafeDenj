@@ -24,6 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
     if ($action === 'assign_barista') {
         $baristaId = (int) ($_POST['barista_id'] ?? 0);
         Order::assignBarista((int) $_POST['id'], $baristaId ?: null);
+    } elseif ($action === 'delete') {
+        $orderId = (int) ($_POST['id'] ?? 0);
+        if ($orderId <= 0 || !Order::delete($orderId)) {
+            $_SESSION['flash_error'] = 'سفارش مورد نظر یافت نشد یا قابل حذف نیست.';
+        } else {
+            $_SESSION['flash_success'] = 'سفارش با موفقیت حذف شد.';
+        }
     } else {
         $status = (string) ($_POST['status'] ?? '');
         $paymentMethod = isset($_POST['payment_method']) ? trim((string) $_POST['payment_method']) : null;
@@ -115,7 +122,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 
 <?php if ($viewOrder !== null): ?>
 <div class="card p-3 mb-4">
-  <h5 class="mb-3">جزئیات سفارش شماره <?= (int) $viewOrder['id'] ?></h5>
+  <h5 class="mb-3">جزئیات سفارش شماره <?= htmlspecialchars($viewOrder['order_number'], ENT_QUOTES, 'UTF-8') ?></h5>
   <div class="mb-3">شماره سفارش: <strong><?= htmlspecialchars($viewOrder['order_number'], ENT_QUOTES, 'UTF-8') ?></strong></div>
   <div class="mb-3">مشتری: <strong><?= htmlspecialchars($viewOrder['customer_name'] ?? '', ENT_QUOTES, 'UTF-8') ?: htmlspecialchars($viewOrder['phone'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong></div>
   <div class="mb-3">وضعیت: <strong><?= htmlspecialchars($statusLabels[$viewOrder['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></strong></div>
@@ -154,7 +161,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
       <?php endif; ?>
       <?php foreach ($orders as $order): ?>
       <tr>
-        <td><b>سفارش شماره <?= (int) $order['id'] ?></b><small class="d-block mt-1" style="color:var(--muted);direction:ltr;text-align:right"><?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></small></td>
+        <td><b>سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></b><small class="d-block mt-1" style="color:var(--muted);direction:ltr;text-align:right"><?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></small></td>
         <td><?= htmlspecialchars($order['customer_name'] ?: $order['phone'], ENT_QUOTES, 'UTF-8') ?></td>
         <td>
           <form method="post" class="d-flex gap-1">
@@ -173,11 +180,19 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <td style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['created_at']) ?></td>
         <td style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['approved_at'] ?? null) ?></td>
         <td>
-          <form method="post" class="d-flex gap-1 flex-wrap align-items-center" data-order-status-form style="margin:0;">
+          <div class="d-flex flex-wrap gap-1 align-items-center" style="margin:0;">
+            <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
+            <form method="post" class="d-inline" data-use-custom-confirm data-confirm-text="آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+              <button type="submit" class="btn btn-outline-danger btn-sm">حذف</button>
+            </form>
+          </div>
+          <form method="post" class="d-flex gap-1 flex-wrap align-items-center mt-2" data-order-status-form style="margin:0;">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="action" value="status">
             <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-            <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
             <select name="status" class="form-select form-select-sm" style="max-width:110px;flex:0 0 auto">
               <?php foreach ($statusLabels as $status => $label): ?><option value="<?= $status ?>" <?= $order['status'] === $status ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?>
             </select>

@@ -8,7 +8,7 @@ $statusLabels = ['pending'=>'در انتظار تأیید','approved'=>'تأیی
 if (!$order) { http_response_code(404); exit('سفارش پیدا نشد.'); }
 ?>
 <!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="assets/css/customer-auth.css"><title>فاکتور</title></head>
-<body class="customer-auth"><main class="auth-card"><div class="auth-brand"><h1>فاکتور سفارش شماره <?= (int) $order['id'] ?></h1><p>وضعیت: <?= $statusLabels[$order['status']] ?? 'نامشخص' ?></p></div>
+<body class="customer-auth"><main class="auth-card"><div class="auth-brand"><h1>فاکتور سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></h1><p>وضعیت: <?= $statusLabels[$order['status']] ?? 'نامشخص' ?></p></div>
 <?php foreach ($order['items'] as $item): ?><p><?= htmlspecialchars($item['product_name'], ENT_QUOTES, 'UTF-8') ?> × <?= (int) $item['quantity'] ?><span style="float:left"><?= number_format((float) $item['price'] * (int) $item['quantity']) ?></span></p><?php endforeach; ?>
 <hr>
 <?php if (!empty($order['discount_amount']) && (float)$order['discount_amount'] > 0): ?>

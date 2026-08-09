@@ -33,7 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // The custom dialog is opt-in only, preventing a backdrop from blocking POST.
   document.querySelectorAll('form[data-use-custom-confirm]').forEach(form => {
     form.removeAttribute('onsubmit');
-    form.addEventListener('submit', e => { if (form.dataset.confirmed) return; e.preventDefault(); pendingForm = form; const button = form.querySelector('button[type="submit"]'); document.getElementById('confirmText').textContent = button?.textContent.includes('حذف') ? 'این مورد برای همیشه حذف می‌شود و قابل بازگشت نیست.' : 'آیا از انجام این عملیات مطمئن هستید؟'; modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false'); });
+    form.addEventListener('submit', e => {
+      if (form.dataset.confirmed) return;
+      e.preventDefault();
+      pendingForm = form;
+      const button = form.querySelector('button[type="submit"]');
+      const confirmText = form.dataset.confirmText?.trim();
+      document.getElementById('confirmText').textContent = confirmText || (button?.textContent.includes('حذف') ? 'آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.' : 'آیا از انجام این عملیات مطمئن هستید؟');
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+    });
   });
   document.getElementById('confirmAction')?.addEventListener('click', event => {
     if (!pendingForm) return;
