@@ -13,6 +13,19 @@ class CustomerAuth
             throw new InvalidArgumentException(json_encode($errors, JSON_UNESCAPED_UNICODE));
         }
 
+        return self::registerWithPasswordHash($phone, $firstName, $lastName, password_hash($password, PASSWORD_DEFAULT));
+    }
+
+    public static function registerWithPasswordHash(string $phone, string $firstName, string $lastName, string $passwordHash): array
+    {
+        $phone = self::normalizePhone($phone);
+        $firstName = trim($firstName);
+        $lastName = trim($lastName);
+        $errors = self::validateRegistrationData($phone, $firstName, $lastName);
+        if ($errors !== []) {
+            throw new InvalidArgumentException(json_encode($errors, JSON_UNESCAPED_UNICODE));
+        }
+
         $pdo = Database::getConnection();
         $pdo->beginTransaction();
         try {
@@ -21,7 +34,7 @@ class CustomerAuth
                 $accountCheck = $pdo->prepare('SELECT id FROM customer_accounts WHERE customer_id = :customer_id LIMIT 1');
                 $accountCheck->execute(['customer_id' => $customer['id']]);
                 if ($accountCheck->fetch()) {
-                    throw new RuntimeException('برای این شماره موبایل حساب کاربری وجود دارد. وارد شوید.');
+                    throw new RuntimeException('ثبت‌نام انجام نشد. لطفاً دوباره تلاش کنید.');
                 }
                 $customerId = (int) $customer['id'];
                 $update = $pdo->prepare('UPDATE customers SET first_name = :first_name, last_name = :last_name WHERE id = :id');
@@ -35,7 +48,7 @@ class CustomerAuth
             $insert = $pdo->prepare('INSERT INTO customer_accounts (customer_id, password_hash) VALUES (:customer_id, :password_hash)');
             $insert->execute([
                 'customer_id' => $customerId,
-                'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                'password_hash' => $passwordHash,
             ]);
             $accountId = (int) $pdo->lastInsertId();
             $pdo->commit();
@@ -79,6 +92,55 @@ class CustomerAuth
 
     public static function validateRegistration(string $phone, string $firstName, string $lastName, string $password): array
     {
+        $errors = self::validateRegistrationData($phone, $firstName, $lastName);
+        $errors = array_merge($errors, self::validatePassword($password));
+        return $errors;
+    }
+
+    public static function validatePassword(string $password, ?string $confirmPassword = null): array
+    {
+        $errors = [];
+        if (mb_strlen($password) < 8) {
+            $errors['password'] = 'رمز عبور باید حداقل ۸ کاراکتر باشد.';
+        }
+        if ($confirmPassword !== null && $password !== $confirmPassword) {
+            $errors['confirm_password'] = 'تکرار رمز عبور یکسان نیست.';
+        }
+        return $errors;
+    }
+
+    public static function findAccountByPhone(string $phone): ?array
+    {
+        $normalizedPhone = self::normalizePhone($phone);
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare(
+            'SELECT ca.id AS account_id, ca.customer_id, c.phone
+             FROM customer_accounts ca INNER JOIN customers c ON c.id = ca.customer_id
+             WHERE c.phone IS NOT NULL'
+        );
+        $stmt->execute();
+
+        while ($row = $stmt->fetch()) {
+            if (self::normalizePhone((string) ($row['phone'] ?? '')) === $normalizedPhone) {
+                return $row;
+            }
+        }
+
+        return null;
+    }
+
+    public static function updatePassword(int $customerId, string $password): bool
+    {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = Database::getConnection()->prepare(
+            'UPDATE customer_accounts SET password_hash = :password_hash, updated_at = NOW() WHERE customer_id = :customer_id'
+        );
+        $stmt->execute(['password_hash' => $passwordHash, 'customer_id' => $customerId]);
+        return $stmt->rowCount() > 0;
+    }
+
+    private static function validateRegistrationData(string $phone, string $firstName, string $lastName): array
+    {
         $errors = [];
         if (!Customer::isValidPhone($phone)) {
             $errors['phone'] = 'شماره موبایل را به‌صورت ۰۹xxxxxxxxx وارد کنید.';
@@ -88,9 +150,6 @@ class CustomerAuth
         }
         if ($lastName === '' || mb_strlen($lastName) > 100) {
             $errors['last_name'] = 'نام خانوادگی را وارد کنید (حداکثر ۱۰۰ کاراکتر).';
-        }
-        if (strlen($password) < 8) {
-            $errors['password'] = 'رمز عبور باید حداقل ۸ کاراکتر باشد.';
         }
         return $errors;
     }

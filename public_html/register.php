@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/customer-auth.php';
+require_once __DIR__ . '/../classes/OtpService.php';
+require_once __DIR__ . '/../classes/PendingRegistration.php';
 
 if (customerIsLoggedIn()) { header('Location: index'); exit; }
 $errors = []; $old = ['phone' => '', 'first_name' => '', 'last_name' => ''];
@@ -15,10 +17,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($password !== $confirm) {
         $errors['confirm_password'] = 'تکرار رمز عبور یکسان نیست.';
     } else {
-        try {
-            $account = CustomerAuth::register($old['phone'], $old['first_name'], $old['last_name'], $password);
-            customerLogin($account);
-            header('Location: index'); exit;
+        $passwordErrors = CustomerAuth::validatePassword($password, $confirm);
+        if ($passwordErrors !== []) {
+            $errors = array_merge($errors, $passwordErrors);
+        } else {
+            try {
+            $phone = CustomerAuth::normalizePhone($old['phone']);
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            $pendingId = PendingRegistration::create(Database::getConnection(), $phone, $old['first_name'], $old['last_name'], $passwordHash);
+            try {
+                $otpService = new OtpService();
+                $otpService->issueOtp($phone, 'registration', $_SERVER['REMOTE_ADDR'] ?? null);
+                $_SESSION['otp_context'] = [
+                    'purpose' => 'registration',
+                    'phone' => $phone,
+                    'pending_id' => $pendingId,
+                ];
+                $_SESSION['otp_notice'] = 'کد تأیید برای ثبت‌نام شما ارسال شد.';
+                header('Location: otp');
+                exit;
+            } catch (Throwable $e) {
+                PendingRegistration::delete(Database::getConnection(), $pendingId);
+                throw $e;
+            }
         } catch (InvalidArgumentException $e) {
             $errors = json_decode($e->getMessage(), true) ?: ['general' => 'اطلاعات واردشده معتبر نیست.'];
         } catch (RuntimeException $e) {

@@ -211,3 +211,33 @@ Stack trace:
 [05-Aug-2026 13:36:36 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 202
 [05-Aug-2026 13:36:36 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 203
 [05-Aug-2026 13:36:36 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.1.worktrees\automatic-thermal-printing-workflow\classes\Product.php on line 204
+[09-Aug-2026 19:14:16 Asia/Tehran] PHP Fatal error:  Uncaught RuntimeException: درخواست کد تأیید بیش از حد مجاز است. in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\OtpService.php:29
+Stack trace:
+#0 C:\Users\Ekaland\.copilot\session-state\00908d6b-84a0-4fda-a29c-552eb01a8c8d\files\test-otp-flow.php(29): OtpService->issueOtp('09086290256', 'registration', '127.0.0.1')
+#1 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\OtpService.php on line 29
+[09-Aug-2026 19:15:21 Asia/Tehran] PHP Fatal error:  Uncaught RuntimeException: درخواست کد تأیید بیش از حد مجاز است. in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\OtpService.php:29
+Stack trace:
+#0 C:\Users\Ekaland\.copilot\session-state\00908d6b-84a0-4fda-a29c-552eb01a8c8d\files\test-otp-flow.php(31): OtpService->issueOtp('09086290321', 'registration', '127.0.0.1')
+#1 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\OtpService.php on line 29
+[09-Aug-2026 21:32:18 Asia/Tehran] Melipayamak provider is not configured.
+[10-Aug-2026 22:35:07 Asia/Tehran] SoapClient extension is not available.
+[10-Aug-2026 22:35:46 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000]: General error: 2006 MySQL server has gone away in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:43
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php(43): PDO->prepare('SELECT id, user...')
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\index.php(31): Auth::attempt('admin', 'admin123')
+#2 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 43
+[10-Aug-2026 22:36:35 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[10-Aug-2026 22:38:19 Asia/Tehran] SoapClient extension is not available.
+[10-Aug-2026 22:43:27 Asia/Tehran] SoapClient extension is not available.
+[10-Aug-2026 22:48:45 Asia/Tehran] SoapClient extension is not available.
+[10-Aug-2026 22:48:55 Asia/Tehran] SoapClient extension is not available.
+[10-Aug-2026 23:09:48 Asia/Tehran] PHP Fatal error:  Cannot declare class Customer, because the name is already in use in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Customer.php on line 12
+[10-Aug-2026 23:10:27 Asia/Tehran] PHP Fatal error:  Cannot declare class CustomerAuth, because the name is already in use in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\CustomerAuth.php on line 4
+[10-Aug-2026 23:10:49 Asia/Tehran] PHP Fatal error:  Uncaught InvalidArgumentException: {"phone":"شماره موبایل را به‌صورت ۰۹xxxxxxxxx وارد کنید."} in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\CustomerAuth.php:26
+Stack trace:
+#0 C:\Users\Ekaland\.copilot\session-state\00908d6b-84a0-4fda-a29c-552eb01a8c8d\files\test-otp-password-reset.php(22): CustomerAuth::registerWithPasswordHash('091286390849', 'Test', 'User', '$2y$10$Yg8zpAdP...')
+#1 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\CustomerAuth.php on line 26

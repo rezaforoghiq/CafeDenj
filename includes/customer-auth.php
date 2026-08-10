@@ -34,6 +34,35 @@ function customerLogout(): void
     session_regenerate_id(true);
 }
 
+function passwordResetAuthorize(int $customerId, string $phone): void
+{
+    session_regenerate_id(true);
+    $_SESSION['password_reset_auth'] = [
+        'customer_id' => $customerId,
+        'phone' => $phone,
+        'expires_at' => time() + 600,
+    ];
+}
+
+function passwordResetGetContext(): ?array
+{
+    $context = $_SESSION['password_reset_auth'] ?? null;
+    if (!is_array($context)
+        || empty($context['customer_id'])
+        || empty($context['phone'])
+        || empty($context['expires_at'])
+        || time() > (int) $context['expires_at']) {
+        return null;
+    }
+
+    return $context;
+}
+
+function passwordResetClear(): void
+{
+    unset($_SESSION['password_reset_auth']);
+}
+
 function customerIsLoggedIn(): bool
 {
     return isset($_SESSION['customer_id'], $_SESSION['customer_account_id']);
