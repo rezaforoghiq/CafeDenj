@@ -159,7 +159,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 </div>
 <?php endif; ?>
 
-<div class="table-responsive">
+<div class="table-responsive orders-table">
   <table class="table align-middle">
     <thead>
       <tr><th>شماره سفارش</th><th>مشتری</th><th>باریستا</th><th>مبلغ (تومان)</th><th>وضعیت</th><th>تاریخ ثبت</th><th>تاریخ تأیید</th><th>عملیات</th></tr>
@@ -170,10 +170,10 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
       <?php endif; ?>
       <?php foreach ($orders as $order): ?>
       <tr>
-        <td><b>سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></b><small class="d-block mt-1" style="color:var(--muted);direction:ltr;text-align:right"><?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></small></td>
-        <td><?= htmlspecialchars($order['customer_name'] ?: $order['phone'], ENT_QUOTES, 'UTF-8') ?></td>
-        <td>
-          <form method="post" class="d-flex gap-1">
+        <td data-label="شماره سفارش"><b>سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></b><small class="d-block mt-1" style="color:var(--muted);direction:ltr;text-align:right"><?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></small></td>
+        <td data-label="مشتری"><?= htmlspecialchars($order['customer_name'] ?: $order['phone'], ENT_QUOTES, 'UTF-8') ?></td>
+        <td data-label="باریستا">
+          <form method="post" class="d-flex gap-1 order-barista-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="action" value="assign_barista">
             <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
@@ -184,12 +184,12 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
             <button class="btn btn-outline-light btn-sm">ثبت</button>
           </form>
         </td>
-        <td><?= number_format((float) $order['total_price']) ?></td>
-        <td><?= htmlspecialchars($statusLabels[$order['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></td>
-        <td style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['created_at']) ?></td>
-        <td style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['approved_at'] ?? null) ?></td>
-        <td>
-          <div class="d-flex flex-wrap gap-1 align-items-center" style="margin:0;">
+        <td data-label="مبلغ"><?= number_format((float) $order['total_price']) ?></td>
+        <td data-label="وضعیت"><?= htmlspecialchars($statusLabels[$order['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></td>
+        <td data-label="تاریخ ثبت" style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['created_at']) ?></td>
+        <td data-label="تاریخ تأیید" style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['approved_at'] ?? null) ?></td>
+        <td data-label="عملیات">
+          <div class="d-flex flex-wrap gap-1 align-items-center order-quick-actions" style="margin:0;">
             <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
             <form method="post" class="d-inline">
               <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
@@ -204,7 +204,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
               <button type="submit" class="btn btn-outline-danger btn-sm">حذف</button>
             </form>
           </div>
-          <form method="post" class="d-flex gap-1 flex-wrap align-items-center mt-2" data-order-status-form style="margin:0;">
+          <form method="post" class="d-flex gap-1 flex-wrap align-items-center mt-2 order-status-controls" data-order-status-form style="margin:0;">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="action" value="status">
             <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
@@ -217,7 +217,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
               <option value="cash">نقدی</option>
               <option value="transfer">کارت به کارت</option>
             </select>
-            <div class="w-100 d-flex justify-content-center mt-2">
+            <div class="w-100 d-flex justify-content-center mt-2 order-status-submit">
               <button class="btn btn-gold btn-sm">ذخیره</button>
             </div>
           </form>

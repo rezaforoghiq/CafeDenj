@@ -1372,3 +1372,74 @@ footer {
 /* Refined account menu: compact on desktop, clear touch targets in the drawer. */
 .user-menu{position:relative}.profile-trigger{min-height:42px;display:inline-flex;align-items:center;gap:8px;padding:4px 6px 4px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ivory);font:600 12px Vazirmatn,Tahoma,sans-serif;cursor:pointer;transition:border-color .2s,background-color .2s,box-shadow .2s,transform .2s}.profile-trigger:hover,.user-menu.is-open .profile-trigger,.profile-trigger:focus-visible{border-color:var(--gold);background:var(--surface-2);box-shadow:0 8px 22px rgba(0,0,0,.12);outline:none}.profile-trigger:active{transform:scale(.97)}.profile-trigger svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}.user-menu.is-open .profile-trigger svg,.user-menu:focus-within .profile-trigger svg{transform:rotate(180deg)}.profile-avatar{width:32px;height:32px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#21180c;font-size:13px;font-weight:800}.profile-menu{position:absolute;top:calc(100% + 9px);right:0;z-index:30;width:220px;padding:8px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:0 18px 45px rgba(0,0,0,.2);opacity:0;visibility:hidden;transform:translateY(-5px) scale(.98);transform-origin:top right;transition:opacity .16s ease,transform .16s ease,visibility .16s}.user-menu:hover .profile-menu,.user-menu:focus-within .profile-menu,.user-menu.is-open .profile-menu{opacity:1;visibility:visible;transform:none}.profile-menu-head{display:flex;align-items:center;gap:9px;padding:7px 8px 11px;margin-bottom:5px;border-bottom:1px solid var(--line)}.profile-menu-head b{display:block;color:var(--ivory);font-size:12px}.profile-menu-head small{display:block;margin-top:2px;color:var(--muted);font-size:10px}.user-menu-link{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:10px;color:var(--ivory);font-size:12px;font-weight:600;text-decoration:none;transition:background-color .16s,color .16s,transform .16s}.user-menu-link:hover,.user-menu-link:focus-visible{background:rgba(201,162,77,.13);color:var(--gold-soft);outline:none}.user-menu-link:active{transform:scale(.98)}.user-menu-logout{color:#cf826f}.user-menu-logout:hover,.user-menu-logout:focus-visible{background:rgba(190,78,60,.12);color:#e69a85}.action-count{min-width:19px;height:19px;padding:0 5px;display:inline-grid;place-items:center;border-radius:999px;background:var(--gold);color:#21180c;font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}.action-count.is-empty{display:none}:root[data-theme="light"] .profile-menu{background:#fffdfa;box-shadow:0 18px 45px rgba(65,48,28,.15)}
 @media (max-width:560px){.mobile-menu-actions .account-welcome{display:block;padding:4px 5px 12px;color:var(--muted);font-size:12px}.mobile-menu-actions .user-menu-link{min-height:48px;padding:12px;border:1px solid var(--line);background:var(--surface-2);font-size:13px}.mobile-menu-actions .user-menu-link+.user-menu-link{margin-top:8px}.mobile-menu-actions .action-count{min-width:21px;height:21px}:root[data-theme="light"] .mobile-menu-actions .user-menu-link{background:#fff}}
+/* Mobile menu: show two compact products per row without changing cart behavior. */
+@media (max-width: 560px) {
+  .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 12px; }
+  .item-card .thumb { height: 122px; }
+  .item-card .item-body { padding: 12px; }
+  .item-card .item-title { font-size: 14px; }
+  .item-card .item-desc { min-height: 0; font-size: 11px; -webkit-line-clamp: 2; }
+  .item-pricing { padding-top: 10px; }
+  .item-pricing .price { font-size: 13px; }
+  .item-card .cart-add button, .item-card .cart-login { min-height: 40px; padding: 8px 5px; font-size: 11px; }
+  .availability { top: 8px; right: 8px; padding: 3px 6px; font-size: 8px; }
+}
+@media (max-width: 340px) {
+  .menu-grid { gap: 8px; padding: 0 9px; }
+  .item-card .item-body { padding: 10px; }
+  .item-card .item-title { font-size: 13px; }
+}
+/* Light theme: cool neutral surfaces keep product cards distinct from the gold accent. */
+:root[data-theme="light"] {
+  --bg: #eef2f6;
+  --surface: #ffffff;
+  --surface-2: #f6f8fb;
+  --gold: #aa7722;
+  --gold-soft: #8b621e;
+  --ivory: #273447;
+  --muted: #69778a;
+  --line: #dce3ec;
+}
+:root[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(170,119,34,.08), transparent 26%),
+    radial-gradient(circle at 88% 16%, rgba(74,111,164,.07), transparent 30%),
+    linear-gradient(150deg, #f8fafc 0%, #eef2f6 100%);
+}
+:root[data-theme="light"] header {
+  background: rgba(255,255,255,.86);
+  border-bottom-color: #dfe6ee;
+  box-shadow: 0 8px 28px rgba(37,53,76,.06);
+}
+:root[data-theme="light"] .item-card {
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px rgba(37,53,76,.07), 0 1px 2px rgba(37,53,76,.03);
+}
+:root[data-theme="light"] .item-card:hover {
+  border-color: rgba(170,119,34,.55);
+  box-shadow: 0 18px 38px rgba(37,53,76,.13);
+}
+:root[data-theme="light"] .thumb { background: #f3f6fa; }
+:root[data-theme="light"] footer { background: #f7f9fc; border-top-color: #dfe6ee; }
+:root[data-theme="light"] .badge { background: #fdf4df; color: #885f1b; }
+:root[data-theme="light"] .mobile-menu-drawer { background: #fbfcfe !important; }
+.instagram-link {
+  position: absolute;
+  top: 20px;
+  left: 98px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  transition: color .2s, border-color .2s, background-color .2s, transform .2s;
+}
+.instagram-link svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.instagram-link:hover, .instagram-link:focus-visible { color: var(--gold-soft); border-color: var(--gold); background: var(--surface-2); outline: none; }
+.instagram-link:active { transform: scale(.94); }
+@media (max-width: 560px) {
+  .instagram-link { top: 19px; left: 70px; width: 38px; height: 38px; border-radius: 11px; }
+}

@@ -6,3 +6,46 @@
 /* Compatibility aliases for existing server-rendered pages. */
 :root{--gold:var(--primary);--gold-soft:var(--ink);--ivory:var(--ink);--muted:var(--ink-muted);--bg:var(--canvas);--surface-2:#f5f7fb}
 .jalali-date-input{cursor:pointer;background:#fff}.jalali-dp-popup{display:none;position:absolute;z-index:1000;width:250px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px;font-family:Vazirmatn,Tahoma,sans-serif}.jalali-dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.jalali-dp-title{font-size:13px;font-weight:700;color:var(--ink)}.jalali-dp-nav{border:0;background:transparent;color:var(--ink-muted);cursor:pointer;font-size:14px;width:24px;height:24px;border-radius:6px}.jalali-dp-nav:hover{background:var(--canvas);color:var(--ink)}.jalali-dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}.jalali-dp-weekdays span{font-size:10.5px;color:var(--ink-muted);padding:4px 0}.jalali-dp-day{border:0;background:transparent;padding:6px 0;border-radius:8px;font-size:12.5px;color:var(--ink);cursor:pointer}.jalali-dp-day:hover{background:var(--primary-soft);color:var(--primary)}.jalali-dp-day.is-selected{background:var(--primary);color:#fff}.jalali-dp-footer{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}.jalali-dp-link{border:0;background:transparent;color:var(--primary);font-size:11.5px;cursor:pointer;padding:4px 6px;border-radius:6px}.jalali-dp-link:hover{background:var(--primary-soft)}
+
+/* Orders: keep existing forms/actions, but give them a clear responsive layout. */
+.orders-table { overflow-x: auto; }
+.orders-table .table { min-width: 1080px; }
+.orders-table .order-barista-form { min-width: 190px; align-items: center; }
+.orders-table .order-quick-actions { gap: 6px !important; }
+.orders-table .order-quick-actions .btn { white-space: nowrap; }
+.orders-table .order-status-controls { display: grid !important; grid-template-columns: minmax(105px, 1fr) minmax(105px, 1fr) auto; align-items: center !important; gap: 6px !important; margin-top: 8px !important; }
+.orders-table .order-status-controls select { max-width: none !important; width: 100%; }
+.orders-table .order-status-submit { width: auto !important; margin: 0 !important; }
+.orders-table .order-status-submit .btn { min-width: 72px; }
+@media (max-width: 720px) {
+  .orders-table .table { min-width: 0; }
+  .orders-table td[data-label="باریستا"], .orders-table td[data-label="عملیات"] { flex-direction: column; align-items: stretch !important; }
+  .orders-table td[data-label="باریستا"]::before, .orders-table td[data-label="عملیات"]::before { width: 100%; }
+  .orders-table .order-barista-form { min-width: 0; display: grid !important; grid-template-columns: 1fr auto; width: 100%; }
+  .orders-table .order-quick-actions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .orders-table .order-quick-actions > * { min-width: 0; }
+  .orders-table .order-quick-actions .btn { width: 100%; }
+  .orders-table .order-status-controls { grid-template-columns: 1fr; width: 100%; }
+  .orders-table .order-status-submit, .orders-table .order-status-submit .btn { width: 100% !important; }
+}
+@media (max-width: 720px) {
+  .orders-table .order-quick-actions > * { width: 100%; }
+  .orders-table .order-quick-actions form:last-child { grid-column: 1 / -1; }
+  .orders-table .order-quick-actions .btn { width: 100% !important; }
+}
+/* Reports: compact large numbers without affecting shared dashboard cards. */
+.reports-kpis .stat-card > div:first-child,
+.reports-payment-summary .stat-card > div:first-child { font-size: 12px; }
+.reports-kpis .stat-card > div:last-child { font-size: 23px !important; line-height: 1.45; }
+.reports-payment-summary .stat-card > div:last-child { font-size: 19px !important; line-height: 1.55; }
+@media (max-width: 720px) {
+  .reports-kpis .stat-card > div:last-child { font-size: 20px !important; }
+  .reports-payment-summary .stat-card > div:last-child { font-size: 16px !important; }
+}
+/* Reports filters: keep fields and actions in a predictable mobile hierarchy. */
+@media (max-width: 720px) {
+  .reports-filters { row-gap: 12px !important; }
+  .reports-filter-actions { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; margin-top: 2px; }
+  .reports-filter-actions .btn { width: 100%; min-height: 42px; padding-inline: 8px; }
+  .reports-filter-actions .btn-gold { grid-column: 1 / -1; }
+}

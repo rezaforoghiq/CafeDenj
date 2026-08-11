@@ -248,3 +248,15 @@ Stack trace:
 #2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\orders.php(37): PrintJob::createCustomerInvoiceForOrder(4)
 #3 {main}
   thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php on line 57
+[11-Aug-2026 20:24:27 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\export.php on line 197
+[11-Aug-2026 20:25:00 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\export.php on line 197
+[11-Aug-2026 20:36:15 Asia/Tehran] PHP Warning:  Undefined array key "discount_type" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 201
+[11-Aug-2026 20:36:15 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[11-Aug-2026 20:36:15 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[11-Aug-2026 20:36:15 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 203
+[11-Aug-2026 20:36:15 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 204
+[11-Aug-2026 20:36:47 Asia/Tehran] PHP Warning:  Undefined array key "discount_type" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 201
+[11-Aug-2026 20:36:47 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[11-Aug-2026 20:36:47 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[11-Aug-2026 20:36:47 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 203
+[11-Aug-2026 20:36:47 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 204

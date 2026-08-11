@@ -121,7 +121,7 @@ $selectedRange = $rangeLabels[$range] ?? 'امروز';
 
 <h4 class="mb-4">گزارش‌های مدیریتی</h4>
 <div class="card p-3 mb-4">
-  <form method="GET" class="row g-2 align-items-end">
+  <form method="GET" class="row g-2 align-items-end reports-filters">
     <div class="col-6 col-md-3">
       <label class="form-label">بازه گزارش</label>
       <select name="range" class="form-select form-select-sm" onchange="this.form.submit()">
@@ -138,7 +138,7 @@ $selectedRange = $rangeLabels[$range] ?? 'امروز';
       <label class="form-label">تا تاریخ</label>
       <input type="text" data-jalali-picker data-name="to" data-value="<?= htmlspecialchars($to, ENT_QUOTES, 'UTF-8') ?>" class="form-control form-control-sm" placeholder="انتخاب تاریخ">
     </div>
-    <div class="col-6 col-md-3 d-flex gap-2 flex-wrap">
+    <div class="col-12 col-md-3 d-flex gap-2 flex-wrap reports-filter-actions">
       <button class="btn btn-gold btn-sm">اعمال فیلتر</button>
       <a href="reports" class="btn btn-outline-light btn-sm" style="border-color:var(--line); color:var(--ivory);">پاک کردن</a>
       <a href="export?type=reports&<?= htmlspecialchars(http_build_query($_GET), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">خروجی اکسل</a>
@@ -146,7 +146,7 @@ $selectedRange = $rangeLabels[$range] ?? 'امروز';
   </form>
 </div>
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4 reports-kpis">
   <div class="col-6 col-md-3"><div class="stat-card p-3"><div>فروش کل</div><div><?= formatMoney((float) $summary['sales_total']) ?></div></div></div>
   <div class="col-6 col-md-3"><div class="stat-card p-3"><div>سفارش‌های تکمیل‌شده</div><div><?= (int) $summary['orders_count'] ?></div></div></div>
   <div class="col-6 col-md-3"><div class="stat-card p-3"><div>میانگین ارزش سفارش</div><div><?= formatMoney((float) $summary['average_order']) ?></div></div></div>
@@ -154,7 +154,7 @@ $selectedRange = $rangeLabels[$range] ?? 'امروز';
 </div>
 
 <!-- Payment Method Summary Cards -->
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4 reports-payment-summary">
   <?php
     $methods = ['card' => 'کارتخوان', 'cash' => 'نقدی', 'transfer' => 'کارت به کارت'];
     // prepare lookup
