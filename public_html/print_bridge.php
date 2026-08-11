@@ -43,7 +43,7 @@ try {
             exit;
         }
         // Only expose safe fields to the bridge. Provide print_text and job metadata.
-        $payload = $job['payload'] ?? null;
+        $payload = is_array($job['payload'] ?? null) ? $job['payload'] : [];
         $orderNumber = null;
         $orderStmt = Database::getConnection()->prepare('SELECT order_number FROM orders WHERE id = :id LIMIT 1');
         $orderStmt->execute(['id' => (int) $job['order_id']]);
@@ -72,12 +72,14 @@ try {
         }
         $payload['order_number'] = $orderNumber;
         $payload['print_text'] = $printText;
+        $payload['job_type'] = $job['job_type'] ?? 'preparation';
         $response = [
             'success' => true,
             'job' => [
                 'id' => (int) $job['id'],
                 'order_id' => (int) $job['order_id'],
                 'order_number' => $orderNumber,
+                'job_type' => $job['job_type'] ?? 'preparation',
                 'print_text' => $printText,
                 'payload' => $payload // structured payload for advanced bridges (contains prices if needed)
             ]

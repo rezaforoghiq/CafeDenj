@@ -241,3 +241,10 @@ Stack trace:
 #0 C:\Users\Ekaland\.copilot\session-state\00908d6b-84a0-4fda-a29c-552eb01a8c8d\files\test-otp-password-reset.php(22): CustomerAuth::registerWithPasswordHash('091286390849', 'Test', 'User', '$2y$10$Yg8zpAdP...')
 #1 {main}
   thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\CustomerAuth.php on line 26
+[11-Aug-2026 01:15:32 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'job_type' in 'field list' in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php:57
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(57): PDO->prepare('INSERT INTO pri...')
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(47): PrintJob::insertJob(4, 'customer_invoic...', Array)
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\orders.php(37): PrintJob::createCustomerInvoiceForOrder(4)
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php on line 57

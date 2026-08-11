@@ -9,19 +9,21 @@ require_once __DIR__ . '/Setting.php';
 class PrintJob
 {
     private const DEFAULT_MAX_RETRIES = 3;
+    public const TYPE_PREPARATION = 'preparation';
+    public const TYPE_CUSTOMER_INVOICE = 'customer_invoice';
 
-    public static function existsForOrder(int $orderId): bool
+    public static function existsForOrder(int $orderId, string $jobType = self::TYPE_PREPARATION): bool
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare('SELECT 1 FROM print_jobs WHERE order_id = :order_id LIMIT 1');
-        $stmt->execute(['order_id' => $orderId]);
+        $stmt = $pdo->prepare('SELECT 1 FROM print_jobs WHERE order_id = :order_id AND job_type = :job_type LIMIT 1');
+        $stmt->execute(['order_id' => $orderId, 'job_type' => $jobType]);
         return (bool) $stmt->fetchColumn();
     }
 
     public static function createForOrder(int $orderId): ?int
     {
-        // avoid duplicate
-        if (self::existsForOrder($orderId)) {
+        // avoid duplicate preparation jobs for the same order
+        if (self::existsForOrder($orderId, self::TYPE_PREPARATION)) {
             return null;
         }
 
@@ -30,25 +32,45 @@ class PrintJob
             return null;
         }
 
-        // build structured payload (includes both full data and a print-ready text)
         $payload = self::buildPayload($order);
+        return self::insertJob($orderId, self::TYPE_PREPARATION, $payload);
+    }
+
+    public static function createCustomerInvoiceForOrder(int $orderId): ?int
+    {
+        $order = Order::findById($orderId);
+        if (!$order) {
+            return null;
+        }
+
+        $payload = self::buildInvoicePayload($order);
+        return self::insertJob($orderId, self::TYPE_CUSTOMER_INVOICE, $payload);
+    }
+
+    private static function insertJob(int $orderId, string $jobType, array $payload): ?int
+    {
+        $payload['job_type'] = $jobType;
         $payloadJson = json_encode($payload, JSON_UNESCAPED_UNICODE);
+        $jobReference = $jobType === self::TYPE_PREPARATION ? '' : bin2hex(random_bytes(8));
 
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare('INSERT INTO print_jobs (order_id, order_number, payload, status, created_at, updated_at) VALUES (:order_id, :order_number, :payload, :status, NOW(), NOW())');
+        $stmt = $pdo->prepare('INSERT INTO print_jobs (order_id, order_number, job_type, job_reference, payload, status, created_at, updated_at) VALUES (:order_id, :order_number, :job_type, :job_reference, :payload, :status, NOW(), NOW())');
         try {
             $stmt->execute([
                 'order_id' => $orderId,
-                'order_number' => $order['order_number'] ?? '',
+                'order_number' => $payload['order_number'] ?? '',
+                'job_type' => $jobType,
+                'job_reference' => $jobReference,
                 'payload' => $payloadJson,
                 'status' => 'pending'
             ]);
             $jobId = (int) $pdo->lastInsertId();
-            ActivityLog::record('order_approve', 'system', null, 'system', $orderId, 'Print job created #' . $jobId);
+            $action = $jobType === self::TYPE_CUSTOMER_INVOICE ? 'order_print_invoice' : 'order_approve';
+            ActivityLog::record($action, 'system', null, 'system', $orderId, 'Print job created #' . $jobId . ' (' . $jobType . ')');
             return $jobId;
         } catch (Throwable $e) {
-            // if duplicate or other DB error, record and return null
-            ActivityLog::record('order_approve', 'system', null, 'system', $orderId, 'Failed creating print job: ' . mb_substr($e->getMessage(), 0, 200));
+            $action = $jobType === self::TYPE_CUSTOMER_INVOICE ? 'order_print_invoice' : 'order_approve';
+            ActivityLog::record($action, 'system', null, 'system', $orderId, 'Failed creating print job: ' . mb_substr($e->getMessage(), 0, 200));
             return null;
         }
     }
@@ -199,7 +221,99 @@ class PrintJob
             'items' => $itemsData,
             'total_amount' => (float) ($order['total_price'] ?? $total),
             'notes' => $order['customer_note'] ?? null,
+            'job_type' => self::TYPE_PREPARATION,
+            'print_text' => $printText
+        ];
+    }
+
+    private static function buildInvoicePayload(array $order): array
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('SELECT * FROM order_items WHERE order_id = :id');
+        $stmt->execute(['id' => $order['id']]);
+        $items = $stmt->fetchAll();
+
+        $customerName = trim(($order['customer_name'] ?? '') ?: 'مشتری');
+        $customerPhone = $order['phone'] ?? '-';
+        $orderNumber = $order['order_number'] ?? '';
+        $dateJalali = Jalali::formatDate($order['created_at']);
+        $time = $order['created_at'] ? date('H:i', strtotime($order['created_at'])) : '';
+
+        $itemsData = [];
+        $subtotal = 0;
+        foreach ($items as $it) {
+            $lineTotal = (float)$it['price'] * (int)$it['quantity'];
+            $itemsData[] = [
+                'product_id' => (int) $it['product_id'],
+                'product_name' => $it['product_name'],
+                'quantity' => (int) $it['quantity'],
+                'price' => (float) $it['price'],
+                'line_total' => $lineTotal
+            ];
+            $subtotal += $lineTotal;
+        }
+
+        $discount = (float) ($order['discount_amount'] ?? 0);
+        $total = (float) ($order['total_price'] ?? $subtotal);
+        $paymentMethodMap = ['card' => 'کارتخوان', 'cash' => 'نقدی', 'transfer' => 'کارت به کارت'];
+        $paymentMethod = $paymentMethodMap[$order['payment_method'] ?? ''] ?? '-';
+
+        $lines = [];
+        $lines[] = "------------------------------";
+        $lines[] = "کافه دنج";
+        $lines[] = "------------------------------";
+        $lines[] = "فاکتور مشتری";
+        $lines[] = "------------------------------";
+        $lines[] = "سفارش:";
+        $lines[] = $orderNumber;
+        $lines[] = "تاریخ:";
+        $lines[] = $dateJalali;
+        $lines[] = "زمان:";
+        $lines[] = $time ?: '—';
+        $lines[] = "مشتری:";
+        $lines[] = $customerName ?: '-';
+        $lines[] = "تلفن:";
+        $lines[] = $customerPhone;
+        $lines[] = "------------------------------";
+        foreach ($itemsData as $it) {
+            $lines[] = $it['product_name'];
+            $lines[] = 'تعداد: ' . $it['quantity'] . ' × ' . number_format($it['price']) . ' تومان';
+            $lines[] = 'جمع: ' . number_format($it['line_total']) . ' تومان';
+            $lines[] = "------------------------------";
+        }
+        $lines[] = 'جمع کل: ' . number_format($subtotal) . ' تومان';
+        if ($discount > 0) {
+            $lines[] = 'تخفیف: ' . number_format($discount) . ' تومان';
+        }
+        $lines[] = 'مبلغ نهایی: ' . number_format($total) . ' تومان';
+        $lines[] = 'روش پرداخت: ' . $paymentMethod;
+        if (!empty($order['customer_note'])) {
+            $lines[] = "------------------------------";
+            $lines[] = "یادداشت مشتری:";
+            $lines[] = $order['customer_note'];
+        }
+        $lines[] = "------------------------------";
+        $lines[] = "با تشکر از خرید شما";
+        $lines[] = "------------------------------";
+
+        $printText = implode("\n", $lines);
+
+        return [
+            'order_id' => (int) $order['id'],
+            'order_number' => $orderNumber,
+            'date_jalali' => $dateJalali,
+            'time' => $time,
+            'customer_name' => $customerName,
+            'customer_phone' => $customerPhone,
+            'items' => $itemsData,
+            'subtotal' => $subtotal,
+            'discount_amount' => $discount,
+            'total_amount' => $total,
+            'payment_method' => $paymentMethod,
+            'notes' => $order['customer_note'] ?? null,
+            'job_type' => self::TYPE_CUSTOMER_INVOICE,
             'print_text' => $printText
         ];
     }
 }
+

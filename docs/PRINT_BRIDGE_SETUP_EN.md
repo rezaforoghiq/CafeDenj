@@ -109,17 +109,23 @@ Endpoints
 - Purpose: Atomically claim the next pending job and return its payload for printing.
 - Response (200):
 {
+  "success": true,
   "job": {
     "id": 123,
     "order_id": 987,
     "order_number": "DNJ-20260804-055C5D",
-    "payload": "...plain UTF-8 text...",
-    "paper": "80",
-    "created_at": "2026-08-04 12:34:56",
-    "retry_count": 0
+    "job_type": "preparation",
+    "print_text": "...plain UTF-8 text...",
+    "payload": {
+      "order_id": 987,
+      "order_number": "DNJ-20260804-055C5D",
+      "job_type": "preparation",
+      "print_text": "...plain UTF-8 text...",
+      ...
+    }
   }
 }
-- Response when no job: {"job": null}
+- Response when no job: { "success": false, "message": "No pending jobs" }
 
 Example curl:
 curl -H "X-Device-Token: YOUR_TOKEN" "https://your-site.local/api/print_bridge.php?action=next"
@@ -130,21 +136,23 @@ curl -H "X-Device-Token: YOUR_TOKEN" "https://your-site.local/api/print_bridge.p
 - Auth: X-Device-Token or ?token
 - Body params:
   - job_id (int) — the print job id returned earlier
-  - result (string) — `completed` or `failed`
-  - error (string, optional) — short error message if failed
-- Successful response: { "ok": true }
-- Example successful body:
-{ "job_id": 123, "result": "completed" }
-- Example failed body:
-{ "job_id": 123, "result": "failed", "error": "Printer offline" }
+- Successful response: { "success": true }
+- Example body:
+{ "job_id": 123 }
 
-Example curl
-curl -X POST -H "Content-Type: application/json" -H "X-Device-Token: YOUR_TOKEN" -d '{"job_id":123, "result":"completed"}' "https://your-site.local/api/print_bridge.php?action=confirm"
+Example curl:
+curl -X POST -H "Content-Type: application/json" -H "X-Device-Token: YOUR_TOKEN" -d '{"job_id":123}' "https://your-site.local/api/print_bridge.php?action=confirm"
 
-3) Pending list (read-only)
-- URL: GET /api/print_bridge.php?action=pending_list
-- Purpose: For diagnostics — list pending jobs without claiming them.
-- Response: { "jobs": [ { id, order_id, order_number, status, created_at, retry_count, paper }, ... ] }
+3) Report failed print
+- URL: POST /api/print_bridge.php?action=failed
+- Method: POST (JSON body recommended)
+- Auth: X-Device-Token or ?token
+- Body params:
+  - job_id (int) — the print job id returned earlier
+  - error (string) — short error message explaining the failure
+- Successful response: { "success": true }
+- Example body:
+{ "job_id": 123, "error": "Printer offline" }
 
 Error responses
 - 401 Unauthorized — missing or invalid token

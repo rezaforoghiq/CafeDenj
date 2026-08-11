@@ -21,16 +21,31 @@ require_once __DIR__ . '/../classes/Template.php';
 require_once __DIR__ . '/../classes/Category.php';
 require_once __DIR__ . '/../classes/Product.php';
 require_once __DIR__ . '/../classes/Event.php';
+require_once __DIR__ . '/../classes/Order.php';
 
 $categories  = Category::all();
 $products    = Product::all(['status' => 'active']);
 $activeEvent = Event::getActive();
 
-$accountActions = isset($_SESSION['customer_id'], $_SESSION['customer_display_name'])
-    ? '<span class="account-welcome">سلام، ' . htmlspecialchars((string) $_SESSION['customer_display_name'], ENT_QUOTES, 'UTF-8') . '</span>'
-        . '<a class="account-link" href="cart">سبد خرید</a><a class="account-link" href="orders">سفارش‌ها</a><a class="account-link" href="profile">پروفایل</a><a class="account-link" href="customer-logout">خروج</a>'
-    : '<a class="account-link" href="login">ورود</a><a class="account-link account-link-primary" href="register">ثبت‌نام</a>';
+$isLoggedIn = isset($_SESSION['customer_id'], $_SESSION['customer_display_name']);
+$desktopAccountActions = '';
+$mobileAccountActions = '';
 
+if ($isLoggedIn) {
+    $customerId = (int) $_SESSION['customer_id'];
+    $cartCount = array_sum(array_column(Order::cart($customerId), 'quantity'));
+    $ordersCount = count(Order::mine($customerId));
+    $cartBadge = $cartCount > 0 ? '<span class="action-count" data-cart-count>' . toPersianDigits((string) $cartCount) . '</span>' : '<span class="action-count is-empty" data-cart-count></span>';
+    $ordersBadge = $ordersCount > 0 ? '<span class="action-count">' . toPersianDigits((string) $ordersCount) . '</span>' : '';
+    $displayName = htmlspecialchars((string) $_SESSION['customer_display_name'], ENT_QUOTES, 'UTF-8');
+    $initial = htmlspecialchars(mb_substr((string) $_SESSION['customer_display_name'], 0, 1), ENT_QUOTES, 'UTF-8');
+    $actionLinks = '<a class="user-menu-link" href="orders"><span>سفارش‌ها</span>' . $ordersBadge . '</a>' . '<a class="user-menu-link" href="cart"><span>سبد خرید</span>' . $cartBadge . '</a>' . '<a class="user-menu-link" href="profile"><span>پروفایل</span></a>' . '<a class="user-menu-link user-menu-logout" href="customer-logout"><span>خروج</span></a>';
+    $desktopAccountActions = '<div class="user-menu"><button class="profile-trigger" id="profileTrigger" type="button" aria-label="منوی حساب کاربری" aria-haspopup="true" aria-controls="profileMenu" aria-expanded="false"><span class="profile-avatar" aria-hidden="true">' . $initial . '</span><span class="profile-label">' . $displayName . '</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="profile-menu" id="profileMenu"><div class="profile-menu-head"><span class="profile-avatar" aria-hidden="true">' . $initial . '</span><div><b>' . $displayName . '</b><small>حساب کاربری</small></div></div>' . $actionLinks . '</div></div>';
+    $mobileAccountActions = '<span class="account-welcome">سلام، ' . $displayName . '</span>' . $actionLinks;
+} else {
+    $desktopAccountActions = '<a class="account-link" href="login">ورود</a><a class="account-link account-link-primary" href="register">ثبت‌نام</a>';
+    $mobileAccountActions = $desktopAccountActions;
+}
 $html = Template::load(__DIR__ . '/../templates/menu.html');
 
 // ---------------------------------------------------------------
@@ -119,5 +134,6 @@ echo Template::fill($html, [
     'CATEGORY_ITEM'  => $categoryHtml,
     'PRODUCT_ITEM'   => $productHtml,
     'EVENT_POPUP'    => $eventHtml,
-    'ACCOUNT_ACTIONS' => $accountActions,
+    'DESKTOP_ACCOUNT_ACTIONS' => $desktopAccountActions,
+    'MOBILE_ACCOUNT_ACTIONS'  => $mobileAccountActions,
 ]);

@@ -31,6 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
         } else {
             $_SESSION['flash_success'] = 'سفارش با موفقیت حذف شد.';
         }
+    } elseif ($action === 'print_invoice') {
+        $orderId = (int) ($_POST['id'] ?? 0);
+        require_once __DIR__ . '/../../classes/PrintJob.php';
+        $jobId = $orderId > 0 ? PrintJob::createCustomerInvoiceForOrder($orderId) : null;
+        if ($jobId === null) {
+            $_SESSION['flash_error'] = 'ایجاد سفارش چاپ فاکتور انجام نشد.';
+        } else {
+            $_SESSION['flash_success'] = 'درخواست چاپ فاکتور ثبت شد.';
+        }
     } else {
         $status = (string) ($_POST['status'] ?? '');
         $paymentMethod = isset($_POST['payment_method']) ? trim((string) $_POST['payment_method']) : null;
@@ -182,6 +191,12 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <td>
           <div class="d-flex flex-wrap gap-1 align-items-center" style="margin:0;">
             <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
+            <form method="post" class="d-inline">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+              <input type="hidden" name="action" value="print_invoice">
+              <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+              <button type="submit" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ فاکتور</button>
+            </form>
             <form method="post" class="d-inline" data-use-custom-confirm data-confirm-text="آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.">
               <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
               <input type="hidden" name="action" value="delete">

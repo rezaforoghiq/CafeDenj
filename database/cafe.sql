@@ -263,6 +263,8 @@ CREATE TABLE IF NOT EXISTS `print_jobs` (
   `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `order_id` INT UNSIGNED NOT NULL,
   `order_number` VARCHAR(64) NOT NULL,
+  `job_type` ENUM('preparation','customer_invoice') NOT NULL DEFAULT 'preparation',
+  `job_reference` VARCHAR(64) NOT NULL DEFAULT '',
   `status` ENUM('pending','processing','completed','failed') NOT NULL DEFAULT 'pending',
   `payload` LONGTEXT NULL,
   `retry_count` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
@@ -270,7 +272,7 @@ CREATE TABLE IF NOT EXISTS `print_jobs` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `printed_at` TIMESTAMP NULL DEFAULT NULL,
-  CONSTRAINT `uq_print_jobs_order` UNIQUE (`order_id`),
+  CONSTRAINT `uq_print_jobs_order_type_reference` UNIQUE (`order_id`,`job_type`,`job_reference`),
   KEY `idx_print_jobs_status` (`status`),
   KEY `idx_print_jobs_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;

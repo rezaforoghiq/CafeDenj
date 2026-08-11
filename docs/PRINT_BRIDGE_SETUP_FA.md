@@ -105,18 +105,34 @@
 1) دریافت و claim شغل بعدی
 - URL: GET /api/print_bridge.php?action=next
 - پاسخ (مثال):
-{ "job": { "id": 123, "order_id": 987, "order_number": "DNJ-...", "payload": "...", "paper": "80", "created_at": "...", "retry_count": 0 } }
-- اگر شغلی نباشد: { "job": null }
+{
+  "success": true,
+  "job": {
+    "id": 123,
+    "order_id": 987,
+    "order_number": "DNJ-...",
+    "job_type": "preparation",
+    "print_text": "...plain UTF-8 text...",
+    "payload": {
+      "order_id": 987,
+      "order_number": "DNJ-...",
+      "job_type": "preparation",
+      "print_text": "...plain UTF-8 text...",
+      ...
+    }
+  }
+}
+- اگر شغلی نباشد: { "success": false, "message": "No pending jobs" }
 
 2) تایید نتیجه چاپ
 - URL: POST /api/print_bridge.php?action=confirm
-- بدنه (JSON): { "job_id": 123, "result": "completed" }
-- یا در صورت خطا: { "job_id": 123, "result": "failed", "error": "Printer offline" }
-- پاسخ: { "ok": true }
+- بدنه (JSON): { "job_id": 123 }
+- پاسخ: { "success": true }
 
-3) لیست شغل‌های pending (برای دیباگ)
-- URL: GET /api/print_bridge.php?action=pending_list
-- پاسخ: لیست سادهٔ شغل‌های pending
+3) گزارش خطای چاپ
+- URL: POST /api/print_bridge.php?action=failed
+- بدنه (JSON): { "job_id": 123, "error": "Printer offline" }
+- پاسخ: { "success": true }
 
 خطاها
 - 401 Unauthorized — توکن نامعتبر
