@@ -260,3 +260,138 @@ Stack trace:
 [11-Aug-2026 20:36:47 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
 [11-Aug-2026 20:36:47 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 203
 [11-Aug-2026 20:36:47 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 204
+[11-Aug-2026 21:22:25 Asia/Tehran] PHP Warning:  Undefined array key "discount_type" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 201
+[11-Aug-2026 21:22:25 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[11-Aug-2026 21:22:25 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[11-Aug-2026 21:22:25 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 203
+[11-Aug-2026 21:22:25 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 204
+[11-Aug-2026 21:22:40 Asia/Tehran] PHP Warning:  Undefined array key "discount_type" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 201
+[11-Aug-2026 21:22:40 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[11-Aug-2026 21:22:40 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[11-Aug-2026 21:22:40 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 203
+[11-Aug-2026 21:22:40 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 204
+[11-Aug-2026 22:44:52 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:44:52 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:44:54 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:44:54 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:44:56 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:44:56 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:44:58 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:44:58 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:00 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:00 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:02 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:02 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:04 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:04 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:06 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:06 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:08 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:08 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:10 Asia/Tehran] PHP Warning:  require_once(C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 22:45:10 Asia/Tehran] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes/Permission.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php:12
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Order.php(3): require_once()
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\PrintJob.php(6): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\print_bridge.php(14): require_once('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php on line 12
+[11-Aug-2026 23:05:42 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'cafe_db_1.permissions' doesn't exist in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php:38
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php(38): PDO->prepare('SELECT p.slug F...')
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php(29): Permission::getBaristaPermissions(1)
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Barista.php(90): Permission::ensureDefaultsForBarista(1)
+#3 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\baristas.php(53): Barista::create(Array)
+#4 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php on line 38
+[11-Aug-2026 23:28:54 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[11-Aug-2026 23:48:50 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method Permission::ensureSchema() from global scope in Command line code:1
+Stack trace:
+#0 {main}
+  thrown in Command line code on line 1
+[12-Aug-2026 00:15:10 Asia/Tehran] PHP Fatal error:  Cannot declare class Permission, because the name is already in use in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php on line 5
+[12-Aug-2026 00:15:19 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`cafe_db_1`.`barista_permissions`, CONSTRAINT `fk_barista_permissions_barista` FOREIGN KEY (`barista_id`) REFERENCES `baristas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE) in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php:138
+Stack trace:
+#0 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php(138): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php(80): Permission::saveForBarista(1, Array)
+#2 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php(161): Permission::ensureDefaultsForBarista(1)
+#3 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Auth.php(174): Auth::can('orders.view')
+#4 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\includes\auth.php(26): Auth::requirePermission('orders.view')
+#5 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\orders.php(18): requirePermission('orders.view')
+#6 C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\barista\orders.php(5): require_once('C:\\xampp\\htdocs...')
+#7 Standard input code(11): require('C:\\xampp\\htdocs...')
+#8 {main}
+  thrown in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Permission.php on line 138
+[12-Aug-2026 00:15:39 Asia/Tehran] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\orders.php on line 23
+[12-Aug-2026 12:13:10 Asia/Tehran] Melipayamak provider error: SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://api.payamak-panel.com/post/Send.asmx?wsdl' : failed to load external entity "http://api.payamak-panel.com/post/Send.asmx?wsdl"
+
+[12-Aug-2026 12:13:18 Asia/Tehran] Melipayamak provider error: SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://api.payamak-panel.com/post/Send.asmx?wsdl' : failed to load external entity "http://api.payamak-panel.com/post/Send.asmx?wsdl"
+
+[12-Aug-2026 12:18:25 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\export.php on line 197
+[12-Aug-2026 12:18:55 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\export.php on line 197
+[12-Aug-2026 23:32:47 Asia/Tehran] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in Standard input code on line 4
+[12-Aug-2026 23:32:47 Asia/Tehran] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\public_html\admin\add-product.php on line 28
+[12-Aug-2026 23:38:35 Asia/Tehran] PHP Warning:  Undefined array key "discount_type" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 201
+[12-Aug-2026 23:38:35 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[12-Aug-2026 23:38:35 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[12-Aug-2026 23:38:35 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 203
+[12-Aug-2026 23:38:35 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 204
+[12-Aug-2026 23:38:49 Asia/Tehran] PHP Warning:  Undefined array key "discount_type" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 201
+[12-Aug-2026 23:38:49 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[12-Aug-2026 23:38:49 Asia/Tehran] PHP Warning:  Undefined array key "discount_value" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 202
+[12-Aug-2026 23:38:49 Asia/Tehran] PHP Warning:  Undefined array key "discount_starts_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 203
+[12-Aug-2026 23:38:49 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 204

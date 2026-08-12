@@ -25,10 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
         $error = 'نشست شما منقضی شده است. صفحه را رفرش کرده و دوباره تلاش کنید.';
     } else {
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
+        $username = (string) ($_POST['username'] ?? '');
+        $password = (string) ($_POST['password'] ?? '');
 
-        if (Auth::attempt($username, $password)) {
+        if (Auth::attemptAdmin($username, $password)) {
             header('Location: ' . APP_URL . '/admin/dashboard');
             exit;
         }

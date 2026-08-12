@@ -127,6 +127,10 @@ Endpoints
 }
 - Response when no job: { "success": false, "message": "No pending jobs" }
 
+Note: The system may create two kinds of print jobs. The field `job_type` indicates the purpose of the job:
+- "preparation": printed for barista preparation (created automatically when an order is approved). Duplicate prevention is enforced for this type.
+- "customer_invoice": a customer-facing invoice/receipt that can be requested manually (reprints allowed). The payload for this type also contains `job_type`="customer_invoice". The Bridge should handle both types; if an operator wants to print only preparation jobs, filter by `job_type` on the client side.
+
 Example curl:
 curl -H "X-Device-Token: YOUR_TOKEN" "https://your-site.local/api/print_bridge.php?action=next"
 

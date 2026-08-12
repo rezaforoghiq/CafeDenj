@@ -12,8 +12,11 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../classes/Setting.php';
+require_once __DIR__ . '/../../classes/Barista.php';
+require_once __DIR__ . '/../../classes/Permission.php';
 
 requireLogin();
+requireAdmin();
 
 $activePage = 'settings';
 $pageTitle  = 'تنظیمات';
@@ -22,16 +25,39 @@ $flashSuccess = $_SESSION['flash_success'] ?? null;
 $flashError   = null;
 unset($_SESSION['flash_success']);
 
+$baristas = Barista::all();
+$selectedBaristaId = (int) ($_GET['barista_id'] ?? 0);
+if ($selectedBaristaId <= 0 && !empty($baristas)) {
+    $selectedBaristaId = (int) $baristas[0]['id'];
+}
+$selectedPermissions = $selectedBaristaId > 0 ? Permission::getBaristaPermissions($selectedBaristaId) : [];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
         $flashError = 'نشست شما منقضی شده است. صفحه را رفرش کرده و دوباره تلاش کنید.';
     } else {
-        $phoneRequired = ($_POST['phone_required'] ?? '1') === '1' ? '1' : '0';
-        Setting::set('phone_required', $phoneRequired);
+        if (($_POST['action'] ?? '') === 'barista_permissions') {
+            $baristaId = (int) ($_POST['barista_id'] ?? 0);
+            $selected = $_POST['permissions'] ?? [];
+            if ($baristaId > 0) {
+                $permissionList = [];
+                foreach ($selected as $permission) {
+                    $permissionList[] = (string) $permission;
+                }
+                Permission::saveForBarista($baristaId, $permissionList);
+                $_SESSION['flash_success'] = 'دسترسی‌های باریستا با موفقیت ذخیره شد.';
+                header('Location: settings?barista_id=' . rawurlencode((string) $baristaId));
+                exit;
+            }
+            $flashError = 'باریستا انتخاب نشده است.';
+        } else {
+            $phoneRequired = ($_POST['phone_required'] ?? '1') === '1' ? '1' : '0';
+            Setting::set('phone_required', $phoneRequired);
 
-        $_SESSION['flash_success'] = 'تنظیمات با موفقیت ذخیره شد.';
-        header('Location: settings');
-        exit;
+            $_SESSION['flash_success'] = 'تنظیمات با موفقیت ذخیره شد.';
+            header('Location: settings');
+            exit;
+        }
     }
 }
 
@@ -67,6 +93,37 @@ require __DIR__ . '/../../includes/admin-header.php';
     </div>
 
     <button type="submit" class="btn btn-gold btn-sm">ذخیرهٔ تنظیمات</button>
+  </form>
+</div>
+
+<div class="card p-4 mt-4" style="max-width:640px;">
+  <h6 class="mb-3" style="color:var(--ivory);">مدیریت دسترسی باریستا</h6>
+  <form method="GET" class="mb-3">
+    <label class="form-label">باریستا</label>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <select name="barista_id" class="form-select" onchange="this.form.submit()">
+        <?php foreach ($baristas as $barista): ?>
+          <option value="<?= (int) $barista['id'] ?>" <?= (int) $selectedBaristaId === (int) $barista['id'] ? 'selected' : '' ?>><?= htmlspecialchars($barista['full_name'], ENT_QUOTES, 'UTF-8') ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+  </form>
+
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+    <input type="hidden" name="action" value="barista_permissions">
+    <input type="hidden" name="barista_id" value="<?= (int) $selectedBaristaId ?>">
+    <div class="row g-2">
+      <?php foreach (Permission::all() as $permission): ?>
+        <div class="col-12 col-md-6">
+          <label class="d-flex align-items-center gap-2 p-2 rounded border" style="border-color:var(--line); background:rgba(255,255,255,0.02);">
+            <input type="checkbox" name="permissions[]" value="<?= htmlspecialchars($permission['slug'], ENT_QUOTES, 'UTF-8') ?>" <?= in_array($permission['slug'], $selectedPermissions, true) ? 'checked' : '' ?>>
+            <span style="font-size:13px; color:var(--ivory);"><?= htmlspecialchars($permission['label'], ENT_QUOTES, 'UTF-8') ?></span>
+          </label>
+        </div>
+      <?php endforeach; ?>
+    </div>
+    <div class="mt-3"><button type="submit" class="btn btn-gold btn-sm">ذخیره دسترسی‌ها</button></div>
   </form>
 </div>
 

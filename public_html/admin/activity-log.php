@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../classes/ActivityLog.php';
 require_once __DIR__ . '/../../classes/Jalali.php';
 
 requireLogin();
+requireAdmin();
 
 $activePage = 'activity-log';
 $pageTitle  = 'لاگ فعالیت';

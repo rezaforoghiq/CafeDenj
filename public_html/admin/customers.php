@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../classes/Customer.php';
 
 requireLogin();
+requireAdmin();
 
 $activePage = 'customers';
 $pageTitle  = 'مشتریان';

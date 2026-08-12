@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../classes/Barista.php';
 require_once __DIR__ . '/../../classes/Jalali.php';
 
 requireLogin();
+requireAdmin();
 
 $activePage = 'baristas';
 $pageTitle  = 'مدیریت باریستا';

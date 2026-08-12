@@ -15,24 +15,62 @@ require_once __DIR__ . '/../../classes/Barista.php';
 require_once __DIR__ . '/../../classes/Jalali.php';
 
 requireLogin();
+requirePermission('orders.view');
 
 $activePage = 'orders';
 $pageTitle  = 'سفارش‌ها';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'] ?? null)) {
     $action = $_POST['action'] ?? 'status';
+    $orderId = (int) ($_POST['id'] ?? 0);
+
+    if (Auth::isBarista()) {
+        if (!Auth::can('orders.update_status')) {
+            http_response_code(403);
+            exit('Access denied');
+        }
+        if ($action === 'assign_barista') {
+            $_SESSION['flash_error'] = 'باریستا اجازهٔ تغییر باریستای سفارش را ندارد.';
+            header('Location: orders');
+            exit;
+        }
+        if ($action === 'delete') {
+            $_SESSION['flash_error'] = 'باریستا اجازهٔ حذف سفارش را ندارد.';
+            header('Location: orders');
+            exit;
+        }
+        if ($action === 'print_invoice' && !Auth::can('orders.print')) {
+            $_SESSION['flash_error'] = 'شما اجازهٔ چاپ فاکتور ندارید.';
+            header('Location: orders');
+            exit;
+        }
+    }
+
     if ($action === 'assign_barista') {
+        if (Auth::isBarista()) {
+            $_SESSION['flash_error'] = 'باریستا نمی‌تواند باریستای دیگری را برای سفارش تعیین کند.';
+            header('Location: orders');
+            exit;
+        }
         $baristaId = (int) ($_POST['barista_id'] ?? 0);
         Order::assignBarista((int) $_POST['id'], $baristaId ?: null);
     } elseif ($action === 'delete') {
-        $orderId = (int) ($_POST['id'] ?? 0);
-        if ($orderId <= 0 || !Order::delete($orderId)) {
+        if (Auth::isBarista()) {
+            $_SESSION['flash_error'] = 'باریستا اجازهٔ حذف سفارش را ندارد.';
+            header('Location: orders');
+            exit;
+        }
+        if ($orderId <= 0 || !Order::delete($orderId, Auth::id(), Auth::username())) {
             $_SESSION['flash_error'] = 'سفارش مورد نظر یافت نشد یا قابل حذف نیست.';
         } else {
             $_SESSION['flash_success'] = 'سفارش با موفقیت حذف شد.';
         }
     } elseif ($action === 'print_invoice') {
-        $orderId = (int) ($_POST['id'] ?? 0);
+        if (!Auth::isAdmin() && !Auth::can('orders.print')) {
+            $_SESSION['flash_error'] = 'شما اجازهٔ چاپ فاکتور ندارید.';
+            header('Location: orders');
+            exit;
+        }
         require_once __DIR__ . '/../../classes/PrintJob.php';
         $jobId = $orderId > 0 ? PrintJob::createCustomerInvoiceForOrder($orderId) : null;
         if ($jobId === null) {
@@ -43,14 +81,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
     } else {
         $status = (string) ($_POST['status'] ?? '');
         $paymentMethod = isset($_POST['payment_method']) ? trim((string) $_POST['payment_method']) : null;
-        // when admin marks completed, payment method is required and must be one of allowed
         $allowed = ['card','cash','transfer'];
         if ($status === 'completed' && !in_array($paymentMethod, $allowed, true)) {
             $_SESSION['flash_error'] = 'وقتی سفارش تکمیل می‌شود، روش پرداخت را انتخاب کنید.';
             header('Location: orders?' . http_build_query($_GET));
             exit;
         }
-        Order::status((int) $_POST['id'], $status, null, null, 'admin', $paymentMethod);
+        if (Auth::isBarista()) {
+            $ownedOrder = Order::findById($orderId);
+            if (!$ownedOrder || (int) ($ownedOrder['barista_id'] ?? 0) !== (int) Auth::currentBaristaId()) {
+                $_SESSION['flash_error'] = 'شما فقط می‌توانید سفارش‌های خودتان را تغییر وضعیت دهید.';
+                header('Location: orders');
+                exit;
+            }
+            Order::status($orderId, $status, Auth::currentBaristaId(), Auth::username(), 'barista', $paymentMethod);
+        } else {
+            Order::status($orderId, $status, null, null, 'admin', $paymentMethod);
+        }
     }
     header('Location: orders?' . http_build_query($_GET));
     exit;
@@ -67,12 +114,23 @@ $filters = [
     'sort'       => (string) ($_GET['sort'] ?? 'date_desc'),
 ];
 
+if (Auth::isBarista()) {
+    $filters['barista_id'] = (string) Auth::currentBaristaId();
+    // Show pending orders to all baristas, while other statuses remain scoped to the assigned barista
+    $filters['barista_pending_all'] = true;
+}
+
 $orders   = Order::report($filters);
 $baristas = Barista::activeOnly();
 $viewOrder = null;
 $viewOrderId = (int) ($_GET['view'] ?? 0);
 if ($viewOrderId > 0) {
     $viewOrder = Order::findById($viewOrderId);
+    if (Auth::isBarista()) {
+        if (!$viewOrder || (int) ($viewOrder['barista_id'] ?? 0) !== (int) Auth::currentBaristaId()) {
+            $viewOrder = null;
+        }
+    }
 }
 
 require __DIR__ . '/../../includes/admin-header.php';
@@ -97,6 +155,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <?php foreach ($statusLabels as $st => $lbl): ?><option value="<?= $st ?>" <?= $filters['status'] === $st ? 'selected' : '' ?>><?= $lbl ?></option><?php endforeach; ?>
       </select>
     </div>
+    <?php if (!Auth::isBarista()): ?>
     <div class="col-6 col-md-2">
       <label class="form-label">باریستا</label>
       <select name="barista_id" class="form-select form-select-sm">
@@ -104,6 +163,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <?php foreach ($baristas as $b): ?><option value="<?= $b['id'] ?>" <?= $filters['barista_id'] == $b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['full_name'], ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?>
       </select>
     </div>
+    <?php endif; ?>
     <div class="col-6 col-md-2">
       <label class="form-label">از تاریخ</label>
       <input type="text" data-jalali-picker data-name="from" data-value="<?= htmlspecialchars($filters['from'], ENT_QUOTES, 'UTF-8') ?>" class="form-control form-control-sm" placeholder="انتخاب تاریخ">
@@ -173,16 +233,20 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <td data-label="شماره سفارش"><b>سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></b><small class="d-block mt-1" style="color:var(--muted);direction:ltr;text-align:right"><?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></small></td>
         <td data-label="مشتری"><?= htmlspecialchars($order['customer_name'] ?: $order['phone'], ENT_QUOTES, 'UTF-8') ?></td>
         <td data-label="باریستا">
-          <form method="post" class="d-flex gap-1 order-barista-form">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-            <input type="hidden" name="action" value="assign_barista">
-            <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-            <select name="barista_id" class="form-select form-select-sm">
-              <option value="">— بدون باریستا —</option>
-              <?php foreach ($baristas as $b): ?><option value="<?= $b['id'] ?>" <?= (int) $order['barista_id'] === (int) $b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['full_name'], ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?>
-            </select>
-            <button class="btn btn-outline-light btn-sm">ثبت</button>
-          </form>
+          <?php if (Auth::isBarista()): ?>
+            <span class="text-light"><?= htmlspecialchars($order['barista_name'] ?? Auth::username(), ENT_QUOTES, 'UTF-8') ?></span>
+          <?php else: ?>
+            <form method="post" class="d-flex gap-1 order-barista-form">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+              <input type="hidden" name="action" value="assign_barista">
+              <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+              <select name="barista_id" class="form-select form-select-sm">
+                <option value="">— بدون باریستا —</option>
+                <?php foreach ($baristas as $b): ?><option value="<?= $b['id'] ?>" <?= (int) $order['barista_id'] === (int) $b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['full_name'], ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?>
+              </select>
+              <button class="btn btn-outline-light btn-sm">ثبت</button>
+            </form>
+          <?php endif; ?>
         </td>
         <td data-label="مبلغ"><?= number_format((float) $order['total_price']) ?></td>
         <td data-label="وضعیت"><?= htmlspecialchars($statusLabels[$order['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></td>
@@ -191,19 +255,24 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
         <td data-label="عملیات">
           <div class="d-flex flex-wrap gap-1 align-items-center order-quick-actions" style="margin:0;">
             <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
-            <form method="post" class="d-inline">
-              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-              <input type="hidden" name="action" value="print_invoice">
-              <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-              <button type="submit" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ فاکتور</button>
-            </form>
-            <form method="post" class="d-inline" data-use-custom-confirm data-confirm-text="آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.">
-              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-              <button type="submit" class="btn btn-outline-danger btn-sm">حذف</button>
-            </form>
+            <?php if (Auth::isAdmin() || Auth::can('orders.print')): ?>
+              <form method="post" class="d-inline">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="action" value="print_invoice">
+                <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+                <button type="submit" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ فاکتور</button>
+              </form>
+            <?php endif; ?>
+            <?php if (Auth::isAdmin()): ?>
+              <form method="post" class="d-inline" data-use-custom-confirm data-confirm-text="آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+                <button type="submit" class="btn btn-outline-danger btn-sm">حذف</button>
+              </form>
+            <?php endif; ?>
           </div>
+          <?php if (Auth::isAdmin() || Auth::can('orders.update_status')): ?>
           <form method="post" class="d-flex gap-1 flex-wrap align-items-center mt-2 order-status-controls" data-order-status-form style="margin:0;">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="action" value="status">
@@ -221,6 +290,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
               <button class="btn btn-gold btn-sm">ذخیره</button>
             </div>
           </form>
+          <?php endif; ?>
         </td>
       </tr>
       <?php endforeach; ?>

@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../classes/Event.php';
 
 requireLogin();
+requireAdmin();
 
 $activePage = 'events';
 $pageTitle  = 'ایونت‌ها';

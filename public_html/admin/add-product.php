@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../classes/Product.php';
 require_once __DIR__ . '/../../classes/Category.php';
 
 requireLogin();
+requirePermission('products.manage');
 
 $activePage = 'products';
 $pageTitle  = 'افزودن محصول';

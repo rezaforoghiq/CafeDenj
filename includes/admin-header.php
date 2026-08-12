@@ -3,18 +3,36 @@ declare(strict_types=1);
 
 $activePage = $activePage ?? '';
 $navItems = [
-    'dashboard'  => ['label' => 'داشبورد', 'icon' => 'grid'],
-    'products'   => ['label' => 'محصولات', 'icon' => 'cup'],
-    'categories' => ['label' => 'دسته‌بندی‌ها', 'icon' => 'layers'],
-    'events'     => ['label' => 'رویدادها', 'icon' => 'calendar'],
-    'customers'  => ['label' => 'مشتریان', 'icon' => 'users'],
-    'orders'     => ['label' => 'سفارش‌ها', 'icon' => 'calendar'],
-    'reports'    => ['label' => 'گزارش‌ها', 'icon' => 'chart'],
-    'baristas'   => ['label' => 'باریستاها', 'icon' => 'barista'],
-    'activity-log' => ['label' => 'لاگ فعالیت', 'icon' => 'log'],
-    'admins'     => ['label' => 'ادمین‌ها', 'icon' => 'users'],
-    'settings'   => ['label' => 'تنظیمات', 'icon' => 'settings'],
+    'dashboard'  => ['label' => 'داشبورد', 'icon' => 'grid', 'permission' => null],
+    'products'   => ['label' => 'محصولات', 'icon' => 'cup', 'permission' => 'products.view'],
+    'categories' => ['label' => 'دسته‌بندی‌ها', 'icon' => 'layers', 'permission' => 'products.manage'],
+    'events'     => ['label' => 'رویدادها', 'icon' => 'calendar', 'permission' => null],
+    'customers'  => ['label' => 'مشتریان', 'icon' => 'users', 'permission' => null],
+    'orders'     => ['label' => 'سفارش‌ها', 'icon' => 'calendar', 'permission' => 'orders.view'],
+    'reports'    => ['label' => 'گزارش‌ها', 'icon' => 'chart', 'permission' => 'reports.view'],
+    'baristas'   => ['label' => 'باریستاها', 'icon' => 'barista', 'permission' => null],
+    'activity-log' => ['label' => 'لاگ فعالیت', 'icon' => 'log', 'permission' => null],
+    'admins'     => ['label' => 'ادمین‌ها', 'icon' => 'users', 'permission' => null],
+    'settings'   => ['label' => 'تنظیمات', 'icon' => 'settings', 'permission' => 'settings.view'],
 ];
+
+foreach ($navItems as $path => $item) {
+    if ($path === 'dashboard') {
+        continue;
+    }
+    if (Auth::isAdmin()) {
+        continue;
+    }
+    if ($item['permission'] === null) {
+        $navItems[$path] = null;
+        continue;
+    }
+    if (!Auth::can((string) $item['permission'])) {
+        $navItems[$path] = null;
+    }
+}
+$navItems = array_filter($navItems, fn ($item) => $item !== null);
+
 function adminIcon(string $name): string {
     $icons = [
         'grid' => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
@@ -66,9 +84,9 @@ function adminIcon(string $name): string {
         <div class="user-menu">
           <button class="profile-trigger" type="button" aria-expanded="false" aria-controls="profileMenu">
             <span class="avatar"><?= htmlspecialchars(function_exists('mb_substr') ? mb_substr(Auth::username() ?? 'م', 0, 1) : 'م', ENT_QUOTES, 'UTF-8') ?></span>
-            <span class="profile-copy"><b><?= htmlspecialchars(Auth::username() ?? 'مدیر', ENT_QUOTES, 'UTF-8') ?></b><small>مدیر سیستم</small></span><?= adminIcon('chevron') ?>
+          <span class="profile-copy"><b><?= htmlspecialchars(Auth::username() ?? 'مدیر', ENT_QUOTES, 'UTF-8') ?></b><small><?= Auth::isAdmin() ? 'مدیر سیستم' : 'باریستا' ?></small></span><?= adminIcon('chevron') ?>
           </button>
-          <div class="profile-menu" id="profileMenu"><div><b><?= htmlspecialchars(Auth::username() ?? 'مدیر', ENT_QUOTES, 'UTF-8') ?></b><small>حساب کاربری مدیر</small></div><a href="settings"><?= adminIcon('settings') ?>تنظیمات حساب</a><a href="logout" class="danger-link"><?= adminIcon('logout') ?>خروج از پنل</a></div>
+        <div class="profile-menu" id="profileMenu"><div><b><?= htmlspecialchars(Auth::username() ?? 'مدیر', ENT_QUOTES, 'UTF-8') ?></b><small><?= Auth::isAdmin() ? 'حساب کاربری مدیر' : 'حساب کاربری باریستا' ?></small></div><?php if (Auth::isAdmin() || Auth::can('settings.view')): ?><a href="settings"><?= adminIcon('settings') ?>تنظیمات حساب</a><?php endif; ?><a href="logout" class="danger-link"><?= adminIcon('logout') ?>خروج از پنل</a></div>
         </div>
       </div>
     </header>

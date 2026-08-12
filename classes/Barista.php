@@ -10,6 +10,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/CustomerAuth.php';
+require_once __DIR__ . '/Permission.php';
 
 class Barista
 {
@@ -85,7 +86,9 @@ class Barista
             'h'  => password_hash((string) $data['password'], PASSWORD_DEFAULT),
             'st' => ($data['status'] ?? 'active') === 'inactive' ? 'inactive' : 'active',
         ]);
-        return (int) Database::getConnection()->lastInsertId();
+        $id = (int) Database::getConnection()->lastInsertId();
+        Permission::ensureDefaultsForBarista($id);
+        return $id;
     }
 
     public static function update(int $id, array $data): void

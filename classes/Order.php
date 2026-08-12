@@ -135,11 +135,37 @@ class Order {
  /** گزارش سفارش‌ها با جستجو/فیلتر/مرتب‌سازی — برای صفحهٔ مدیریت سفارش‌ها */
  public static function report(array $f=[]):array{
   $where=[];$params=[];
-  if(!empty($f['status'])){$where[]='o.status=:status';$params['status']=$f['status'];}
-  if(!empty($f['barista_id'])){$where[]='o.barista_id=:barista_id';$params['barista_id']=(int)$f['barista_id'];}
-  if(!empty($f['q'])){$where[]='(o.order_number LIKE :q1 OR c.phone LIKE :q2 OR CONCAT_WS(" ",c.first_name,c.last_name) LIKE :q3)';$params['q1']=$params['q2']=$params['q3']='%'.$f['q'].'%';}
-  if(!empty($f['from'])){$where[]='o.created_at >= :from';$params['from']=$f['from'].' 00:00:00';}
-  if(!empty($f['to'])){$where[]='o.created_at <= :to';$params['to']=$f['to'].' 23:59:59';}
+  // If a barista requested orders and we want to show pending to all baristas
+  $baristaPendingAll = !empty($f['barista_pending_all']);
+  $statusFilterProvided = !empty($f['status']);
+
+  if($baristaPendingAll && !$statusFilterProvided) {
+      // Show orders that are pending (for everyone) OR assigned to this barista
+      if(!empty($f['q'])){
+          // apply search to both sides via same conditions
+          $where[] = '((o.status = \'pending\') OR (o.barista_id = :barista_id))';
+          $params['barista_id'] = (int)$f['barista_id'];
+          // add search condition separately
+          $where[] = '(o.order_number LIKE :q1 OR c.phone LIKE :q2 OR CONCAT_WS(" ",c.first_name,c.last_name) LIKE :q3)';
+          $params['q1']=$params['q2']=$params['q3']='%'.$f['q'].'%';
+      } else {
+          $where[] = '((o.status = \'pending\') OR (o.barista_id = :barista_id))';
+          $params['barista_id'] = (int)$f['barista_id'];
+      }
+  } else {
+      if(!empty($f['status'])){$where[]='o.status=:status';$params['status']=$f['status'];}
+      if(!empty($f['barista_id'])){$where[]='o.barista_id=:barista_id';$params['barista_id']=(int)$f['barista_id'];}
+      if(!empty($f['q'])){$where[]='(o.order_number LIKE :q1 OR c.phone LIKE :q2 OR CONCAT_WS(" ",c.first_name,c.last_name) LIKE :q3)';$params['q1']=$params['q2']=$params['q3']='%'.$f['q'].'%';}
+      if(!empty($f['from'])){$where[]='o.created_at >= :from';$params['from']=$f['from'].' 00:00:00';}
+      if(!empty($f['to'])){$where[]='o.created_at <= :to';$params['to']=$f['to'].' 23:59:59';}
+  }
+
+  // If baristaPendingAll applied other date filters should still be applied
+  if($baristaPendingAll && !$statusFilterProvided){
+      if(!empty($f['from'])){ $where[]='o.created_at >= :from'; $params['from']=$f['from'].' 00:00:00'; }
+      if(!empty($f['to'])){ $where[]='o.created_at <= :to'; $params['to']=$f['to'].' 23:59:59'; }
+  }
+
   $sortMap=['date_desc'=>'o.created_at DESC','date_asc'=>'o.created_at ASC','amount_desc'=>'o.total_price DESC','amount_asc'=>'o.total_price ASC'];
   $order=$sortMap[$f['sort']??'date_desc']??$sortMap['date_desc'];
   $sql='SELECT o.*, c.phone, CONCAT_WS(" ", c.first_name, c.last_name) AS customer_name, b.full_name AS barista_name FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN baristas b ON b.id=o.barista_id';

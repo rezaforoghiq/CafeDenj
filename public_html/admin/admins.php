@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../classes/Admin.php';
 require_once __DIR__ . '/../../classes/Jalali.php';
 
 requireLogin();
+requireAdmin();
 
 $activePage = 'admins';
 $pageTitle  = 'مدیریت ادمین‌ها';

@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../classes/Barista.php';
 require_once __DIR__ . '/../../classes/Jalali.php';
 
 requireLogin();
+requirePermission('reports.view');
 
 $activePage = 'reports';
 $pageTitle = 'گزارش‌ها';

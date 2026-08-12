@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../classes/Category.php';
 
 requireLogin();
+requirePermission('products.manage');
 
 $activePage = 'categories';
 $pageTitle  = 'دسته‌بندی‌ها';

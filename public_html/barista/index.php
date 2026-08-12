@@ -2,7 +2,7 @@
 /**
  * barista/index.php
  * -----------------------------------------------------------------------
- * صفحهٔ ورود باریستا. اگر از قبل لاگین باشد، مستقیم به داشبورد می‌رود.
+ * صفحهٔ ورود باریستا. اگر از قبل لاگین باشد، مستقیماً به داشبورد پنل باریستا می‌رود.
  * -----------------------------------------------------------------------
  */
 
@@ -40,7 +40,9 @@ $csrfToken = csrfToken();
 <link href="../assets/css/fonts.css" rel="stylesheet">
 <link href="../assets/vendor/bootstrap/bootstrap.rtl.min.css" rel="stylesheet">
 <style>
-  :root{--bg:#14110D;--surface:#1E1912;--line:#3A3226;--gold:#C9A24D;--gold-soft:#E8CE8B;--ivory:#EDE6D6;--muted:#A89B85;}
+  :root{
+    --bg:#14110D;--surface:#1E1912;--line:#3A3226;--gold:#C9A24D;--gold-soft:#E8CE8B;--ivory:#EDE6D6;--muted:#A89B85;
+  }
   body{background:var(--bg);color:var(--ivory);font-family:'Vazirmatn',Tahoma,'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
   .login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:36px 30px;}
   .logo-mark{width:52px;height:52px;margin:0 auto 16px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);}

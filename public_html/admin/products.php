@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../classes/Product.php';
 require_once __DIR__ . '/../../classes/Category.php';
 
 requireLogin();
+requirePermission('products.view');
 
 $activePage = 'products';
 $pageTitle  = 'محصولات';
@@ -30,12 +31,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
         $flashError = 'نشست شما منقضی شده است. دوباره تلاش کنید.';
     } else {
         $id = (int) $_POST['id'];
+        $action = (string) ($_POST['action'] ?? '');
+
+        // Mutating actions require stronger permission
+        if (in_array($action, ['delete', 'toggle'], true)) {
+            requirePermission('products.manage');
+        }
 
         try {
-            if ($_POST['action'] === 'delete') {
+            if ($action === 'delete') {
                 Product::delete($id);
                 $flashSuccess = 'محصول با موفقیت حذف شد.';
-            } elseif ($_POST['action'] === 'toggle') {
+            } elseif ($action === 'toggle') {
                 Product::toggleStatus($id);
                 $flashSuccess = 'وضعیت محصول تغییر کرد.';
             }
