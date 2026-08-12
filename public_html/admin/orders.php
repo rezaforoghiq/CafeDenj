@@ -89,7 +89,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
         }
         if (Auth::isBarista()) {
             $ownedOrder = Order::findById($orderId);
-            if (!$ownedOrder || (int) ($ownedOrder['barista_id'] ?? 0) !== (int) Auth::currentBaristaId()) {
+            if (!$ownedOrder) {
+                $_SESSION['flash_error'] = 'سفارش مورد نظر یافت نشد.';
+                header('Location: orders');
+                exit;
+            }
+            // Allow baristas to act on unassigned pending orders (they will claim them on status change).
+            $isPendingUnassigned = ($ownedOrder['status'] === 'pending' && empty($ownedOrder['barista_id']));
+            if (! $isPendingUnassigned && (int) ($ownedOrder['barista_id'] ?? 0) !== (int) Auth::currentBaristaId()) {
                 $_SESSION['flash_error'] = 'شما فقط می‌توانید سفارش‌های خودتان را تغییر وضعیت دهید.';
                 header('Location: orders');
                 exit;
