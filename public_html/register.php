@@ -22,33 +22,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors = array_merge($errors, $passwordErrors);
         } else {
             try {
-            $phone = CustomerAuth::normalizePhone($old['phone']);
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-            $pendingId = PendingRegistration::create(Database::getConnection(), $phone, $old['first_name'], $old['last_name'], $passwordHash);
-            try {
-                $otpService = new OtpService();
-                $otpService->issueOtp($phone, 'registration', $_SERVER['REMOTE_ADDR'] ?? null);
-                $_SESSION['otp_context'] = [
-                    'purpose' => 'registration',
-                    'phone' => $phone,
-                    'pending_id' => $pendingId,
-                ];
-                $_SESSION['otp_notice'] = 'کد تأیید برای ثبت‌نام شما ارسال شد.';
-                header('Location: otp');
-                exit;
+                $phone = CustomerAuth::normalizePhone($old['phone']);
+                $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+                $pendingId = PendingRegistration::create(Database::getConnection(), $phone, $old['first_name'], $old['last_name'], $passwordHash);
+
+                try {
+                    $otpService = new OtpService();
+                    $otpService->issueOtp($phone, 'registration', $_SERVER['REMOTE_ADDR'] ?? null);
+                    $_SESSION['otp_context'] = [
+                        'purpose' => 'registration',
+                        'phone' => $phone,
+                        'pending_id' => $pendingId,
+                    ];
+                    $_SESSION['otp_notice'] = 'کد تأیید برای ثبت‌نام شما ارسال شد.';
+                    header('Location: otp');
+                    exit;
+                } catch (Throwable $e) {
+                    PendingRegistration::delete(Database::getConnection(), $pendingId);
+                    throw $e;
+                }
+
+            } catch (InvalidArgumentException $e) {
+                $errors = json_decode($e->getMessage(), true) ?: ['general' => 'اطلاعات واردشده معتبر نیست.'];
+            } catch (RuntimeException $e) {
+                $errors['general'] = $e->getMessage();
             } catch (Throwable $e) {
-                PendingRegistration::delete(Database::getConnection(), $pendingId);
-                throw $e;
+                error_log('Customer registration error: ' . $e->getMessage());
+                $errors['general'] = 'ثبت‌نام انجام نشد. لطفاً دوباره تلاش کنید.';
             }
-        } catch (InvalidArgumentException $e) {
-            $errors = json_decode($e->getMessage(), true) ?: ['general' => 'اطلاعات واردشده معتبر نیست.'];
-        } catch (RuntimeException $e) {
-            $errors['general'] = $e->getMessage();
-        } catch (Throwable $e) {
-            error_log('Customer registration error: ' . $e->getMessage());
-            $errors['general'] = 'ثبت‌نام انجام نشد. لطفاً دوباره تلاش کنید.';
         }
-    }
+}
 }
 ?>
 <!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ثبت‌نام | کافه دنج</title><link rel="stylesheet" href="assets/css/customer-auth.css"></head><body class="customer-auth"><main class="auth-card"><div class="auth-brand"><div class="auth-mark">د</div><h1>ساخت حساب کاربری</h1><p>برای دریافت خدمات شخصی‌سازی‌شده کافه دنج</p></div><?php if (isset($errors['general'])): ?><div class="auth-alert"><?= htmlspecialchars($errors['general'], ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?><form method="post" data-auth-form novalidate><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>"><div class="auth-field"><label for="phone">شماره موبایل</label><input class="auth-input <?= isset($errors['phone']) ? 'is-invalid' : '' ?>" id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="۰۹۱۲۳۴۵۶۷۸۹" value="<?= htmlspecialchars($old['phone'], ENT_QUOTES, 'UTF-8') ?>" required><?php if(isset($errors['phone'])): ?><small class="field-error"><?= htmlspecialchars($errors['phone'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?></div>
