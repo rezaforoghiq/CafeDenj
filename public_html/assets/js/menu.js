@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const profileTrigger = document.getElementById('profileTrigger'); const userMenu = profileTrigger?.closest('.user-menu'); const closeProfileMenu = () => { userMenu?.classList.remove('is-open'); profileTrigger?.setAttribute('aria-expanded', 'false'); }; profileTrigger?.addEventListener('click', () => { const isOpen = userMenu?.classList.toggle('is-open'); profileTrigger.setAttribute('aria-expanded', String(Boolean(isOpen))); }); document.addEventListener('click', event => { if (userMenu && !userMenu.contains(event.target)) closeProfileMenu(); }); document.addEventListener('keydown', event => { if (event.key === 'Escape') closeProfileMenu(); });
   themeSwitch?.addEventListener('click', function () { const nextTheme = root.dataset.theme === 'light' ? 'dark' : 'light'; root.dataset.theme = nextTheme; try { localStorage.setItem('denj-theme', nextTheme); } catch (e) {} updateThemeControl(nextTheme);
     // toggle beans animation when theme changes
-    if (nextTheme === 'dark') initBeans(); else clearBeans();
+    if (nextTheme === 'dark' || nextTheme === 'light') initBeans(); else clearBeans();
   });
 
   // --- Beans animation (dark theme) ---
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', function () {
     delete beansEl.dataset.inited;
   }
 
-  // Initialize on load if theme is dark
-  if(root.dataset.theme === 'dark') initBeans();
+  // Initialize on load if theme is dark or light
+  if(root.dataset.theme === 'dark' || root.dataset.theme === 'light') initBeans();
 
   const searchInput = document.getElementById('searchInput');
   const catButtons = document.querySelectorAll('.cat-btn');

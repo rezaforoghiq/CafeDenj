@@ -574,11 +574,19 @@ footer {
 
 }
 
-/* Beans floating animation - dark theme only */
+/* Beans floating animation - enabled for dark and light themes */
 .beans{position:fixed;inset:0;pointer-events:none;z-index:0;display:none}
 :root[data-theme="dark"] .beans{display:block}
+:root[data-theme="light"] .beans{display:block}
+
+/* default bean (dark theme) */
 .bean{position:absolute;width:14px;height:20px;background:linear-gradient(135deg,#6b3a1f,#3a1e10);border-radius:60% 60% 60% 60% / 70% 70% 30% 30%;opacity:0.25;filter:blur(0.3px);animation:drift linear infinite}
 .bean::after{content:'';position:absolute;top:10%;left:50%;width:1.5px;height:80%;background:rgba(0,0,0,0.4);transform:translateX(-50%) rotate(8deg);border-radius:2px}
+
+/* light-theme bean override: warmer, lighter, subtler */
+:root[data-theme="light"] .bean{background:linear-gradient(135deg,#f2d79b,#d6b45a);opacity:0.18;filter:blur(0.2px)}
+:root[data-theme="light"] .bean::after{background:rgba(255,255,255,0.18)}
+
 @keyframes drift{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(-120vh) rotate(360deg)}}
 
 /* Ensure main content stacks above beans */
