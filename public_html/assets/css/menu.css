@@ -76,9 +76,9 @@ header {
 
 }
 .logo-mark {
-  width: 112px;
-  height: 112px;
-  margin: 0 auto 12px;
+  width: 125px;
+  height: 76px;
+  margin: 0 auto 0px;
 }
 .logo-mark img {
   width: 100%;
@@ -553,7 +553,7 @@ footer {
     /* keep title and value stacked in a column, right-aligned for RTL */
     display:flex;
     flex-direction:column;
-    align-items:flex-end;
+    align-items:flex-start;
     justify-content:center;
     gap:6px;
     text-align:right;
@@ -561,7 +561,7 @@ footer {
     direction: rtl; /* enforce RTL inside these two blocks */
   }
   /* ensure only these two blocks are right-aligned; others remain unchanged */
-  .footer-info > .footer-item:not(:nth-child(3)):not(:nth-child(4)) { text-align: left; direction: ltr; }
+  .footer-info > .footer-item:not(:nth-child(3)):not(:nth-child(4)) { text-align: right; direction: rtl; }
   .footer-instagram{justify-content:flex-start}
 }
 
@@ -731,9 +731,9 @@ footer {
     visibility: visible;
   }
   .logo-mark {
-    width: 76px;
+    width: 105px;
     height: 76px;
-    margin-bottom: 8px;
+    margin-bottom: -5;
   }
   .cat-btn {
     padding: 10px 16px;
