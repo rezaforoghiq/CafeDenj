@@ -533,7 +533,8 @@ footer {
 .footer-item div{color:var(--muted);font-size:13px}
 .footer-item a{color:var(--gold-soft);text-decoration:none}
 .footer-item a:hover{text-decoration:underline}
-.footer-item .phone-line{display:block;margin-bottom:4px}
+.footer-item .phone-line{display:inline-flex;align-items:center;gap:8px;margin-bottom:4px}
+.footer-item .phone-line svg{flex:0 0 auto;width:14px;height:14px;color:var(--gold-soft);fill:currentColor}
 .footer-meta{color:var(--muted);font-size:12px;margin-top:8px}
 .footer-instagram{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;padding:4px 8px;border-radius:10px;background:rgba(201,162,77,0.06);color:var(--gold-soft)}
 .footer-instagram svg{fill:currentColor}
