@@ -1499,6 +1499,64 @@ header, .controls, .menu-grid, footer{position:relative;z-index:1}
   transition: color .2s, border-color .2s, background-color .2s, transform .2s;
 }
 .instagram-link svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+
+/* Mobile touch/focus polish: remove default blue tap highlight and replace with a soft animated press effect */
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* remove default focus outline but keep focus-visible for keyboard users */
+button:focus,
+a:focus,
+[role="button"]:focus {
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid rgba(230, 184, 92, 0.6);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* touch/click press animation only on small screens */
+@media (max-width: 768px) {
+  button,
+  a,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    will-change: transform, box-shadow;
+    /* ensure buttons keep their existing display and don't get unexpected transforms */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  button:active,
+  a:active,
+  [role="button"]:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 4px rgba(230, 184, 92, 0.25);
+  }
+
+  /* for elements that use .btn class ensure consistent touch target */
+  .btn,
+  .account-link,
+  .cat-btn {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .btn:active,
+  .account-link:active,
+  .cat-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 4px rgba(230, 184, 92, 0.18);
+  }
+}
+
 .instagram-link:hover, .instagram-link:focus-visible { color: var(--gold-soft); border-color: var(--gold); background: var(--surface-2); outline: none; }
 .instagram-link:active { transform: scale(.94); }
 @media (max-width: 560px) {
