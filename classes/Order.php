@@ -13,28 +13,92 @@ class Order {
  public static function status(int $id,string $status,?int $actorId=null,?string $actorLabel=null,string $role='admin', ?string $paymentMethod = null):void{
   if(!in_array($status,['pending','approved','rejected','completed'],true))throw new RuntimeException('وضعیت نامعتبر است.');
   $actorId=$actorId??Auth::id();$actorLabel=$actorLabel??Auth::username();
-  if ($status === 'approved') {
-      $sql = 'UPDATE orders SET status=:s, approved_at=NOW() WHERE id=:i';
-      Database::getConnection()->prepare($sql)->execute(['s'=>$status,'i'=>$id]);
-      // Attempt to create a print job for approved orders (non-blocking)
-      try {
-          require_once __DIR__ . '/PrintJob.php';
-          // createForOrder returns job id or null if exists / failed
-          \PrintJob::createForOrder($id);
-      } catch (Throwable $e) {
-          // log but do not prevent status change
-          ActivityLog::record('order_status', 'system', null, 'system', $id, 'Print job creation error: '.mb_substr($e->getMessage(),0,200));
+
+  $pdo = Database::getConnection();
+  try {
+      // Make the claim/unclaim and status change atomic
+      $pdo->beginTransaction();
+      $sel = $pdo->prepare('SELECT status, barista_id FROM orders WHERE id = :i FOR UPDATE');
+      $sel->execute(['i' => $id]);
+      $order = $sel->fetch();
+      if(!$order){ $pdo->rollBack(); throw new RuntimeException('سفارش پیدا نشد.'); }
+
+      $currentStatus = $order['status'];
+      $currentBaristaId = $order['barista_id'] ? (int)$order['barista_id'] : null;
+
+      // If setting to pending -> only admin or assigned barista may revert; clear assignment
+      if($status === 'pending'){
+          if($role === 'barista' && $currentBaristaId !== $actorId){
+              $pdo->rollBack(); throw new RuntimeException('شما اجازهٔ برگرداندن سفارش به حالت در انتظار تایید را ندارید.');
+          }
+          $u = $pdo->prepare('UPDATE orders SET status=:s, barista_id=NULL, payment_method=NULL WHERE id=:i');
+          $u->execute(['s'=>$status,'i'=>$id]);
+          $pdo->commit();
+
+          ActivityLog::record('order_status',$role,$actorId,$actorLabel,$id,'تغییر وضعیت سفارش به «'.$status.'» و حذف تخصیص باریستا');
+          return;
       }
-  } elseif ($status === 'completed') {
-      // when completing, optionally record payment method
-      $sql = 'UPDATE orders SET status=:s, approved_at=NOW(), payment_method=:pm WHERE id=:i';
-      Database::getConnection()->prepare($sql)->execute(['s'=>$status,'pm'=>$paymentMethod,'i'=>$id]);
-  } else {
-      $sql = 'UPDATE orders SET status=:s, payment_method=NULL WHERE id=:i';
-      Database::getConnection()->prepare($sql)->execute(['s'=>$status,'i'=>$id]);
+
+      // For non-pending transitions (approve/reject/complete): enforce claim rules
+      // If actor is a barista and the order is pending and unassigned, assign it to the first barista who changes status
+      if(in_array($status,['approved','rejected','completed'], true)){
+          if($role === 'barista'){
+              if($currentStatus === 'pending'){
+                  if($currentBaristaId === null){
+                      // claim it
+                      $claim = $pdo->prepare('UPDATE orders SET barista_id = :b WHERE id = :i');
+                      $claim->execute(['b'=>$actorId,'i'=>$id]);
+                      ActivityLog::record('order_barista','barista',$actorId,$actorLabel,$id,'باریستا سفارش را پذیرفت');
+                      $currentBaristaId = $actorId;
+                  } else {
+                      // already assigned to someone else -> forbid
+                      if($currentBaristaId !== $actorId){
+                          $pdo->rollBack(); throw new RuntimeException('این سفارش اکنون توسط باریستا دیگری در دسترس است.');
+                      }
+                  }
+              } else {
+                  // not pending: only assigned barista may change
+                  if($currentBaristaId !== $actorId){
+                      $pdo->rollBack(); throw new RuntimeException('شما اجازهٔ تغییر وضعیت این سفارش را ندارید.');
+                  }
+              }
+          }
+
+          // perform status update
+          if($status === 'approved'){
+              $u = $pdo->prepare('UPDATE orders SET status=:s, approved_at=NOW() WHERE id=:i');
+              $u->execute(['s'=>$status,'i'=>$id]);
+          } elseif($status === 'completed'){
+              $u = $pdo->prepare('UPDATE orders SET status=:s, approved_at=NOW(), payment_method=:pm WHERE id=:i');
+              $u->execute(['s'=>$status,'pm'=>$paymentMethod,'i'=>$id]);
+          } else {
+              $u = $pdo->prepare('UPDATE orders SET status=:s, payment_method=NULL WHERE id=:i');
+              $u->execute(['s'=>$status,'i'=>$id]);
+          }
+
+          $pdo->commit();
+
+          // After commit, create print job for approvals (non-blocking)
+          if($status === 'approved'){
+              try{
+                  require_once __DIR__ . '/PrintJob.php';
+                  \PrintJob::createForOrder($id);
+              } catch(Throwable $e){
+                  ActivityLog::record('order_status','system',null,'system',$id,'Print job creation error: '.mb_substr($e->getMessage(),0,200));
+              }
+          }
+
+          $action=['approved'=>'order_approve','rejected'=>'order_reject','completed'=>'order_complete'][$status]??'order_status';
+          ActivityLog::record($action,$role,$actorId,$actorLabel,$id,'تغییر وضعیت سفارش به «'.$status.'»');
+          return;
+      }
+
+      // fallback
+      $pdo->rollBack(); throw new RuntimeException('عملیات نامشخص وضعیت سفارش');
+  } catch(Throwable $e){
+      if($pdo->inTransaction()) $pdo->rollBack();
+      throw $e;
   }
-  $action=['approved'=>'order_approve','rejected'=>'order_reject'][$status]??'order_status';
-  ActivityLog::record($action,$role,$actorId,$actorLabel,$id,'تغییر وضعیت سفارش به «'.$status.'»');
  }
  public static function assignBarista(int $id,?int $baristaId,?int $actorId=null,?string $actorLabel=null):void{
   Database::getConnection()->prepare('UPDATE orders SET barista_id=:b WHERE id=:i')->execute(['b'=>$baristaId,'i'=>$id]);
