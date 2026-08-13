@@ -550,7 +550,15 @@ footer {
   .footer-info > .footer-item:nth-child(3),
   .footer-info > .footer-item:nth-child(4){
     flex:1 1 calc(50% - 6px);
-    display:flex;align-items:center;justify-content:flex-start;gap:10px}
+    /* keep title and value stacked in a column, right-aligned for RTL */
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    justify-content:center;
+    gap:6px;
+    text-align:right;
+    padding:6px 8px;
+  }
   .footer-instagram{justify-content:flex-start}
 }
 
