@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>۵۰۰ — خطای سرور | کافه دنج</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;800;900&display=swap');
+
+  :root{
+    --bg:#140608;
+    --maroon:#2b0f12;
+    --gold:#C9A24D;
+    --gold-bright:#E8C874;
+    --cream:#F4E9D8;
+    --card:#3a1418;
+    --line:rgba(201,162,77,0.16);
+    --alert:#d9713c;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+
+  body{
+    font-family:'Vazirmatn', sans-serif;
+    color:var(--gold);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+    background:
+      linear-gradient(180deg, var(--bg) 0%, #2b0f12 60%),
+      radial-gradient(circle at 15% 0%, rgba(201, 162, 77, 0.06), transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(201, 162, 77, 0.05), transparent 35%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .flicker-overlay{
+    position:fixed; inset:0;
+    background:rgba(201,162,77,0.02);
+    pointer-events:none;
+    z-index:5;
+    animation:screenFlicker 6s steps(1) infinite;
+  }
+  @keyframes screenFlicker{
+    0%,93%,100%{opacity:0;}
+    93.5%{opacity:1;}
+    94%{opacity:0;}
+    96%{opacity:0.6;}
+    96.3%{opacity:0;}
+  }
+
+  .wrap{
+    position:relative;
+    z-index:2;
+    width:100%;
+    max-width:720px;
+    padding:48px 32px;
+    text-align:center;
+  }
+
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-size:13px;
+    letter-spacing:0.15em;
+    color:var(--gold-bright);
+    opacity:0.85;
+    margin-bottom:30px;
+    animation:fadeDown 0.9s ease both;
+  }
+  .eyebrow::before,.eyebrow::after{
+    content:'';
+    width:22px;height:1px;
+    background:var(--gold);
+    opacity:0.5;
+  }
+
+  /* scene: espresso machine with wild gauge + steam bursts */
+  .scene{
+    position:relative;
+    height:220px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    margin-bottom:8px;
+    animation:fadeUp 1s ease both 0.15s;
+  }
+
+  .machine{
+    position:relative;
+    width:200px;
+    height:150px;
+    background:linear-gradient(160deg, #331512, #1c0b0a 70%);
+    border:2px solid var(--gold);
+    border-radius:10px 10px 6px 6px;
+    box-shadow:inset 0 10px 26px rgba(0,0,0,0.5), 0 20px 44px rgba(0,0,0,0.5);
+  }
+  .machine::before{
+    content:'';
+    position:absolute;
+    left:16px; right:16px; top:14px;
+    height:1px;
+    background:var(--line);
+  }
+
+  .gauge{
+    position:absolute;
+    top:26px; left:50%;
+    transform:translateX(-50%);
+    width:54px; height:54px;
+    border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #241009, #150908);
+    border:2px solid var(--gold);
+    box-shadow:0 0 14px rgba(201,162,77,0.15);
+  }
+  .needle{
+    position:absolute;
+    bottom:50%; left:50%;
+    width:2px; height:20px;
+    background:var(--alert);
+    transform-origin:bottom center;
+    transform:translateX(-50%) rotate(-40deg);
+    animation:needleGlitch 3.2s infinite;
+    box-shadow:0 0 6px rgba(217,113,60,0.7);
+  }
+  .gauge::after{
+    content:'';
+    position:absolute;
+    top:50%; left:50%;
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--gold);
+    transform:translate(-50%,-50%);
+  }
+  @keyframes needleGlitch{
+    0%{transform:translateX(-50%) rotate(-50deg);}
+    12%{transform:translateX(-50%) rotate(60deg);}
+    24%{transform:translateX(-50%) rotate(-30deg);}
+    38%{transform:translateX(-50%) rotate(80deg);}
+    50%{transform:translateX(-50%) rotate(-60deg);}
+    65%{transform:translateX(-50%) rotate(20deg);}
+    80%{transform:translateX(-50%) rotate(-45deg);}
+    100%{transform:translateX(-50%) rotate(-50deg);}
+  }
+
+  .spouts{
+    position:absolute;
+    bottom:0; left:50%;
+    transform:translateX(-50%);
+    width:120px;
+    display:flex;
+    justify-content:space-between;
+  }
+  .spout{
+    width:8px; height:38px;
+    background:linear-gradient(180deg, var(--gold), #8a6a2e);
+    border-radius:2px;
+  }
+  .drip{
+    position:absolute;
+    bottom:-14px; left:50%;
+    width:3px; height:8px;
+    background:var(--alert);
+    border-radius:0 0 3px 3px;
+    transform:translateX(-50%);
+    animation:dripFall 1.8s ease-in infinite;
+    opacity:0;
+  }
+  @keyframes dripFall{
+    0%{opacity:0; transform:translate(-50%,-6px);}
+    10%{opacity:1;}
+    80%{opacity:1; transform:translate(-50%, 20px);}
+    100%{opacity:0; transform:translate(-50%, 26px);}
+  }
+
+  .burst{
+    position:absolute;
+    top:-6px; left:50%;
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--gold-bright);
+    opacity:0;
+    filter:blur(0.5px);
+  }
+  .burst.b1{animation:burstOut 3.2s ease-out infinite;}
+  .burst.b2{animation:burstOut 3.2s ease-out infinite 0.4s;}
+  .burst.b3{animation:burstOut 3.2s ease-out infinite 0.8s;}
+  @keyframes burstOut{
+    0%{opacity:0; transform:translate(-50%,0) scale(0.6);}
+    5%{opacity:0.8;}
+    40%{opacity:0; transform:translate(calc(-50% + var(--dx,20px)), -50px) scale(1.4);}
+    100%{opacity:0;}
+  }
+  .burst.b1{--dx:-26px;}
+  .burst.b2{--dx:4px;}
+  .burst.b3{--dx:30px;}
+
+  .num{
+    font-size:clamp(72px, 15vw, 128px);
+    font-weight:900;
+    line-height:1;
+    letter-spacing:0.02em;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold) 55%, #8a6a2e);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 0 60px rgba(201,162,77,0.18);
+    margin-bottom:4px;
+    animation:fadeUp 1s ease both 0.3s, numGlitch 5s ease-in-out infinite 1.5s;
+    position:relative;
+    display:inline-block;
+  }
+  @keyframes numGlitch{
+    0%,96%,100%{filter:none; transform:translateX(0);}
+    96.5%{filter:blur(1px); transform:translateX(-2px);}
+    97%{filter:none; transform:translateX(2px);}
+    97.5%{filter:blur(1px); transform:translateX(-1px);}
+    98%{filter:none; transform:translateX(0);}
+  }
+
+  h1.headline{
+    font-size:clamp(20px, 3.2vw, 28px);
+    font-weight:800;
+    color:var(--cream);
+    margin-top:18px;
+    margin-bottom:14px;
+    animation:fadeUp 1s ease both 0.45s;
+  }
+
+  p.sub{
+    font-size:15.5px;
+    font-weight:300;
+    line-height:2;
+    color:var(--gold);
+    opacity:0.75;
+    max-width:480px;
+    margin:0 auto 40px;
+    animation:fadeUp 1s ease both 0.6s;
+  }
+
+  .actions{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    flex-wrap:wrap;
+    animation:fadeUp 1s ease both 0.75s;
+  }
+
+  .btn{
+    position:relative;
+    overflow:hidden;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:14px 30px;
+    font-family:inherit;
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--bg);
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold));
+    border:none;
+    border-radius:999px;
+    cursor:pointer;
+    text-decoration:none;
+    transition:transform 0.35s ease, box-shadow 0.35s ease;
+    box-shadow:0 8px 24px rgba(201,162,77,0.18);
+  }
+  .btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 14px 34px rgba(201,162,77,0.3);
+  }
+  .btn:active{transform:translateY(-1px);}
+  .btn .ripple{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,0.5);
+    transform:scale(0);
+    animation:rippleAnim 0.6s ease-out forwards;
+    pointer-events:none;
+  }
+  @keyframes rippleAnim{ to{transform:scale(4); opacity:0;} }
+
+  .btn.ghost{
+    background:transparent;
+    color:var(--gold);
+    border:1px solid var(--line);
+    box-shadow:none;
+  }
+  .btn.ghost:hover{
+    background:rgba(201,162,77,0.06);
+    border-color:var(--gold);
+  }
+
+  .btn .icon{
+    display:inline-block;
+    transition:transform 0.5s ease;
+  }
+  .btn:hover .icon{transform:rotate(180deg);}
+
+  .code-tag{
+    margin-top:34px;
+    font-size:11.5px;
+    letter-spacing:0.12em;
+    color:var(--gold);
+    opacity:0.4;
+    animation:fadeUp 1s ease both 0.9s;
+  }
+
+  @keyframes fadeDown{from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);}}
+  @keyframes fadeUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  @media (max-width:520px){
+    .scene{height:200px;}
+    .machine{width:170px; height:130px;}
+    .actions{flex-direction:column; align-items:center;}
+    .btn{width:100%; max-width:280px; justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="flicker-overlay"></div>
+
+<div class="wrap">
+  <div class="eyebrow">کافه دنج</div>
+
+  <div class="scene">
+    <div class="machine">
+      <div class="gauge"><div class="needle"></div></div>
+      <div class="spouts">
+        <div class="spout" style="position:relative;">
+          <div class="drip"></div>
+          <div class="burst b1"></div>
+          <div class="burst b2"></div>
+        </div>
+        <div class="spout" style="position:relative;">
+          <div class="drip" style="animation-delay:0.9s;"></div>
+          <div class="burst b3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="num">۵۰۰</div>
+
+  <h1 class="headline">قهوه‌سازمون یه لحظه قاطی کرده</h1>
+  <p class="sub">
+    یه چیزی پشت پرده خراب شده، نه از دست تو کاری برمیاد نه از دست ما زیاد.
+    باریستاهای فنی دارن درستش می‌کنن، یه کم دیگه دوباره سر بزن.
+  </p>
+
+  <div class="actions">
+    <button class="btn" id="retryBtn"><span class="icon">↻</span> تلاش دوباره</button>
+    <a href="/" class="btn ghost">برگشت به کافه دنج</a>
+  </div>
+
+  <div class="code-tag">ERROR · 500 · INTERNAL SERVER ERROR</div>
+</div>
+
+<script>
+  document.querySelectorAll('.btn').forEach(btn=>{
+    btn.addEventListener('click', function(e){
+      const rect = this.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size+'px';
+      ripple.style.left = (e.clientX - rect.left - size/2)+'px';
+      ripple.style.top = (e.clientY - rect.top - size/2)+'px';
+      this.appendChild(ripple);
+      setTimeout(()=>ripple.remove(), 650);
+    });
+  });
+
+  document.getElementById('retryBtn').addEventListener('click', function(){
+    this.querySelector('.icon').style.transform = 'rotate(360deg)';
+    setTimeout(()=>{ location.reload(); }, 500);
+  });
+</script>
+
+</body>
+</html>
