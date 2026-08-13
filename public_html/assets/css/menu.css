@@ -34,17 +34,12 @@ body {
   background: var(--bg);
   color: var(--ivory);
   font-family: Vazirmatn, Tahoma, "Segoe UI", Arial, sans-serif;
-  background-image:
-    radial-gradient(
-      circle at 15% 0%,
-      rgba(201, 162, 77, 0.06),
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 20%,
-      rgba(201, 162, 77, 0.05),
-      transparent 35%
-    );
+  background:
+    linear-gradient(180deg, var(--bg) 0%, #2b0f12 60%),
+    radial-gradient(circle at 15% 0%, rgba(201,162,77,0.06), transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(201,162,77,0.05), transparent 35%);
+  background-size: cover;
+  background-repeat: no-repeat;
   transition:
     background-color 0.28s,
     color 0.28s;
