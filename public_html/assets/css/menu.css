@@ -46,10 +46,13 @@ body {
 }
 :root[data-theme="light"] body{
 
+    /* gentle warm gradient for light theme using existing base color */
     background:
-    radial-gradient(circle at top left,#fff6df 0%,transparent 28%),
-    radial-gradient(circle at bottom right,#f8edd2 0%,transparent 25%),
-    linear-gradient(#faf8f4,#f5f2ed);
+      linear-gradient(180deg, var(--bg) 0%, #f2e9d6 62%),
+      radial-gradient(circle at top left,#fff6df 0%,transparent 28%),
+      radial-gradient(circle at bottom right,#f8edd2 0%,transparent 25%);
+    background-size: cover;
+    background-repeat: no-repeat;
 
 }
 header {
