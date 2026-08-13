@@ -544,7 +544,7 @@ footer {
 }
 @media (max-width:560px){
   /* Stack by default, but allow pairing of hours + instagram on one row */
-  .footer-info{display:flex;flex-wrap:wrap;align-items:stretch;gap:12px;padding:10px 16px}
+  .footer-info{display:flex;flex-wrap:wrap;align-items:stretch;gap:12px;padding:10px 16px;justify-content:flex-end}
   .footer-item{white-space:normal;flex:1 1 100%}
   /* Make 'ساعات کاری' (3rd) and 'اینستاگرام' (4th) share a row */
   .footer-info > .footer-item:nth-child(3),
