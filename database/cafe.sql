@@ -136,13 +136,6 @@ CREATE TABLE IF NOT EXISTS `coupons` (
   UNIQUE KEY `uq_coupons_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
--- -------------------------------------------------------------------------
--- افزودن اطلاعات کوپن به سفارش‌ها (در صورتی که مشتری از کوپن استفاده کند)
--- -------------------------------------------------------------------------
-ALTER TABLE `orders`
-  ADD COLUMN IF NOT EXISTS `coupon_code` VARCHAR(64) NULL DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `coupon_percent` INT NULL DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `discount_amount` DECIMAL(12,0) UNSIGNED NOT NULL DEFAULT 0;
 
 -- -------------------------------------------------------------------------
 -- تنظیمات عمومی سایت (Key/Value)
@@ -234,6 +227,9 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `updated_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `approved_at`   DATETIME NULL DEFAULT NULL,
   `payment_method` ENUM('card','cash','transfer') NULL DEFAULT NULL,
+  `coupon_code` VARCHAR(64) NULL DEFAULT NULL,
+  `coupon_percent` INT NULL DEFAULT NULL,
+  `discount_amount` DECIMAL(12,0) UNSIGNED NOT NULL DEFAULT 0,
   UNIQUE KEY `uq_orders_number` (`order_number`),
   KEY `idx_orders_customer` (`customer_id`),
   KEY `idx_orders_status` (`status`),
