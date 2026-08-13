@@ -15,7 +15,43 @@ document.addEventListener('DOMContentLoaded', function () {
   mobileToggle?.addEventListener('click', () => { document.body.classList.add('mobile-menu-open'); mobileToggle.setAttribute('aria-expanded', 'true'); });
   mobileClose?.addEventListener('click', closeMobile); mobileBackdrop?.addEventListener('click', closeMobile);
   const profileTrigger = document.getElementById('profileTrigger'); const userMenu = profileTrigger?.closest('.user-menu'); const closeProfileMenu = () => { userMenu?.classList.remove('is-open'); profileTrigger?.setAttribute('aria-expanded', 'false'); }; profileTrigger?.addEventListener('click', () => { const isOpen = userMenu?.classList.toggle('is-open'); profileTrigger.setAttribute('aria-expanded', String(Boolean(isOpen))); }); document.addEventListener('click', event => { if (userMenu && !userMenu.contains(event.target)) closeProfileMenu(); }); document.addEventListener('keydown', event => { if (event.key === 'Escape') closeProfileMenu(); });
-  themeSwitch?.addEventListener('click', function () { const nextTheme = root.dataset.theme === 'light' ? 'dark' : 'light'; root.dataset.theme = nextTheme; try { localStorage.setItem('denj-theme', nextTheme); } catch (e) {} updateThemeControl(nextTheme); });
+  themeSwitch?.addEventListener('click', function () { const nextTheme = root.dataset.theme === 'light' ? 'dark' : 'light'; root.dataset.theme = nextTheme; try { localStorage.setItem('denj-theme', nextTheme); } catch (e) {} updateThemeControl(nextTheme);
+    // toggle beans animation when theme changes
+    if (nextTheme === 'dark') initBeans(); else clearBeans();
+  });
+
+  // --- Beans animation (dark theme) ---
+  function initBeans(){
+    const beansEl = document.getElementById('beans');
+    if(!beansEl) return;
+    if(beansEl.dataset.inited) return; // prevent duplicate
+    const total = 14;
+    for (let i = 0; i < total; i++) {
+      const b = document.createElement('div');
+      b.className = 'bean';
+
+      const size = 10 + Math.random() * 10;
+      b.style.width = size + 'px';
+      b.style.height = (size * 1.4) + 'px';
+      b.style.left = Math.random() * 100 + 'vw';
+      b.style.top = (100 + Math.random() * 20) + 'vh';
+      b.style.animationDuration = (14 + Math.random() * 14) + 's';
+      b.style.animationDelay = (Math.random() * 10) + 's';
+
+      beansEl.appendChild(b);
+    }
+    beansEl.dataset.inited = '1';
+  }
+  function clearBeans(){
+    const beansEl = document.getElementById('beans');
+    if(!beansEl) return;
+    beansEl.innerHTML = '';
+    delete beansEl.dataset.inited;
+  }
+
+  // Initialize on load if theme is dark
+  if(root.dataset.theme === 'dark') initBeans();
+
   const searchInput = document.getElementById('searchInput');
   const catButtons = document.querySelectorAll('.cat-btn');
   const cards = document.querySelectorAll('.item-card');
