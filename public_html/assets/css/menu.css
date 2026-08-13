@@ -63,14 +63,15 @@ header {
 }
 :root[data-theme="light"] header{
 
-    background:rgba(255,255,255,.72);
+   /* subtle warm gradient for header on light theme */
+   background: linear-gradient(180deg, rgba(255,250,240,0.96), rgba(245,242,237,0.92));
 
-    backdrop-filter:blur(18px);
+   backdrop-filter:blur(18px);
 
-    border-bottom:1px solid #ece2d5;
+   border-bottom:1px solid #ece2d5;
 
-    box-shadow:
-    0 10px 35px rgba(0,0,0,.04);
+   box-shadow:
+   0 10px 35px rgba(0,0,0,.04);
 
 }
 .logo-mark {
@@ -566,7 +567,8 @@ footer {
 
 :root[data-theme="light"] footer{
 
-    background:#faf6ef;
+    /* warm gradient for footer on light theme that complements header/body */
+    background: linear-gradient(180deg, #fffaf2 0%, #f7efe4 60%);
 
     border-top:1px solid #ece2d5;
 
