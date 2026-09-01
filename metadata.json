@@ -1,0 +1,8 @@
+{
+  "name": "کافه دنج",
+  "description": "سامانه سفارش‌گیر آنلاین و مدیریت کافه دنج (Cafe Denj Online Ordering & Management System)",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
