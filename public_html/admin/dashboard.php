@@ -39,7 +39,7 @@ require __DIR__ . '/../../includes/admin-header.php';
 ?>
 
 <h4 class="mb-1" style="color:var(--gold-soft);">خوش آمدید، <?= htmlspecialchars(Auth::username() ?? '', ENT_QUOTES, 'UTF-8') ?> 👋</h4>
-<p class="mb-4" style="color:var(--muted); font-size:14px;">نمای کلی وضعیت منوی کافه نویان</p>
+<p class="mb-4" style="color:var(--muted); font-size:14px;">نمای کلی وضعیت منوی کافه دنج</p>
 
 <div class="row g-3">
   <div class="col-6 col-md-3">

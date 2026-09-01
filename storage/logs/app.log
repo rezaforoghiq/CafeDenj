@@ -397,3 +397,10 @@ Stack trace:
 [12-Aug-2026 23:38:49 Asia/Tehran] PHP Warning:  Undefined array key "discount_ends_at" in C:\xampp\htdocs\cafe-1.2.worktrees\admin-order-deletion-feature\classes\Product.php on line 204
 [13-Aug-2026 14:14:34 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
 [13-Aug-2026 14:15:16 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2006] MySQL server has gone away
+[13-Aug-2026 18:41:17 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user 'h413630_cafedenj'@'localhost' (using password: YES)
+[13-Aug-2026 18:41:22 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user 'h413630_cafedenj'@'localhost' (using password: YES)
+[13-Aug-2026 18:41:23 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user 'h413630_cafedenj'@'localhost' (using password: YES)
+[13-Aug-2026 18:42:07 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user 'h413630_cafedenj'@'localhost' (using password: YES)
+[13-Aug-2026 18:42:07 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user 'h413630_cafedenj'@'localhost' (using password: YES)
+[13-Aug-2026 18:46:13 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user 'h413630_cafedenj'@'localhost' (using password: YES)
+[30-Aug-2026 23:42:40 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user 'h413630_cafedenjdb'@'localhost' (using password: YES)
