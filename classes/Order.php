@@ -1,11 +1,40 @@
 <?php declare(strict_types=1);
 require_once __DIR__ . '/ActivityLog.php';
 require_once __DIR__ . '/Auth.php';
+require_once __DIR__ . '/Product.php';
 class Order {
- public static function cart(int $customerId): array { $s=Database::getConnection()->prepare('SELECT c.product_id,c.quantity,p.name,p.price,p.image FROM carts c JOIN products p ON p.id=c.product_id WHERE c.customer_id=:id AND p.status="active"');$s->execute(['id'=>$customerId]);return $s->fetchAll(); }
+ public static function cart(int $customerId): array {
+   $s = Database::getConnection()->prepare(
+     'SELECT c.product_id, c.quantity, p.name, p.price, p.image,
+             p.discount_enabled, p.discount_type, p.discount_value,
+             p.discount_starts_at, p.discount_ends_at
+      FROM carts c
+      JOIN products p ON p.id = c.product_id
+      WHERE c.customer_id = :id AND p.status = "active"'
+   );
+   $s->execute(['id' => $customerId]);
+   $rows = $s->fetchAll();
+
+   $items = [];
+   foreach ($rows as $row) {
+     $discount = Product::calculateDiscount($row);
+     $items[] = [
+       'product_id'       => (int) $row['product_id'],
+       'quantity'         => (int) $row['quantity'],
+       'name'             => (string) $row['name'],
+       'image'            => $row['image'],
+       'original_price'   => (float) $row['price'],
+       'price'            => (float) $discount['final'],
+       'has_discount'     => (bool) $discount['has_discount'],
+       'discount_percent' => (int) $discount['percent'],
+       'discount_amount'  => (float) ($discount['original'] - $discount['final']),
+     ];
+   }
+   return $items;
+ }
  public static function add(int $customerId,int $productId,int $qty=1): void { $p=Product::find($productId);if(!$p||$p['status']!=='active')throw new RuntimeException('محصول در دسترس نیست.');$q=max(1,min(99,$qty));$s=Database::getConnection()->prepare('INSERT INTO carts(customer_id,product_id,quantity) VALUES(:c,:p,:q) ON DUPLICATE KEY UPDATE quantity=LEAST(99,quantity+VALUES(quantity))');$s->execute(['c'=>$customerId,'p'=>$productId,'q'=>$q]); }
  public static function updateCart(int $customerId,int $productId,int $qty): void { $s=Database::getConnection()->prepare($qty<1?'DELETE FROM carts WHERE customer_id=:c AND product_id=:p':'UPDATE carts SET quantity=:q WHERE customer_id=:c AND product_id=:p');$a=['c'=>$customerId,'p'=>$productId];if($qty>0)$a['q']=min(99,$qty);$s->execute($a); }
- public static function place(int $customerId,string $note='', ?string $couponCode = null): int { $pdo=Database::getConnection(); $items=self::cart($customerId); if(!$items) throw new RuntimeException('سبد خرید خالی است.'); $pdo->beginTransaction(); try{ self::acquireOrderNumberLock($pdo); self::rebuildSequentialOrderNumbers($pdo); $total=0; foreach($items as $i) $total+=(int)$i['price']*(int)$i['quantity']; $appliedCouponCode = null; $appliedCouponPercent = null; $discountAmount = 0; if ($couponCode && trim($couponCode) !== '') { require_once __DIR__ . '/Coupon.php'; $c = Coupon::findByCode(trim($couponCode)); if (!$c || !Coupon::isValidCoupon($c)) { throw new RuntimeException('کد کوپن نامعتبر یا منقضی شده است.'); } $appliedCouponCode = $c['code']; $appliedCouponPercent = (int)$c['percent']; $discountAmount = (int) round($total * $appliedCouponPercent / 100); } $finalTotal = max(0, $total - $discountAmount); $number=self::nextSequentialOrderNumber($pdo); $s=$pdo->prepare('INSERT INTO orders(customer_id,order_number,total_price,customer_note,coupon_code,coupon_percent,discount_amount) VALUES(:c,:n,:t,:note,:ccode,:cpercent,:damount)'); $s->execute(['c'=>$customerId,'n'=>$number,'t'=>$finalTotal,'note'=>mb_substr(trim($note),0,500),'ccode'=>$appliedCouponCode,'cpercent'=>$appliedCouponPercent,'damount'=>$discountAmount]); $id=(int)$pdo->lastInsertId(); $ins=$pdo->prepare('INSERT INTO order_items(order_id,product_id,product_name,quantity,price) VALUES(:o,:p,:n,:q,:price)'); foreach($items as $i) $ins->execute(['o'=>$id,'p'=>$i['product_id'],'n'=>$i['name'],'q'=>$i['quantity'],'price'=>$i['price']]); $pdo->prepare('DELETE FROM carts WHERE customer_id=:c')->execute(['c'=>$customerId]); $pdo->commit(); ActivityLog::record('order_create','customer',$customerId,$_SESSION['customer_display_name']??null,$id,'ثبت سفارش '.$number); return $id; }catch(Throwable $e){ if($pdo->inTransaction())$pdo->rollBack(); throw $e; } finally { self::releaseOrderNumberLock($pdo); } }
+ public static function place(int $customerId,string $note='', ?string $couponCode = null): int { $pdo=Database::getConnection(); $items=self::cart($customerId); if(!$items) throw new RuntimeException('سبد خرید خالی است.'); $pdo->beginTransaction(); try{ self::acquireOrderNumberLock($pdo); self::rebuildSequentialOrderNumbers($pdo); $total=0; foreach($items as $i) $total+=(int)$i['price']*(int)$i['quantity']; $appliedCouponCode = null; $appliedCouponPercent = null; $discountAmount = 0; if ($couponCode && trim($couponCode) !== '') { require_once __DIR__ . '/Coupon.php'; $c = Coupon::findByCode(trim($couponCode)); if (!$c || !Coupon::isValidCoupon($c)) { throw new RuntimeException('کد کوپن نامعتبر یا منقضی شده است.'); } $appliedCouponCode = $c['code']; $appliedCouponPercent = (int)$c['percent']; $discountAmount = (int) round($total * $appliedCouponPercent / 100); } $finalTotal = max(0, $total - $discountAmount); $number=self::nextSequentialOrderNumber($pdo); $s=$pdo->prepare('INSERT INTO orders(customer_id,order_number,total_price,customer_note,coupon_code,coupon_percent,discount_amount) VALUES(:c,:n,:t,:note,:ccode,:cpercent,:damount)'); $s->execute(['c'=>$customerId,'n'=>$number,'t'=>$finalTotal,'note'=>mb_substr(trim($note),0,500),'ccode'=>$appliedCouponCode,'cpercent'=>$appliedCouponPercent,'damount'=>$discountAmount]); $id=(int)$pdo->lastInsertId(); $ins=$pdo->prepare('INSERT INTO order_items(order_id,product_id,product_name,quantity,original_price,discount_percent,discount_amount,price) VALUES(:o,:p,:n,:q,:op,:dp,:da,:price)'); foreach($items as $i) $ins->execute(['o'=>$id,'p'=>$i['product_id'],'n'=>$i['name'],'q'=>$i['quantity'],'op'=>$i['original_price']??$i['price'],'dp'=>$i['discount_percent']??0,'da'=>$i['discount_amount']??0,'price'=>$i['price']]); $pdo->prepare('DELETE FROM carts WHERE customer_id=:c')->execute(['c'=>$customerId]); $pdo->commit(); ActivityLog::record('order_create','customer',$customerId,$_SESSION['customer_display_name']??null,$id,'ثبت سفارش '.$number); return $id; }catch(Throwable $e){ if($pdo->inTransaction())$pdo->rollBack(); throw $e; } finally { self::releaseOrderNumberLock($pdo); } }
  public static function mine(int $customerId):array{$s=Database::getConnection()->prepare('SELECT * FROM orders WHERE customer_id=:c ORDER BY id DESC');$s->execute(['c'=>$customerId]);return $s->fetchAll();}
  public static function findMine(int $id,int $customerId):?array{$s=Database::getConnection()->prepare('SELECT * FROM orders WHERE id=:id AND customer_id=:c');$s->execute(['id'=>$id,'c'=>$customerId]);$o=$s->fetch();if(!$o)return null;$x=Database::getConnection()->prepare('SELECT * FROM order_items WHERE order_id=:id');$x->execute(['id'=>$id]);$o['items']=$x->fetchAll();return $o;}
  public static function findById(int $id): ?array { $s=Database::getConnection()->prepare('SELECT o.*, c.phone, CONCAT_WS(" ", c.first_name, c.last_name) AS customer_name FROM orders o JOIN customers c ON c.id=o.customer_id WHERE o.id=:id');$s->execute(['id'=>$id]);$o=$s->fetch();if(!$o) return null;$x=Database::getConnection()->prepare('SELECT * FROM order_items WHERE order_id=:id');$x->execute(['id'=>$id]);$o['items']=$x->fetchAll();return $o; }

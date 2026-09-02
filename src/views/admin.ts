@@ -263,19 +263,26 @@ export function renderAdminProductsView(username = 'مدیر'): string {
   const products = store.products.slice().sort((a, b) => a.sort_order - b.sort_order);
   const catMap = new Map(store.categories.map(c => [c.id, c.name]));
 
-  const rows = products.map(p => `
+  const rows = products.map(p => {
+    const disc = store.calculateProductDiscount(p);
+    return `
     <tr>
       <td>
         ${p.image ? `<img src="/uploads/${p.image}" style="width:40px; height:40px; border-radius:6px; object-fit:cover;">` : '☕'}
       </td>
       <td><b>${p.name}</b> ${p.badge ? `<span style="background:var(--gold-soft); color:#000; font-size:10px; padding:2px 6px; border-radius:4px; margin-right:4px;">${p.badge}</span>` : ''}</td>
       <td>${catMap.get(p.category_id) || '—'}</td>
-      <td>${Jalali.formatNumber(p.price)} تومان</td>
+      <td>
+        ${disc.has_discount ? `
+          <div style="font-size:12px; text-decoration:line-through; color:var(--muted);">${Jalali.formatNumber(p.price)} تومان</div>
+          <div style="font-weight:700; color:var(--gold-soft);">${Jalali.formatNumber(disc.final)} تومان</div>
+        ` : `${Jalali.formatNumber(p.price)} تومان`}
+      </td>
       <td>
         ${p.status === 'active' ? '<span style="color:#52c41a;">فعال</span>' : '<span style="color:#ff4d4f;">غیرفعال</span>'}
       </td>
       <td>
-        ${p.discount_enabled ? `<span style="color:#faad14;">${Jalali.digits(p.discount_value || 0)}٪</span>` : '—'}
+        ${disc.has_discount ? `<span style="background:#ef4444; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px;">${Jalali.digits(disc.percent)}٪ تخفیف</span>` : '—'}
       </td>
       <td>
         <a href="/admin/edit-product?id=${p.id}" class="btn-sm-action" style="background:#223046; color:#fff;">ویرایش</a>
@@ -285,7 +292,8 @@ export function renderAdminProductsView(username = 'مدیر'): string {
         </form>
       </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
   const content = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">

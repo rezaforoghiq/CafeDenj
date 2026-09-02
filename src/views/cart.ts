@@ -12,7 +12,15 @@ export function renderCartView(customerId: number, error?: string | null): strin
       </div>
       <div class="cart-product-info">
         <h2>${item.name}</h2>
-        <p>${Jalali.formatNumber(item.price)} تومان برای هر عدد</p>
+        ${item.original_price && item.original_price > item.price ? `
+          <p>
+            <span style="text-decoration:line-through; color:var(--muted); margin-left:6px;">${Jalali.formatNumber(item.original_price)}</span>
+            <span style="color:var(--gold-soft); font-weight:600;">${Jalali.formatNumber(item.price)} تومان</span>
+            <span style="background:#ef4444; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; margin-right:4px;">تخفیف</span>
+          </p>
+        ` : `
+          <p>${Jalali.formatNumber(item.price)} تومان برای هر عدد</p>
+        `}
         <strong>${Jalali.formatNumber(item.price * item.quantity)} تومان</strong>
       </div>
       <div class="cart-item-actions">

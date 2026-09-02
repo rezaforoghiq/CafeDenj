@@ -108,24 +108,60 @@ Endpoints
 - Auth: X-Device-Token or ?token
 - Purpose: Atomically claim the next pending job and return its payload for printing.
 - Response (200):
+```json
 {
   "success": true,
   "job": {
     "id": 123,
     "order_id": 987,
     "order_number": "DNJ-20260804-055C5D",
-    "job_type": "preparation",
+    "job_type": "customer_invoice",
     "print_text": "...plain UTF-8 text...",
     "payload": {
       "order_id": 987,
       "order_number": "DNJ-20260804-055C5D",
-      "job_type": "preparation",
-      "print_text": "...plain UTF-8 text...",
-      ...
+      "date_jalali": "۱۴۰۳/۰۶/۱۰",
+      "time": "14:20",
+      "customer_name": "علی رضایی",
+      "customer_phone": "09123456789",
+      "items": [
+        {
+          "product_id": 4,
+          "product_name": "اسپرسو دبل",
+          "quantity": 2,
+          "original_price": 50000,
+          "discount_percent": 15,
+          "discount_amount": 7500,
+          "price": 42500,
+          "line_total": 85000
+        }
+      ],
+      "subtotal": 85000,
+      "discount_amount": 0,
+      "total_amount": 85000,
+      "payment_method": "کارتخوان",
+      "notes": null,
+      "job_type": "customer_invoice",
+      "print_text": "...plain UTF-8 text..."
     }
   }
 }
-- Response when no job: { "success": false, "message": "No pending jobs" }
+```
+- Response when no job: `{ "success": false, "message": "No pending jobs" }`
+
+#### Item-Level Fields in `payload.items[]`:
+- `product_id` (int): Unique product ID.
+- `product_name` (string): Product title in Persian.
+- `quantity` (int): Number of units ordered.
+- `original_price` (float): Original unit price before product discount (Tomans).
+- `discount_percent` (int): Percentage of product discount applied to this item (0 if no discount).
+- `discount_amount` (float): Product discount amount for **ONE UNIT** (Tomans). Example: if original_price is 50,000 and price is 42,500, discount_amount is 7,500 (even when quantity is 2).
+- `price` (float): Final/locked unit price after product discount (Tomans).
+- `line_total` (float): Total for this line (`price * quantity`, Tomans, present in `customer_invoice`).
+
+#### Order-Level vs Product-Level Discount:
+- `payload.discount_amount` (float): Order-level coupon/discount applied to the whole order.
+- `payload.items[].discount_amount` (float): Product-level discount amount for a single unit of that item.
 
 Note: The system may create two kinds of print jobs. The field `job_type` indicates the purpose of the job:
 - "preparation": printed for barista preparation (created automatically when an order is approved). Duplicate prevention is enforced for this type.
@@ -218,8 +254,8 @@ Logs
 Q: What language is the print payload in?
 A: UTF-8 Persian (Farsi), plain text. Designed for RTL printing on thermal printers.
 
-Q: Does the payload include prices?
-A: No. The payload intentionally excludes prices, totals, discounts, coupons and payment details — it is only for barista preparation.
+Q: Does the payload include prices and discounts?
+A: The `print_text` for preparation jobs excludes prices (only showing quantities and product names for the barista). However, the structured `payload` object for both preparation and customer invoice jobs contains complete product-level pricing, original price, discount percentage, and per-unit discount amount.
 
 Q: How do I change printer width usage (58mm vs 80mm)?
 A: The job includes a `paper` field ('58' or '80'). The Bridge can adjust font size or margins based on that value.
@@ -242,6 +278,3 @@ require_once __DIR__ . "/classes/Setting.php";
 Setting::set('print_bridge_token', 'YOUR_TOKEN');
 
 End of document.
-
-
-

@@ -122,8 +122,11 @@ class Customer
     public static function delete(int $id): bool
     {
         $pdo = Database::getConnection();
-        // جلوگیری از خطای کلید خارجی: اگر سفارش مرتبط وجود داشته باشد، حذف نشود
-        $check = $pdo->prepare('SELECT COUNT(*) c FROM orders WHERE customer_id = :id');
+        // جلوگیری از حذف رکوردهایی که دارای سفارش یا حساب کاربری فعال هستند
+        $check = $pdo->prepare(
+            'SELECT (SELECT COUNT(*) FROM orders WHERE customer_id = :id) +
+                    (SELECT COUNT(*) FROM customer_accounts WHERE customer_id = :id) AS c'
+        );
         $check->execute(['id' => $id]);
         $count = (int) $check->fetchColumn();
         if ($count > 0) {

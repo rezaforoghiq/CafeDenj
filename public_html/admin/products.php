@@ -107,16 +107,18 @@ require __DIR__ . '/../../includes/admin-header.php';
         <th>نام</th>
         <th>دسته</th>
         <th>قیمت</th>
+        <th>تخفیف</th>
         <th>وضعیت</th>
         <th>عملیات</th>
       </tr>
     </thead>
     <tbody>
       <?php if (empty($products)): ?>
-        <tr><td colspan="6" class="text-center py-4" style="color:var(--muted);">محصولی پیدا نشد.</td></tr>
+        <tr><td colspan="7" class="text-center py-4" style="color:var(--muted);">محصولی پیدا نشد.</td></tr>
       <?php endif; ?>
 
       <?php foreach ($products as $product): ?>
+        <?php $discountInfo = Product::calculateDiscount($product); ?>
         <tr>
           <td>
             <?php if ($product['image']): ?>
@@ -133,7 +135,27 @@ require __DIR__ . '/../../includes/admin-header.php';
             <?php endif; ?>
           </td>
           <td style="color:var(--muted);"><?= htmlspecialchars($product['category_name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= number_format((float) $product['price']) ?> تومان</td>
+          <td>
+            <?php if ($discountInfo['has_discount']): ?>
+              <div style="font-size:12px; text-decoration:line-through; color:var(--muted);"><?= number_format((float) $product['price']) ?> تومان</div>
+              <div style="font-weight:700; color:var(--gold-soft);"><?= number_format((float) $discountInfo['final']) ?> تومان</div>
+            <?php else: ?>
+              <?= number_format((float) $product['price']) ?> تومان
+            <?php endif; ?>
+          </td>
+          <td>
+            <?php if ($discountInfo['has_discount']): ?>
+              <span class="badge" style="background:#ef4444; color:#fff; font-size:12px;">
+                <?= (int) $discountInfo['percent'] ?>٪ تخفیف
+              </span>
+            <?php elseif (!empty($product['discount_enabled'])): ?>
+              <span class="badge bg-secondary" style="font-size:11px;" title="تخفیف خارج از بازه زمانی تعریف شده است">
+                غیرفعال (بازه تاریخ)
+              </span>
+            <?php else: ?>
+              <span style="color:var(--muted);">—</span>
+            <?php endif; ?>
+          </td>
           <td>
             <form method="POST" class="d-inline">
               <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">

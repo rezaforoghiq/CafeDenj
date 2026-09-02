@@ -173,10 +173,21 @@ class PrintJob
         $itemsData = [];
         $total = 0;
         foreach ($items as $it) {
+            $origPrice = isset($it['original_price']) && (float)$it['original_price'] > 0
+                ? (float)$it['original_price']
+                : (float)$it['price'];
+            $discPercent = isset($it['discount_percent']) ? (int)$it['discount_percent'] : 0;
+            $discAmount = isset($it['discount_amount']) && (float)$it['discount_amount'] > 0
+                ? (float)$it['discount_amount']
+                : max(0.0, $origPrice - (float)$it['price']);
+
             $itemsData[] = [
                 'product_id' => (int) $it['product_id'],
                 'product_name' => $it['product_name'],
                 'quantity' => (int) $it['quantity'],
+                'original_price' => $origPrice,
+                'discount_percent' => $discPercent,
+                'discount_amount' => $discAmount,
                 'price' => (float) $it['price']
             ];
             $total += (float)$it['price'] * (int)$it['quantity'];
@@ -243,10 +254,21 @@ class PrintJob
         $subtotal = 0;
         foreach ($items as $it) {
             $lineTotal = (float)$it['price'] * (int)$it['quantity'];
+            $origPrice = isset($it['original_price']) && (float)$it['original_price'] > 0
+                ? (float)$it['original_price']
+                : (float)$it['price'];
+            $discPercent = isset($it['discount_percent']) ? (int)$it['discount_percent'] : 0;
+            $discAmount = isset($it['discount_amount']) && (float)$it['discount_amount'] > 0
+                ? (float)$it['discount_amount']
+                : max(0.0, $origPrice - (float)$it['price']);
+
             $itemsData[] = [
                 'product_id' => (int) $it['product_id'],
                 'product_name' => $it['product_name'],
                 'quantity' => (int) $it['quantity'],
+                'original_price' => $origPrice,
+                'discount_percent' => $discPercent,
+                'discount_amount' => $discAmount,
                 'price' => (float) $it['price'],
                 'line_total' => $lineTotal
             ];
@@ -316,4 +338,3 @@ class PrintJob
         ];
     }
 }
-

@@ -28,12 +28,17 @@ if ($product === null) {
 
 $errors = [];
 $old = [
-    'name'        => $product['name'],
-    'description' => $product['description'] ?? '',
-    'price'       => $product['price'],
-    'category_id' => $product['category_id'],
-    'badge'       => $product['badge'] ?? '',
-    'status'      => $product['status'],
+    'name'               => $product['name'],
+    'description'        => $product['description'] ?? '',
+    'price'              => $product['price'],
+    'category_id'        => $product['category_id'],
+    'badge'              => $product['badge'] ?? '',
+    'status'             => $product['status'],
+    'discount_enabled'   => (bool) ($product['discount_enabled'] ?? false),
+    'discount_type'      => $product['discount_type'] ?? 'percentage',
+    'discount_value'     => $product['discount_value'] !== null ? (string) $product['discount_value'] : '',
+    'discount_starts_at' => $product['discount_starts_at'] ?? '',
+    'discount_ends_at'   => $product['discount_ends_at'] ?? '',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -41,12 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['general'] = 'نشست شما منقضی شده است. صفحه را رفرش کرده و دوباره تلاش کنید.';
     } else {
         $old = [
-            'name'        => trim($_POST['name'] ?? ''),
-            'description' => trim($_POST['description'] ?? ''),
-            'price'       => trim($_POST['price'] ?? ''),
-            'category_id' => $_POST['category_id'] ?? '',
-            'badge'       => trim($_POST['badge'] ?? ''),
-            'status'      => $_POST['status'] ?? 'active',
+            'name'               => trim($_POST['name'] ?? ''),
+            'description'        => trim($_POST['description'] ?? ''),
+            'price'              => trim($_POST['price'] ?? ''),
+            'category_id'        => $_POST['category_id'] ?? '',
+            'badge'              => trim($_POST['badge'] ?? ''),
+            'status'             => $_POST['status'] ?? 'active',
+            'discount_enabled'   => isset($_POST['discount_enabled']),
+            'discount_type'      => $_POST['discount_type'] ?? 'percentage',
+            'discount_value'     => trim($_POST['discount_value'] ?? ''),
+            'discount_starts_at' => trim($_POST['discount_starts_at'] ?? ''),
+            'discount_ends_at'   => trim($_POST['discount_ends_at'] ?? ''),
         ];
 
         $errors = Product::validate($old);
@@ -141,6 +151,45 @@ require __DIR__ . '/../../includes/admin-header.php';
       <label class="form-label"><?= $product['image'] ? 'جایگزینی تصویر (اختیاری)' : 'تصویر محصول (اختیاری)' ?> — JPG، PNG یا WEBP، حداکثر ۲ مگابایت</label>
       <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" class="form-control">
     </div>
+
+    <hr style="border-color:var(--line);">
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" name="discount_enabled" id="discountEnabled" <?= !empty($old['discount_enabled']) ? 'checked' : '' ?>>
+      <label class="form-check-label" for="discountEnabled">این محصول تخفیف داشته باشد</label>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">نوع تخفیف</label>
+        <select name="discount_type" class="form-select <?= isset($errors['discount_type']) ? 'is-invalid' : '' ?>">
+          <option value="percentage" <?= ($old['discount_type'] ?? '') === 'percentage' ? 'selected' : '' ?>>درصدی (%)</option>
+          <option value="fixed" <?= ($old['discount_type'] ?? '') === 'fixed' ? 'selected' : '' ?>>مبلغ ثابت (تومان)</option>
+        </select>
+        <?php if (isset($errors['discount_type'])): ?><div class="invalid-feedback"><?= htmlspecialchars($errors['discount_type'], ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">مقدار تخفیف</label>
+        <input type="number" name="discount_value" min="0" step="0.01" class="form-control <?= isset($errors['discount_value']) ? 'is-invalid' : '' ?>"
+               value="<?= htmlspecialchars((string) ($old['discount_value'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+        <?php if (isset($errors['discount_value'])): ?><div class="invalid-feedback"><?= htmlspecialchars($errors['discount_value'], ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">شروع تخفیف (اختیاری)</label>
+        <input type="text" data-jalali-picker data-name="discount_starts_at" data-value="<?= htmlspecialchars((string) ($old['discount_starts_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="form-control" placeholder="انتخاب تاریخ">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">پایان تخفیف (اختیاری)</label>
+        <input type="text" data-jalali-picker data-name="discount_ends_at" data-value="<?= htmlspecialchars((string) ($old['discount_ends_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" class="form-control <?= isset($errors['discount_ends_at']) ? 'is-invalid' : '' ?>" placeholder="انتخاب تاریخ">
+        <?php if (isset($errors['discount_ends_at'])): ?><div class="invalid-feedback"><?= htmlspecialchars($errors['discount_ends_at'], ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+        <div class="form-text" style="color:var(--muted); font-size:12px;">اگر خالی بماند، تخفیف تا لغو دستی ادامه دارد.</div>
+      </div>
+    </div>
+
+    <hr style="border-color:var(--line);">
 
     <div class="mb-4">
       <label class="form-label">وضعیت نمایش در منو</label>

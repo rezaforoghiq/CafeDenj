@@ -105,24 +105,60 @@
 1) دریافت و claim شغل بعدی
 - URL: GET /api/print_bridge.php?action=next
 - پاسخ (مثال):
+```json
 {
   "success": true,
   "job": {
     "id": 123,
     "order_id": 987,
-    "order_number": "DNJ-...",
-    "job_type": "preparation",
+    "order_number": "DNJ-20260804-055C5D",
+    "job_type": "customer_invoice",
     "print_text": "...plain UTF-8 text...",
     "payload": {
       "order_id": 987,
-      "order_number": "DNJ-...",
-      "job_type": "preparation",
-      "print_text": "...plain UTF-8 text...",
-      ...
+      "order_number": "DNJ-20260804-055C5D",
+      "date_jalali": "۱۴۰۳/۰۶/۱۰",
+      "time": "14:20",
+      "customer_name": "علی رضایی",
+      "customer_phone": "09123456789",
+      "items": [
+        {
+          "product_id": 4,
+          "product_name": "اسپرسو دبل",
+          "quantity": 2,
+          "original_price": 50000,
+          "discount_percent": 15,
+          "discount_amount": 7500,
+          "price": 42500,
+          "line_total": 85000
+        }
+      ],
+      "subtotal": 85000,
+      "discount_amount": 0,
+      "total_amount": 85000,
+      "payment_method": "کارتخوان",
+      "notes": null,
+      "job_type": "customer_invoice",
+      "print_text": "...plain UTF-8 text..."
     }
   }
 }
-- اگر شغلی نباشد: { "success": false, "message": "No pending jobs" }
+```
+- اگر شغلی نباشد: `{ "success": false, "message": "No pending jobs" }`
+
+#### فیلدهای هر آیتم در `payload.items[]`:
+- `product_id` (عدد صحیح): شناسه یکتای محصول.
+- `product_name` (رشته): نام فارسی محصول.
+- `quantity` (عدد صحیح): تعداد سفارش داده شده.
+- `original_price` (عدد اعشاری/تومان): قیمت پایه/اصلی واحد کالا قبل از تخفیف.
+- `discount_percent` (عدد صحیح): درصد تخفیف محصول اعمال‌شده روی این قلم (در صورت عدم تخفیف 0).
+- `discount_amount` (عدد اعشاری/تومان): مبلغ تخفیف محصول برای **یک واحد** کالا (تومان). مثال: اگر قیمت اصلی ۵۰,۰۰۰ و قیمت نهایی ۴۲,۵۰۰ باشد، مقدار این فیلد برابر ۷,۵۰۰ خواهد بود حتی اگر تعداد ۲ عدد باشد.
+- `price` (عدد اعشاری/تومان): قیمت نهایی واحد کالا پس از تخفیف محصول.
+- `line_total` (عدد اعشاری/تومان): جمع کل سطر (`price * quantity`، تومان، موجود در فاکتور مشتری).
+
+#### تفاوت تخفیف سفارش و تخفیف محصول:
+- `payload.discount_amount`: تخفیف کلی سفارش / کوپن تخفیف اعمال‌شده روی کل فاکتور.
+- `payload.items[].discount_amount`: تخفیف اختصاصی محصول برای یک واحد از همان قلم کالا.
 
 نکته: سیستم ممکن است دو نوع شغل چاپ ایجاد کند. فیلد `job_type` هدف شغل را مشخص می‌کند:
 - "preparation": چاپ برای آماده‌سازی باریستا (به‌صورت خودکار هنگام تایید سفارش ایجاد می‌شود). جلوگیری از چاپ تکراری برای این نوع اعمال می‌شود.
@@ -211,6 +247,3 @@ Setting::set('print_bridge_token', 'YOUR_TOKEN');
 
 
 پایان سند.
-
-
-
