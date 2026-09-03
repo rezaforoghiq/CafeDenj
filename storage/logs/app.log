@@ -1,0 +1,12 @@
+[03-Sep-2026 18:01:49 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY093]: Invalid parameter number in C:\xampp\htdocs\classes\classes\Setting.php:47
+Stack trace:
+#0 C:\xampp\htdocs\classes\classes\Setting.php(47): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\classes\public_html\admin\settings.php(55): Setting::set('phone_required', '0')
+#2 {main}
+  thrown in C:\xampp\htdocs\classes\classes\Setting.php on line 47
+[03-Sep-2026 18:01:59 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY093]: Invalid parameter number in C:\xampp\htdocs\classes\classes\Setting.php:47
+Stack trace:
+#0 C:\xampp\htdocs\classes\classes\Setting.php(47): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\classes\public_html\admin\settings.php(55): Setting::set('phone_required', '1')
+#2 {main}
+  thrown in C:\xampp\htdocs\classes\classes\Setting.php on line 47
