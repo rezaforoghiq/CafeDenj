@@ -10,3 +10,5 @@ Stack trace:
 #1 C:\xampp\htdocs\classes\public_html\admin\settings.php(55): Setting::set('phone_required', '1')
 #2 {main}
   thrown in C:\xampp\htdocs\classes\classes\Setting.php on line 47
+[03-Sep-2026 21:22:32 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\classes\public_html\admin\export.php on line 197
+[03-Sep-2026 21:23:19 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\classes\public_html\admin\export.php on line 197

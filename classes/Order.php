@@ -259,6 +259,8 @@ class Order {
       if(!empty($f['to'])){ $where[]='o.created_at <= :to'; $params['to']=$f['to'].' 23:59:59'; }
   }
 
+  if(!empty($f['after_id'])){ $where[]='o.id > :after_id'; $params['after_id']=(int)$f['after_id']; }
+
   $sortMap=['date_desc'=>'o.created_at DESC','date_asc'=>'o.created_at ASC','amount_desc'=>'o.total_price DESC','amount_asc'=>'o.total_price ASC'];
   $order=$sortMap[$f['sort']??'date_desc']??$sortMap['date_desc'];
   $sql='SELECT o.*, c.phone, CONCAT_WS(" ", c.first_name, c.last_name) AS customer_name, b.full_name AS barista_name FROM orders o JOIN customers c ON c.id=o.customer_id LEFT JOIN baristas b ON b.id=o.barista_id';

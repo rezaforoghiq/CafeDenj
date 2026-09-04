@@ -127,6 +127,115 @@ if (Auth::isBarista()) {
     $filters['barista_pending_all'] = true;
 }
 
+function renderAdminOrderTableRow(array $order, array $statusLabels, array $baristas): void {
+?>
+      <tr data-order-id="<?= (int) $order['id'] ?>">
+        <td data-label="شماره سفارش"><b>سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></b><small class="d-block mt-1" style="color:var(--muted);direction:ltr;text-align:right"><?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></small></td>
+        <td data-label="مشتری"><?= htmlspecialchars($order['customer_name'] ?: $order['phone'], ENT_QUOTES, 'UTF-8') ?></td>
+        <td data-label="باریستا">
+          <?php if (Auth::isBarista()): ?>
+            <span class="text-light"><?= htmlspecialchars($order['barista_name'] ?? Auth::username(), ENT_QUOTES, 'UTF-8') ?></span>
+          <?php else: ?>
+            <form method="post" class="d-flex gap-1 order-barista-form">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+              <input type="hidden" name="action" value="assign_barista">
+              <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+              <select name="barista_id" class="form-select form-select-sm">
+                <option value="">— بدون باریستا —</option>
+                <?php foreach ($baristas as $b): ?><option value="<?= $b['id'] ?>" <?= (int) $order['barista_id'] === (int) $b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['full_name'], ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?>
+              </select>
+              <button class="btn btn-outline-light btn-sm">ثبت</button>
+            </form>
+          <?php endif; ?>
+        </td>
+        <td data-label="مبلغ"><?= number_format((float) $order['total_price']) ?></td>
+        <td data-label="وضعیت"><?= htmlspecialchars($statusLabels[$order['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></td>
+        <td data-label="تاریخ ثبت" style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['created_at']) ?></td>
+        <td data-label="تاریخ تأیید" style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['approved_at'] ?? null) ?></td>
+        <td data-label="عملیات">
+          <div class="d-flex flex-wrap gap-1 align-items-center order-quick-actions" style="margin:0;">
+            <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
+            <?php if (Auth::isAdmin() || Auth::can('orders.print')): ?>
+              <form method="post" class="d-inline">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="action" value="print_invoice">
+                <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+                <button type="submit" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ فاکتور</button>
+              </form>
+            <?php endif; ?>
+            <?php if (Auth::isAdmin()): ?>
+              <form method="post" class="d-inline" data-use-custom-confirm data-confirm-text="آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+                <button type="submit" class="btn btn-outline-danger btn-sm">حذف</button>
+              </form>
+            <?php endif; ?>
+          </div>
+          <?php if (Auth::isAdmin() || Auth::can('orders.update_status')): ?>
+          <form method="post" class="d-flex gap-1 flex-wrap align-items-center mt-2 order-status-controls" data-order-status-form style="margin:0;">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="action" value="status">
+            <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+            <select name="status" class="form-select form-select-sm" style="max-width:110px;flex:0 0 auto">
+              <?php foreach ($statusLabels as $status => $label): ?><option value="<?= $status ?>" <?= $order['status'] === $status ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?>
+            </select>
+            <select name="payment_method" class="form-select form-select-sm" style="max-width:110px;flex:0 0 auto">
+              <option value="">روش پرداخت</option>
+              <option value="card">کارتخوان</option>
+              <option value="cash">نقدی</option>
+              <option value="transfer">کارت به کارت</option>
+            </select>
+            <div class="w-100 d-flex justify-content-center mt-2 order-status-submit">
+              <button class="btn btn-gold btn-sm">ذخیره</button>
+            </div>
+          </form>
+          <?php endif; ?>
+        </td>
+      </tr>
+<?php
+}
+
+if (isset($_GET['poll']) && $_GET['poll'] === '1') {
+    header('Content-Type: application/json; charset=utf-8');
+    $afterId = (int) ($_GET['after_id'] ?? 0);
+    $newOrders = [];
+    if ($afterId > 0) {
+        $pollFilters = $filters;
+        $pollFilters['after_id'] = $afterId;
+        $newOrders = Order::report($pollFilters);
+    }
+    $baristas = Barista::activeOnly();
+
+    ob_start();
+    foreach ($newOrders as $order) {
+        renderAdminOrderTableRow($order, $statusLabels, $baristas);
+    }
+    $html = ob_get_clean();
+
+    $maxId = $afterId;
+    foreach ($newOrders as $o) {
+        if ((int)$o['id'] > $maxId) {
+            $maxId = (int)$o['id'];
+        }
+    }
+
+    $allCurrentOrders = Order::report($filters);
+    $activeIds = array_map(function($o) { return (int)$o['id']; }, $allCurrentOrders);
+
+    echo json_encode([
+        'success' => true,
+        'count' => count($newOrders),
+        'after_id' => $afterId,
+        'max_id' => $maxId,
+        'total_count' => count($allCurrentOrders),
+        'total_count_display' => Jalali::digits((string)count($allCurrentOrders)),
+        'active_ids' => $activeIds,
+        'html' => $html,
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $orders   = Order::report($filters);
 $baristas = Barista::activeOnly();
 $viewOrder = null;
@@ -231,75 +340,12 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     <thead>
       <tr><th>شماره سفارش</th><th>مشتری</th><th>باریستا</th><th>مبلغ (تومان)</th><th>وضعیت</th><th>تاریخ ثبت</th><th>تاریخ تأیید</th><th>عملیات</th></tr>
     </thead>
-    <tbody>
+    <tbody id="adminOrdersTableBody" data-max-order-id="<?= !empty($orders) ? (int)$orders[0]['id'] : 0 ?>">
       <?php if (empty($orders)): ?>
-        <tr><td colspan="8" class="text-center py-4" style="color:var(--muted);">سفارشی یافت نشد.</td></tr>
+        <tr id="noOrdersRow" class="no-orders-row"><td colspan="8" class="text-center py-4" style="color:var(--muted);">سفارشی یافت نشد.</td></tr>
       <?php endif; ?>
       <?php foreach ($orders as $order): ?>
-      <tr>
-        <td data-label="شماره سفارش"><b>سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></b><small class="d-block mt-1" style="color:var(--muted);direction:ltr;text-align:right"><?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></small></td>
-        <td data-label="مشتری"><?= htmlspecialchars($order['customer_name'] ?: $order['phone'], ENT_QUOTES, 'UTF-8') ?></td>
-        <td data-label="باریستا">
-          <?php if (Auth::isBarista()): ?>
-            <span class="text-light"><?= htmlspecialchars($order['barista_name'] ?? Auth::username(), ENT_QUOTES, 'UTF-8') ?></span>
-          <?php else: ?>
-            <form method="post" class="d-flex gap-1 order-barista-form">
-              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-              <input type="hidden" name="action" value="assign_barista">
-              <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-              <select name="barista_id" class="form-select form-select-sm">
-                <option value="">— بدون باریستا —</option>
-                <?php foreach ($baristas as $b): ?><option value="<?= $b['id'] ?>" <?= (int) $order['barista_id'] === (int) $b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['full_name'], ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?>
-              </select>
-              <button class="btn btn-outline-light btn-sm">ثبت</button>
-            </form>
-          <?php endif; ?>
-        </td>
-        <td data-label="مبلغ"><?= number_format((float) $order['total_price']) ?></td>
-        <td data-label="وضعیت"><?= htmlspecialchars($statusLabels[$order['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></td>
-        <td data-label="تاریخ ثبت" style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['created_at']) ?></td>
-        <td data-label="تاریخ تأیید" style="font-size:12.5px;color:var(--muted)"><?= Jalali::format($order['approved_at'] ?? null) ?></td>
-        <td data-label="عملیات">
-          <div class="d-flex flex-wrap gap-1 align-items-center order-quick-actions" style="margin:0;">
-            <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
-            <?php if (Auth::isAdmin() || Auth::can('orders.print')): ?>
-              <form method="post" class="d-inline">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-                <input type="hidden" name="action" value="print_invoice">
-                <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-                <button type="submit" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ فاکتور</button>
-              </form>
-            <?php endif; ?>
-            <?php if (Auth::isAdmin()): ?>
-              <form method="post" class="d-inline" data-use-custom-confirm data-confirm-text="آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-                <button type="submit" class="btn btn-outline-danger btn-sm">حذف</button>
-              </form>
-            <?php endif; ?>
-          </div>
-          <?php if (Auth::isAdmin() || Auth::can('orders.update_status')): ?>
-          <form method="post" class="d-flex gap-1 flex-wrap align-items-center mt-2 order-status-controls" data-order-status-form style="margin:0;">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-            <input type="hidden" name="action" value="status">
-            <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-            <select name="status" class="form-select form-select-sm" style="max-width:110px;flex:0 0 auto">
-              <?php foreach ($statusLabels as $status => $label): ?><option value="<?= $status ?>" <?= $order['status'] === $status ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?>
-            </select>
-            <select name="payment_method" class="form-select form-select-sm" style="max-width:110px;flex:0 0 auto">
-              <option value="">روش پرداخت</option>
-              <option value="card">کارتخوان</option>
-              <option value="cash">نقدی</option>
-              <option value="transfer">کارت به کارت</option>
-            </select>
-            <div class="w-100 d-flex justify-content-center mt-2 order-status-submit">
-              <button class="btn btn-gold btn-sm">ذخیره</button>
-            </div>
-          </form>
-          <?php endif; ?>
-        </td>
-      </tr>
+        <?php renderAdminOrderTableRow($order, $statusLabels, $baristas); ?>
       <?php endforeach; ?>
     </tbody>
   </table>

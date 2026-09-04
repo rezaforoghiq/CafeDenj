@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>پروفایل | کافه دنج</title>
 <link rel="stylesheet" href="assets/css/customer-auth.css">
+<link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.rtl.min.css">
 </head>
 <body class="customer-auth">
 <main class="auth-card">
@@ -58,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="auth-field"><label for="first_name">نام</label><input class="auth-input <?= isset($errors['first_name']) ? 'is-invalid' : '' ?>" id="first_name" name="first_name" type="text" value="<?= htmlspecialchars($first, ENT_QUOTES, 'UTF-8') ?>" required maxlength="100"><?php if(isset($errors['first_name'])): ?><small class="field-error"><?= htmlspecialchars($errors['first_name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?></div>
     <div class="auth-field"><label for="last_name">نام خانوادگی</label><input class="auth-input <?= isset($errors['last_name']) ? 'is-invalid' : '' ?>" id="last_name" name="last_name" type="text" value="<?= htmlspecialchars($last, ENT_QUOTES, 'UTF-8') ?>" required maxlength="100"><?php if(isset($errors['last_name'])): ?><small class="field-error"><?= htmlspecialchars($errors['last_name'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?></div>
     <div class="auth-field"><label>شماره موبایل</label><div class="auth-input-wrap"><input class="auth-input" type="tel" value="<?= htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') ?>" disabled></div></div>
-    <div style="display:flex;gap:8px;align-items:center;"><button class="auth-submit" type="submit">ذخیرهٔ تغییرات</button><a href="index" style="margin-left:8px">بازگشت به منو</a></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;"><button class="auth-submit" style="width: 60%;" type="submit">ذخیرهٔ تغییرات</button><a href="index" class="btn btn-danger btn-sm" style="margin-left:8px; width: 33%; min-height: 47px; padding-top: 10px; border-radius: 11px;">بازگشت به منو</a></div>
   </form>
 </main>
 </body>
