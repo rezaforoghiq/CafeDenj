@@ -182,6 +182,7 @@ class PrintJob
             return false;
         }
     }
+
     public static function buildPayload(array $order): array
     {
         $pdo = Database::getConnection();
@@ -239,8 +240,10 @@ class PrintJob
             $lines[] = 'تعداد: ' . $it['quantity'];
             $lines[] = "------------------------------";
         }
+        $customerNote = trim((string)($order['customer_note'] ?? ($order['notes'] ?? ($order['note'] ?? ''))));
+
         $lines[] = "یادداشت:";
-        $lines[] = $order['customer_note'] ?: '-';
+        $lines[] = $customerNote !== '' ? $customerNote : '-';
         $lines[] = "------------------------------";
         $lines[] = "برای آماده‌سازی سفارش";
         $lines[] = "------------------------------";
@@ -256,7 +259,8 @@ class PrintJob
             'customer_phone' => $customerPhone,
             'items' => $itemsData,
             'total_amount' => (float) ($order['total_price'] ?? $total),
-            'notes' => $order['customer_note'] ?? null,
+            'notes' => $customerNote !== '' ? $customerNote : null,
+            'customer_note' => $customerNote !== '' ? $customerNote : null,
             'job_type' => self::TYPE_PREPARATION,
             'print_text' => $printText
         ];

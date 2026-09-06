@@ -7,8 +7,6 @@
  * -----------------------------------------------------------------------
  */
 
-declare(strict_types=1);
-
 /** @var array $payload */
 /** @var bool $autoprint */
 /** @var string $cafeTitle */
@@ -25,21 +23,28 @@ $cafeTitle = $cafeTitle ?? 'کافه دنج';
   <style>
     @font-face {
       font-family: 'Vazirmatn';
-      src: url('/assets/fonts/vazirmatn/Vazirmatn-Regular.woff2') format('woff2');
+      src: url('assets/fonts/vazirmatn/Vazirmatn-Regular.woff2') format('woff2');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'Vazirmatn';
-      src: url('/assets/fonts/vazirmatn/Vazirmatn-Medium.woff2') format('woff2');
+      src: url('assets/fonts/vazirmatn/Vazirmatn-Medium.woff2') format('woff2');
       font-weight: 500;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'Vazirmatn';
-      src: url('/assets/fonts/vazirmatn/Vazirmatn-Bold.woff2') format('woff2');
+      src: url('assets/fonts/vazirmatn/Vazirmatn-SemiBold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Vazirmatn';
+      src: url('assets/fonts/vazirmatn/Vazirmatn-Bold.woff2') format('woff2');
       font-weight: 700;
       font-style: normal;
       font-display: swap;
@@ -110,125 +115,144 @@ $cafeTitle = $cafeTitle ?? 'کافه دنج';
 
     .receipt-header {
       text-align: center;
-      padding-bottom: 6px;
-      border-bottom: 2px dashed #000;
-      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 1.5px dashed #000;
+      margin-bottom: 6px;
     }
 
     .cafe-name {
-      font-size: 13px;
+      font-size: 11.5px;
       font-weight: 600;
       margin-bottom: 2px;
     }
 
     .badge-barista {
       display: inline-block;
-      font-size: 13.5px;
+      font-size: 11px;
       font-weight: 700;
       background: #000;
       color: #fff;
-      padding: 2px 8px;
+      padding: 1.5px 6px;
       border-radius: 3px;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .order-number-box {
-      border: 2px solid #000;
-      padding: 6px 4px;
-      margin: 6px 0;
+      border: 1.5px solid #000;
+      padding: 4px 3px;
+      margin: 4px 0;
       text-align: center;
-      border-radius: 4px;
+      border-radius: 3px;
     }
 
     .order-num-label {
-      font-size: 10px;
+      font-size: 9px;
+      font-weight: 700;
       display: block;
-      color: #333;
+      color: #000;
     }
 
     .order-num-val {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 800;
       letter-spacing: 0.5px;
       direction: ltr;
       display: inline-block;
+      color: #000;
     }
 
     .meta-line {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
-      margin-bottom: 3px;
+      font-size: 9.5px;
+      font-weight: 600;
+      margin-bottom: 2.5px;
+      line-height: 1.35;
+      color: #000;
     }
 
     .section-title {
-      font-size: 11.5px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 4px 0;
+      padding: 3px 0;
       border-bottom: 1px solid #000;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+      color: #000;
     }
 
     .item-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: 6px 0;
-      border-bottom: 1px dotted #999;
+      padding: 4px 0;
+      border-bottom: 1px dashed #000;
       page-break-inside: avoid;
     }
 
     .item-name {
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 700;
+      line-height: 1.3;
       flex: 1;
     }
 
     .item-qty {
-      font-size: 15px;
-      font-weight: 800;
+      font-size: 11.5px;
+      font-weight: 700;
       background: #f0f0f0;
       border: 1px solid #000;
       border-radius: 3px;
-      padding: 1px 8px;
+      padding: 1px 6px;
       margin-right: 6px;
       white-space: nowrap;
     }
 
     .notes-box {
-      margin-top: 8px;
-      padding: 6px 8px;
-      border: 2px dashed #000;
-      background: #fff8e6;
-      border-radius: 4px;
+      margin-top: 6px;
+      padding: 4px 6px;
+      border: 1px dashed #000;
+      background: #fafafa;
+      border-radius: 3px;
     }
 
     .notes-box strong {
       display: block;
-      font-size: 11px;
+      font-size: 9.5px;
+      font-weight: 700;
       margin-bottom: 2px;
-      color: #7c4a00;
+      color: #000;
     }
 
     .notes-box p {
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 600;
       color: #000;
+      margin: 0;
+      line-height: 1.4;
+      word-break: break-word;
+      white-space: pre-line;
     }
 
     .footer-note {
       text-align: center;
-      margin-top: 10px;
-      padding-top: 6px;
+      margin-top: 8px;
+      padding-top: 4px;
       border-top: 1px dashed #000;
-      font-size: 10px;
-      color: #555;
+      font-size: 9px;
+      font-weight: 600;
+      color: #000;
     }
 
     @media print {
       @page {
         size: 80mm auto;
         margin: 0;
+      }
+
+      * {
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
 
       html, body {
@@ -238,8 +262,6 @@ $cafeTitle = $cafeTitle ?? 'کافه دنج';
         padding: 0 !important;
         background: #fff !important;
         color: #000 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
       }
 
       .no-print {
@@ -266,6 +288,10 @@ $cafeTitle = $cafeTitle ?? 'کافه دنج';
       .item-qty {
         background: #fff !important;
         border: 2px solid #000 !important;
+      }
+
+      .notes-box {
+        background: transparent !important;
       }
 
       .item-row {
@@ -320,10 +346,13 @@ $cafeTitle = $cafeTitle ?? 'کافه دنج';
       <?php endforeach; ?>
     </div>
 
-    <?php if (!empty($payload['notes'])): ?>
+    <?php 
+      $orderNotes = trim((string)($payload['notes'] ?? ($payload['customer_note'] ?? '')));
+    ?>
+    <?php if ($orderNotes !== ''): ?>
       <div class="notes-box">
-        <strong>⚠️ یادداشت مشتری برای سفارش:</strong>
-        <p><?= htmlspecialchars((string)$payload['notes'], ENT_QUOTES, 'UTF-8') ?></p>
+        <strong>یادداشت و توضیحات مشتری:</strong>
+        <p><?= htmlspecialchars($orderNotes, ENT_QUOTES, 'UTF-8') ?></p>
       </div>
     <?php endif; ?>
 

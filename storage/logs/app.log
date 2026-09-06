@@ -114,3 +114,10 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 21:52:17 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
+[06-Sep-2026 21:52:28 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
+[06-Sep-2026 21:53:30 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
+[06-Sep-2026 21:56:06 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
+[06-Sep-2026 21:56:06 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
+[06-Sep-2026 21:56:35 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
+[06-Sep-2026 21:56:46 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
