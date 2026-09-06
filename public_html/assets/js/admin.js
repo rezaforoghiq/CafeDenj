@@ -94,6 +94,33 @@ document.addEventListener('DOMContentLoaded', () => {
     HTMLFormElement.prototype.submit.call(form);
   });
 
+  // Printing Method Integration: Manual mode browser-direct printing
+  const openReceiptWindow = (orderId, type = 'customer') => {
+    const url = `../receipt.php?id=${encodeURIComponent(orderId)}&type=${encodeURIComponent(type)}&autoprint=1`;
+    const win = window.open(url, `receipt_${type}_${orderId}`, 'width=460,height=680,scrollbars=yes,resizable=yes');
+    if (win) {
+      win.focus();
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+  window.triggerBrowserReceipt = openReceiptWindow;
+
+  // Handle manual print button clicks
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-manual-print');
+    if (btn) {
+      e.preventDefault();
+      const href = btn.getAttribute('href');
+      const win = window.open(href, 'receipt_window', 'width=460,height=680,scrollbars=yes,resizable=yes');
+      if (win) {
+        win.focus();
+      } else {
+        window.open(href, '_blank');
+      }
+    }
+  });
+
   const bindOrderStatusForms = (root = document) => {
     root.querySelectorAll('form[data-order-status-form]').forEach(form => {
       if (form.dataset.statusBound) return;
@@ -107,9 +134,44 @@ document.addEventListener('DOMContentLoaded', () => {
         statusSelect.addEventListener('change', updateRequirement);
         updateRequirement();
       }
+
+      form.addEventListener('submit', () => {
+        const selectedStatus = statusSelect?.value;
+        const ordersTable = document.querySelector('.orders-table');
+        const printingMethod = ordersTable?.dataset?.printingMethod || 'manual';
+        const idInput = form.querySelector('input[name="id"]');
+        const orderId = idInput?.value;
+
+        if (selectedStatus === 'approved' && printingMethod === 'manual' && orderId) {
+          openReceiptWindow(orderId, 'barista');
+        }
+      });
     });
   };
   bindOrderStatusForms();
+
+  const bindPrintInvoiceForms = (root = document) => {
+    const ordersTable = document.querySelector('.orders-table');
+    const method = ordersTable?.dataset?.printingMethod || 'automatic';
+
+    if (method === 'manual') {
+      root.querySelectorAll('form').forEach(form => {
+        const actionInput = form.querySelector('input[name="action"][value="print_invoice"]');
+        if (actionInput && !form.dataset.manualPrintBound) {
+          form.dataset.manualPrintBound = 'true';
+          form.addEventListener('submit', e => {
+            e.preventDefault();
+            const idInput = form.querySelector('input[name="id"]');
+            const orderId = idInput?.value;
+            if (orderId) {
+              openReceiptWindow(orderId, 'customer');
+            }
+          });
+        }
+      });
+    }
+  };
+  bindPrintInvoiceForms();
 
   // Auto-refresh new orders via lightweight AJAX Polling (Order management page)
   const ordersTableBody = document.getElementById('adminOrdersTableBody') || document.querySelector('.orders-table tbody');
@@ -250,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Bind any dynamic form handlers
             bindOrderStatusForms(row);
             bindCustomConfirm(row);
+            bindPrintInvoiceForms(row);
 
             // Prepend new row at top
             ordersTableBody.prepend(row);

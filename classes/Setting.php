@@ -42,8 +42,12 @@ class Setting
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
             'INSERT INTO settings (setting_key, setting_value) VALUES (:key, :value)
-             ON DUPLICATE KEY UPDATE setting_value = :value'
+             ON DUPLICATE KEY UPDATE setting_value = :update_value'
         );
-        return $stmt->execute(['key' => $key, 'value' => $value]);
+        return $stmt->execute([
+            'key'          => $key,
+            'value'        => $value,
+            'update_value' => $value,
+        ]);
     }
 }

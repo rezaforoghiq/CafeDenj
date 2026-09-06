@@ -34,4 +34,8 @@ if (isset($_GET['poll']) && $_GET['poll'] === '1') {
   <p>مقدار تخفیف: <b><?= number_format((float)$order['discount_amount']) ?> تومان</b></p>
 <?php endif; ?>
 <p>مبلغ کل: <b><?= number_format((float) $order['total_price']) ?> تومان</b></p>
-<a class="back-home" href="orders">سفارش‌های من</a></main><script src="assets/js/orders.js?v=7"></script></body></html>
+<div style="display:flex; gap:8px; margin-top:12px;">
+  <a class="back-home" style="margin-top:0; flex:1; text-align:center; background:#223046;" href="receipt.php?id=<?= (int)$order['id'] ?>&type=customer" target="_blank">چاپ فاکتور 🖨️</a>
+  <a class="back-home" style="margin-top:0; flex:1; text-align:center;" href="orders">سفارش‌های من</a>
+</div>
+</main><script src="assets/js/orders.js?v=7"></script></body></html>

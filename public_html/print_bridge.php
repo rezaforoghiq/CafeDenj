@@ -35,6 +35,15 @@ if (!$expected || $provided === '' || !hash_equals((string)$expected, (string)$p
     exit;
 }
 
+// Check printing method: in manual mode, Print Bridge API does not dispatch jobs
+if (PrintJob::isManual()) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Printing method is set to manual. Print Bridge is currently inactive.'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 try {
     if ($method === 'GET' && $action === 'next') {
         $job = PrintJob::fetchNextPending();

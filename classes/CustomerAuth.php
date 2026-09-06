@@ -3,6 +3,16 @@ declare(strict_types=1);
 
 class CustomerAuth
 {
+    public static function check(): bool
+    {
+        return isset($_SESSION['customer_id'], $_SESSION['customer_account_id']);
+    }
+
+    public static function id(): ?int
+    {
+        return isset($_SESSION['customer_id']) ? (int) $_SESSION['customer_id'] : null;
+    }
+
     public static function register(string $phone, string $firstName, string $lastName, string $password): array
     {
         $phone = self::normalizePhone($phone);

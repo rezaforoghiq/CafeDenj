@@ -48,6 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
             $flashError = 'باریستا انتخاب نشده است.';
+        } elseif (($_POST['action'] ?? '') === 'printing_settings') {
+            $method = in_array($_POST['printing_method'] ?? '', ['automatic', 'manual'], true) ? (string)$_POST['printing_method'] : 'automatic';
+            Setting::set('printing_method', $method);
+            $_SESSION['flash_success'] = 'روش چاپ فاکتور با موفقیت ذخیره شد.';
+            header('Location: settings');
+            exit;
         }
     }
 }
@@ -92,6 +98,50 @@ require __DIR__ . '/../../includes/admin-header.php';
       <?php endforeach; ?>
     </div>
     <div class="mt-3"><button type="submit" class="btn btn-gold btn-sm">ذخیره دسترسی‌ها</button></div>
+  </form>
+</div>
+
+<!-- Printing Method Setting Card -->
+<div class="card p-4 mt-4" style="max-width:640px;">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h6 class="mb-0" style="color:var(--ivory);">روش چاپ فاکتور (Printing Method)</h6>
+    <?php $currentPrintingMethod = Setting::get('printing_method', 'automatic'); ?>
+    <span class="badge" style="background:<?= $currentPrintingMethod === 'automatic' ? 'var(--gold-soft)' : 'var(--blue)' ?>; color:#000; font-size:12px;">
+      <?= $currentPrintingMethod === 'automatic' ? 'اتوماتیک (Windows Bridge)' : 'دستی (Browser Print)' ?>
+    </span>
+  </div>
+  
+  <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">
+    مشخص کنید هنگام کلیک روی دکمه‌های چاپ یا فعال‌شدن تریگر خودکار باریستا، فاکتورها از چه طریقی چاپ شوند.
+  </p>
+
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+    <input type="hidden" name="action" value="printing_settings">
+
+    <div class="d-flex flex-column gap-3 mb-3">
+      <label class="d-flex align-items-start gap-3 p-3 rounded border" style="border-color:<?= $currentPrintingMethod === 'automatic' ? 'var(--gold-soft)' : 'var(--line)' ?>; background:rgba(255,255,255,0.02); cursor:pointer;">
+        <input type="radio" name="printing_method" value="automatic" class="mt-1" <?= $currentPrintingMethod === 'automatic' ? 'checked' : '' ?>>
+        <div>
+          <strong style="color:var(--ivory); font-size:14px; display:block;">چاپ اتوماتیک (Automatic)</strong>
+          <div style="font-size:12.5px; color:var(--muted); margin-top:2px;">
+            فاکتورها و برگه‌های آماده‌سازی مستقیماً به صف دیتابیس ارسال شده و توسط نرم‌افزار واسط ویندوز (Windows Print Bridge) بر روی چاپگر حرارتی چاپ می‌شوند.
+          </div>
+        </div>
+      </label>
+
+      <label class="d-flex align-items-start gap-3 p-3 rounded border" style="border-color:<?= $currentPrintingMethod === 'manual' ? 'var(--gold-soft)' : 'var(--line)' ?>; background:rgba(255,255,255,0.02); cursor:pointer;">
+        <input type="radio" name="printing_method" value="manual" class="mt-1" <?= $currentPrintingMethod === 'manual' ? 'checked' : '' ?>>
+        <div>
+          <strong style="color:var(--ivory); font-size:14px; display:block;">چاپ دستی (Manual / Browser Print)</strong>
+          <div style="font-size:12.5px; color:var(--muted); margin-top:2px;">
+            دیالوگ استاندارد چاپ مرورگر (با ابعاد استاندارد ۸۰ میلی‌متری حرارتی) باز می‌شود. در این حالت هیچ درخواستی به API نرم‌افزار ویندوز ارسال نشده و هیچ صف چاپی تشکیل نمی‌شود.
+          </div>
+        </div>
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn-gold btn-sm">ذخیره روش چاپ</button>
   </form>
 </div>
 

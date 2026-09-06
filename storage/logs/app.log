@@ -12,3 +12,105 @@ Stack trace:
   thrown in C:\xampp\htdocs\classes\classes\Setting.php on line 47
 [03-Sep-2026 21:22:32 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\classes\public_html\admin\export.php on line 197
 [03-Sep-2026 21:23:19 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\classes\public_html\admin\export.php on line 197
+[06-Sep-2026 19:54:08 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY093]: Invalid parameter number in C:\xampp\htdocs\classes\classes\Setting.php:47
+Stack trace:
+#0 C:\xampp\htdocs\classes\classes\Setting.php(47): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\classes\public_html\admin\settings.php(53): Setting::set('printing_method', 'manual')
+#2 {main}
+  thrown in C:\xampp\htdocs\classes\classes\Setting.php on line 47
+[06-Sep-2026 19:57:28 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY093]: Invalid parameter number in C:\xampp\htdocs\classes\classes\Setting.php:47
+Stack trace:
+#0 C:\xampp\htdocs\classes\classes\Setting.php(47): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\classes\public_html\admin\settings.php(53): Setting::set('printing_method', 'manual')
+#2 {main}
+  thrown in C:\xampp\htdocs\classes\classes\Setting.php on line 47
+[06-Sep-2026 19:57:42 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY093]: Invalid parameter number in C:\xampp\htdocs\classes\classes\Setting.php:47
+Stack trace:
+#0 C:\xampp\htdocs\classes\classes\Setting.php(47): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\classes\public_html\admin\settings.php(53): Setting::set('printing_method', 'manual')
+#2 {main}
+  thrown in C:\xampp\htdocs\classes\classes\Setting.php on line 47
+[06-Sep-2026 20:01:07 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "PrintJob" not found in C:\xampp\htdocs\classes\public_html\admin\orders.php:355
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\orders.php on line 355
+[06-Sep-2026 20:01:10 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "PrintJob" not found in C:\xampp\htdocs\classes\public_html\admin\orders.php:355
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\orders.php on line 355
+[06-Sep-2026 20:01:15 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "PrintJob" not found in C:\xampp\htdocs\classes\public_html\admin\orders.php:355
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\orders.php on line 355
+[06-Sep-2026 20:01:39 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "PrintJob" not found in C:\xampp\htdocs\classes\public_html\admin\orders.php:355
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\orders.php on line 355
+[06-Sep-2026 20:02:24 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "PrintJob" not found in C:\xampp\htdocs\classes\public_html\admin\orders.php:355
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\orders.php on line 355
+[06-Sep-2026 20:02:27 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "PrintJob" not found in C:\xampp\htdocs\classes\public_html\admin\orders.php:355
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\orders.php on line 355
+[06-Sep-2026 20:02:32 Asia/Tehran] PHP Fatal error:  Uncaught Error: Class "PrintJob" not found in C:\xampp\htdocs\classes\public_html\admin\orders.php:355
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\orders.php on line 355
+[06-Sep-2026 20:13:01 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method CustomerAuth::check() in C:\xampp\htdocs\classes\public_html\receipt.php:45
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 45
+[06-Sep-2026 20:23:42 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:34:19 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:35:01 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:39:08 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:39:09 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:42:38 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:42:57 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:44:17 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:44:23 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:46:46 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:46:46 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:47:02 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60
+[06-Sep-2026 20:47:02 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to private method PrintJob::buildPayload() from global scope in C:\xampp\htdocs\classes\public_html\receipt.php:60
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\receipt.php on line 60

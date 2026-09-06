@@ -7,6 +7,6 @@
   <div class="modal-card"><div class="modal-icon">!</div><h2 id="confirmTitle">تأیید عملیات</h2><p id="confirmText">آیا از انجام این عملیات مطمئن هستید؟</p><div class="modal-actions"><button type="button" class="btn btn-ghost" data-modal-close>انصراف</button><button type="button" class="btn btn-danger" id="confirmAction">بله، ادامه بده</button></div></div>
 </div>
 <script src="../assets/js/jalali-datepicker.js"></script>
-<script src="../assets/js/admin.js?v=4"></script>
+<script src="../assets/js/admin.js?v=7"></script>
 </body>
 </html>

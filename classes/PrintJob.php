@@ -20,8 +20,29 @@ class PrintJob
         return (bool) $stmt->fetchColumn();
     }
 
+    public static function getPrintingMethod(): string
+    {
+        $method = Setting::get('printing_method', 'automatic');
+        return in_array($method, ['automatic', 'manual'], true) ? $method : 'automatic';
+    }
+
+    public static function isManual(): bool
+    {
+        return self::getPrintingMethod() === 'manual';
+    }
+
+    public static function isAutomatic(): bool
+    {
+        return self::getPrintingMethod() === 'automatic';
+    }
+
     public static function createForOrder(int $orderId): ?int
     {
+        // In manual mode, do not call Windows Print API or create queue records
+        if (self::isManual()) {
+            return null;
+        }
+
         // avoid duplicate preparation jobs for the same order
         if (self::existsForOrder($orderId, self::TYPE_PREPARATION)) {
             return null;
@@ -38,6 +59,11 @@ class PrintJob
 
     public static function createCustomerInvoiceForOrder(int $orderId): ?int
     {
+        // In manual mode, do not call Windows Print API or create queue records
+        if (self::isManual()) {
+            return null;
+        }
+
         $order = Order::findById($orderId);
         if (!$order) {
             return null;
@@ -156,8 +182,7 @@ class PrintJob
             return false;
         }
     }
-
-    private static function buildPayload(array $order): array
+    public static function buildPayload(array $order): array
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare('SELECT * FROM order_items WHERE order_id = :id');
@@ -237,7 +262,7 @@ class PrintJob
         ];
     }
 
-    private static function buildInvoicePayload(array $order): array
+    public static function buildInvoicePayload(array $order): array
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare('SELECT * FROM order_items WHERE order_id = :id');

@@ -48,6 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'
             }
         } catch (Throwable $e) {
             $flashError = 'خطایی رخ داد. لطفاً دوباره تلاش کنید.';
+            // var_dump($e->getMessage());
+            // exit;
         }
     }
 }

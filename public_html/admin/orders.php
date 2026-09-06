@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../classes/Order.php';
 require_once __DIR__ . '/../../classes/Barista.php';
 require_once __DIR__ . '/../../classes/Jalali.php';
+require_once __DIR__ . '/../../classes/PrintJob.php';
 
 requireLogin();
 requirePermission('orders.view');
@@ -72,11 +73,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
             exit;
         }
         require_once __DIR__ . '/../../classes/PrintJob.php';
-        $jobId = $orderId > 0 ? PrintJob::createCustomerInvoiceForOrder($orderId) : null;
-        if ($jobId === null) {
-            $_SESSION['flash_error'] = 'ایجاد سفارش چاپ فاکتور انجام نشد.';
+        if (PrintJob::isAutomatic()) {
+            $jobId = $orderId > 0 ? PrintJob::createCustomerInvoiceForOrder($orderId) : null;
+            if ($jobId === null) {
+                $_SESSION['flash_error'] = 'ایجاد سفارش چاپ فاکتور انجام نشد.';
+            } else {
+                $_SESSION['flash_success'] = 'درخواست چاپ فاکتور ثبت شد.';
+            }
         } else {
-            $_SESSION['flash_success'] = 'درخواست چاپ فاکتور ثبت شد.';
+            // Manual mode: trigger browser print for customer invoice without calling Windows Print API
+            $_SESSION['manual_print'] = ['id' => $orderId, 'type' => 'customer'];
         }
     } else {
         $status = (string) ($_POST['status'] ?? '');
@@ -87,6 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
             header('Location: orders?' . http_build_query($_GET));
             exit;
         }
+
+        $prevOrder = Order::findById($orderId);
+        $prevStatus = $prevOrder['status'] ?? null;
+
         if (Auth::isBarista()) {
             $ownedOrder = Order::findById($orderId);
             if (!$ownedOrder) {
@@ -104,6 +114,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
             Order::status($orderId, $status, Auth::currentBaristaId(), Auth::username(), 'barista', $paymentMethod);
         } else {
             Order::status($orderId, $status, null, null, 'admin', $paymentMethod);
+        }
+
+        // Barista Auto Print Trigger: when transitioning to 'approved' in manual mode
+        if ($status === 'approved') {
+            require_once __DIR__ . '/../../classes/PrintJob.php';
+            if (PrintJob::isManual()) {
+                $_SESSION['manual_print'] = ['id' => $orderId, 'type' => 'barista'];
+            }
         }
     }
     header('Location: orders?' . http_build_query($_GET));
@@ -156,12 +174,19 @@ function renderAdminOrderTableRow(array $order, array $statusLabels, array $bari
           <div class="d-flex flex-wrap gap-1 align-items-center order-quick-actions" style="margin:0;">
             <a href="orders?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['view' => $order['id']])), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مشاهده</a>
             <?php if (Auth::isAdmin() || Auth::can('orders.print')): ?>
-              <form method="post" class="d-inline">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
-                <input type="hidden" name="action" value="print_invoice">
-                <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
-                <button type="submit" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ فاکتور</button>
-              </form>
+              <?php if (PrintJob::isManual()): ?>
+                <a href="../receipt.php?id=<?= (int) $order['id'] ?>&type=customer&autoprint=1" target="_blank" class="btn btn-sm btn-outline-light btn-manual-print" data-order-id="<?= (int) $order['id'] ?>" style="border-color:var(--line); color:var(--ivory);" title="چاپ فاکتور مشتری">چاپ فاکتور</a>
+                <?php if (in_array($order['status'], ['approved', 'completed'], true)): ?>
+                  <a href="../receipt.php?id=<?= (int) $order['id'] ?>&type=barista&autoprint=1" target="_blank" class="btn btn-sm btn-outline-light btn-manual-print" data-order-id="<?= (int) $order['id'] ?>" style="border-color:var(--line); color:var(--ivory);" title="چاپ برگه آماده‌سازی باریستا">برگه باریستا</a>
+                <?php endif; ?>
+              <?php else: ?>
+                <form method="post" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                  <input type="hidden" name="action" value="print_invoice">
+                  <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+                  <button type="submit" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">چاپ فاکتور</button>
+                </form>
+              <?php endif; ?>
             <?php endif; ?>
             <?php if (Auth::isAdmin()): ?>
               <form method="post" class="d-inline" data-use-custom-confirm data-confirm-text="آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.">
@@ -252,11 +277,23 @@ if ($viewOrderId > 0) {
 require __DIR__ . '/../../includes/admin-header.php';
 $flashSuccess = $_SESSION['flash_success'] ?? null;
 $flashError = $_SESSION['flash_error'] ?? null;
-unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+$manualPrint = $_SESSION['manual_print'] ?? null;
+unset($_SESSION['flash_success'], $_SESSION['flash_error'], $_SESSION['manual_print']);
 ?>
 <h4 class="mb-4">مدیریت و گزارش سفارش‌ها</h4>
 <?php if ($flashSuccess): ?><div class="alert alert-success py-2 px-3" style="font-size:13.5px;"><?= htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
 <?php if ($flashError): ?><div class="alert alert-danger py-2 px-3" style="font-size:13.5px;"><?= htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+<?php if ($manualPrint && !empty($manualPrint['id'])): ?>
+  <div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2 py-2 px-3 mb-3" style="font-size:13.5px;">
+    <div>
+      <strong>سفارش شماره <?= (int)$manualPrint['id'] ?> با موفقیت تأیید شد.</strong>
+      <span class="d-block" style="font-size:12px;opacity:0.9;">در صورتی که پنجرهٔ چاپ برگه باریستا به صورت خودکار باز نشد، روی دکمه مقابل کلیک کنید:</span>
+    </div>
+    <a href="../receipt.php?id=<?= (int)$manualPrint['id'] ?>&type=<?= htmlspecialchars((string)$manualPrint['type'], ENT_QUOTES, 'UTF-8') ?>&autoprint=1" target="_blank" class="btn btn-sm btn-gold btn-manual-print">
+      🖨️ چاپ برگه باریستا (سفارش #<?= (int)$manualPrint['id'] ?>)
+    </a>
+  </div>
+<?php endif; ?>
 
 <div class="card p-3 mb-4">
   <form method="GET" class="row g-2 align-items-end">
@@ -335,7 +372,7 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 </div>
 <?php endif; ?>
 
-<div class="table-responsive orders-table">
+<div class="table-responsive orders-table" data-printing-method="<?= htmlspecialchars(PrintJob::getPrintingMethod(), ENT_QUOTES, 'UTF-8') ?>">
   <table class="table align-middle">
     <thead>
       <tr><th>شماره سفارش</th><th>مشتری</th><th>باریستا</th><th>مبلغ (تومان)</th><th>وضعیت</th><th>تاریخ ثبت</th><th>تاریخ تأیید</th><th>عملیات</th></tr>
@@ -350,5 +387,17 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     </tbody>
   </table>
 </div>
+
+<?php if (!empty($manualPrint) && !empty($manualPrint['id'])): ?>
+  <script>
+    (function() {
+      var printUrl = '../receipt.php?id=<?= (int)$manualPrint['id'] ?>&type=<?= htmlspecialchars((string)$manualPrint['type'], ENT_QUOTES, 'UTF-8') ?>&autoprint=1';
+      var w = window.open(printUrl, 'receipt_barista_<?= (int)$manualPrint['id'] ?>', 'width=460,height=680,scrollbars=yes,resizable=yes');
+      if (w) {
+        w.focus();
+      }
+    })();
+  </script>
+<?php endif; ?>
 
 <?php require __DIR__ . '/../../includes/admin-footer.php'; ?>
