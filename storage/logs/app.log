@@ -121,3 +121,36 @@ Stack trace:
 [06-Sep-2026 21:56:06 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
 [06-Sep-2026 21:56:35 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
 [06-Sep-2026 21:56:46 Asia/Tehran] PHP Fatal error:  strict_types declaration must be the very first statement in the script in C:\xampp\htdocs\classes\templates\receipt-barista.php on line 10
+[07-Sep-2026 17:52:19 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 18:07:32 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method Category::updateSortOrder() in C:\xampp\htdocs\classes\public_html\admin\menu-display.php:58
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58
+[07-Sep-2026 18:08:34 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method Category::updateSortOrder() in C:\xampp\htdocs\classes\public_html\admin\menu-display.php:58
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58
+[07-Sep-2026 18:08:39 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method Category::updateSortOrder() in C:\xampp\htdocs\classes\public_html\admin\menu-display.php:58
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58
+[07-Sep-2026 18:08:57 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method Category::updateSortOrder() in C:\xampp\htdocs\classes\public_html\admin\menu-display.php:58
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58
+[07-Sep-2026 18:08:59 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method Category::updateSortOrder() in C:\xampp\htdocs\classes\public_html\admin\menu-display.php:58
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58
+[07-Sep-2026 18:09:01 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method Category::updateSortOrder() in C:\xampp\htdocs\classes\public_html\admin\menu-display.php:58
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58
+[07-Sep-2026 18:09:29 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method Category::updateSortOrder() in C:\xampp\htdocs\classes\public_html\admin\menu-display.php:58
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58
+[07-Sep-2026 18:13:23 Asia/Tehran] PHP Fatal error:  Uncaught Error: Call to undefined method Category::updateSortOrder() in C:\xampp\htdocs\classes\public_html\admin\menu-display.php:58
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58

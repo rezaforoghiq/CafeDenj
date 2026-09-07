@@ -75,7 +75,7 @@ class Product
             $params['status'] = $filters['status'];
         }
 
-        $sql .= ' ORDER BY p.sort_order ASC, p.created_at DESC';
+        $sql .= ' ORDER BY c.sort_order ASC, p.sort_order ASC, p.id ASC';
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -423,6 +423,37 @@ class Product
 
         if (is_file($path)) {
             @unlink($path);
+        }
+    }
+
+    /**
+     * بروزرسانی ترتیب نمایش محصولات یک دسته‌بندی
+     */
+    public static function updateSortOrder(int $categoryId, array $orderedIds): bool
+    {
+        $pdo = Database::getConnection();
+        $inTx = $pdo->inTransaction();
+        if (!$inTx) {
+            $pdo->beginTransaction();
+        }
+        try {
+            $stmt = $pdo->prepare('UPDATE products SET sort_order = :sort_order WHERE id = :id AND category_id = :category_id');
+            foreach ($orderedIds as $index => $id) {
+                $stmt->execute([
+                    'sort_order' => $index + 1,
+                    'id' => (int) $id,
+                    'category_id' => $categoryId,
+                ]);
+            }
+            if (!$inTx) {
+                $pdo->commit();
+            }
+            return true;
+        } catch (\Throwable $e) {
+            if (!$inTx && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            return false;
         }
     }
 }

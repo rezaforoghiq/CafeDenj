@@ -176,4 +176,34 @@ class Category
 
         return (int) $stmt->fetchColumn() > 0;
     }
+
+    /**
+     * بروزرسانی ترتیب نمایش دسته‌بندی‌ها
+     */
+    public static function updateSortOrder(array $orderedIds): bool
+    {
+        $pdo = Database::getConnection();
+        $inTx = $pdo->inTransaction();
+        if (!$inTx) {
+            $pdo->beginTransaction();
+        }
+        try {
+            $stmt = $pdo->prepare('UPDATE categories SET sort_order = :sort_order WHERE id = :id');
+            foreach ($orderedIds as $index => $id) {
+                $stmt->execute([
+                    'sort_order' => $index + 1,
+                    'id' => (int) $id,
+                ]);
+            }
+            if (!$inTx) {
+                $pdo->commit();
+            }
+            return true;
+        } catch (\Throwable $e) {
+            if (!$inTx && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            return false;
+        }
+    }
 }

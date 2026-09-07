@@ -32,6 +32,8 @@ class ActivityLog
         'barista_delete'      => 'حذف باریستا',
         'admin_create'        => 'ایجاد ادمین',
         'admin_delete'        => 'حذف ادمین',
+        'menu_reorder_categories' => 'تغییر ترتیب دسته‌بندی‌ها',
+        'menu_reorder_products'   => 'تغییر ترتیب محصولات',
     ];
 
     public const ROLES = ['admin' => 'ادمین', 'barista' => 'باریستا', 'customer' => 'مشتری', 'system' => 'سیستم'];
