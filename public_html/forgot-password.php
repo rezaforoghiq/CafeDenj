@@ -12,46 +12,9 @@ if (customerIsLoggedIn()) {
     exit;
 }
 
-$error = $_SESSION['password_reset_error'] ?? $_SESSION['otp_error'] ?? null;
-unset($_SESSION['password_reset_error'], $_SESSION['otp_error']);
-$phone = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $phone = trim((string) ($_POST['phone'] ?? ''));
-
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
-        $error = 'نشست شما منقضی شده است؛ صفحه را تازه‌سازی کنید.';
-    } elseif ($phone === '') {
-        $error = 'شماره موبایل را وارد کنید.';
-    } elseif (!Customer::isValidPhone($phone)) {
-        $error = 'شماره موبایل را به‌صورت ۰۹xxxxxxxxx وارد کنید.';
-    } else {
-        $normalizedPhone = CustomerAuth::normalizePhone($phone);
-        $account = CustomerAuth::findAccountByPhone($normalizedPhone);
-        $_SESSION['otp_context'] = [
-            'purpose' => 'password_reset',
-            'phone' => $normalizedPhone,
-            'customer_id' => $account ? (int) $account['customer_id'] : null,
-        ];
-        $_SESSION['otp_notice'] = 'اگر این شماره در سامانه ثبت شده باشد، کد تأیید ارسال خواهد شد.';
-
-        if ($account) {
-            try {
-                $otpService = new OtpService();
-                $otpService->issueOtp($normalizedPhone, 'password_reset', $_SERVER['REMOTE_ADDR'] ?? null);
-            } catch (Throwable $e) {
-                error_log('Password reset OTP send error: ' . $e->getMessage());
-                $error = 'ارسال کد انجام نشد. لطفاً دوباره تلاش کنید.';
-                unset($_SESSION['otp_context'], $_SESSION['otp_notice']);
-            }
-        }
-
-        if ($error === null) {
-            header('Location: otp');
-            exit;
-        }
-    }
-}
+$_SESSION['otp_notice'] = 'ورود به حساب کاربری بدون نیاز به رمز عبور و با کد تأیید پیامکی انجام می‌شود.';
+header('Location: login');
+exit;
 ?>
 <!doctype html>
 <html lang="fa" dir="rtl">

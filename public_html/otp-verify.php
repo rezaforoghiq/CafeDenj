@@ -64,24 +64,31 @@ if (($context['purpose'] ?? 'login') === 'registration') {
 }
 
 if (($context['purpose'] ?? 'login') === 'password_reset') {
-    $customerId = (int) ($context['customer_id'] ?? 0);
     $phone = (string) ($context['phone'] ?? '');
-
-    if ($customerId <= 0) {
-        $_SESSION['otp_error'] = 'جلسه بازیابی رمز منقضی شده است. دوباره تلاش کنید.';
-        header('Location: forgot-password');
+    $account = CustomerAuth::findAccountByPhone($phone);
+    if ($account) {
+        unset($_SESSION['otp_context']);
+        customerLogin($account);
+        header('Location: index');
         exit;
     }
-
-    passwordResetAuthorize($customerId, $phone);
-    unset($_SESSION['otp_context']);
-    ActivityLog::record('password_reset_verify', 'customer', $customerId, $phone, null, 'OTP بازیابی رمز عبور تایید شد.');
-    header('Location: reset-password');
+    header('Location: login');
     exit;
 }
 
 $accountId = (int) ($context['account_id'] ?? 0);
 $customerId = (int) ($context['customer_id'] ?? 0);
+if ($accountId <= 0 || $customerId <= 0) {
+    $phone = (string) ($context['phone'] ?? '');
+    if ($phone !== '') {
+        $account = CustomerAuth::loginWithOtp($phone);
+        if ($account) {
+            $accountId = (int) $account['account_id'];
+            $customerId = (int) $account['customer_id'];
+        }
+    }
+}
+
 if ($accountId <= 0 || $customerId <= 0) {
     $_SESSION['otp_error'] = 'نشست ورود منقضی شده است.';
     header('Location: login');

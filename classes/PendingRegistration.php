@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 class PendingRegistration
 {
-    public static function create(PDO $pdo, string $phone, string $firstName, string $lastName, string $passwordHash): int
+    public static function create(PDO $pdo, string $phone, string $firstName, string $lastName, string $passwordHash = ''): int
     {
+        if ($passwordHash === '') {
+            $passwordHash = bin2hex(random_bytes(32));
+        }
         $expiresAt = date('Y-m-d H:i:s', time() + max(300, (int) env('OTP_EXPIRATION_SECONDS', 300)) + 600);
         $stmt = $pdo->prepare(
             'INSERT INTO pending_registrations (phone, first_name, last_name, password_hash, expires_at) VALUES (:phone, :first_name, :last_name, :password_hash, :expires_at)'

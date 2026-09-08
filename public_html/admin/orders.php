@@ -383,14 +383,39 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error'], $_SESSION['manual_pr
   <div class="mb-3">وضعیت: <strong><?= htmlspecialchars($statusLabels[$viewOrder['status']] ?? 'نامشخص', ENT_QUOTES, 'UTF-8') ?></strong></div>
   <div class="table-responsive">
     <table class="table table-sm">
-      <thead><tr><th>محصول</th><th>تعداد</th><th>قیمت واحد</th><th>جمع</th></tr></thead>
+      <thead>
+        <tr>
+          <th>محصول</th>
+          <th>قیمت اصلی</th>
+          <th>تخفیف</th>
+          <th>قیمت بعد از تخفیف</th>
+          <th>تعداد</th>
+          <th>جمع</th>
+        </tr>
+      </thead>
       <tbody>
-        <?php foreach ($viewOrder['items'] as $item): ?>
+        <?php foreach ($viewOrder['items'] as $item): 
+          $origPrice = (isset($item['original_price']) && (float) $item['original_price'] > 0)
+              ? (float) $item['original_price']
+              : (float) $item['price'];
+          $finalPrice = (float) $item['price'];
+          $qty = (int) $item['quantity'];
+          $discountAmount = isset($item['discount_amount']) && (float) $item['discount_amount'] > 0
+              ? (float) $item['discount_amount']
+              : max(0, $origPrice - $finalPrice);
+          $discountPercent = !empty($item['discount_percent']) ? (int) $item['discount_percent'] : 0;
+          if ($discountPercent === 0 && $origPrice > 0 && $discountAmount > 0) {
+              $discountPercent = (int) round(($discountAmount / $origPrice) * 100);
+          }
+          $lineTotal = $finalPrice * $qty;
+        ?>
         <tr>
           <td><?= htmlspecialchars($item['product_name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= (int) $item['quantity'] ?></td>
-          <td><?= number_format((float) $item['price']) ?> تومان</td>
-          <td><?= number_format((float) $item['price'] * (int) $item['quantity']) ?> تومان</td>
+          <td><?= number_format($origPrice) ?> تومان</td>
+          <td><?= $discountAmount > 0 ? number_format($discountAmount) . ' تومان' . ($discountPercent > 0 ? ' (' . $discountPercent . '٪)' : '') : '۰ تومان' ?></td>
+          <td><?= number_format($finalPrice) ?> تومان</td>
+          <td><?= $qty ?></td>
+          <td><?= number_format($lineTotal) ?> تومان</td>
         </tr>
         <?php endforeach; ?>
       </tbody>

@@ -6,6 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (form) {
     const otpInput = form.querySelector('input[name="otp"]');
     otpInput?.focus();
+
+    if (otpInput) {
+      otpInput.addEventListener('input', () => {
+        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        let val = otpInput.value;
+        for (let i = 0; i < 10; i++) {
+          val = val.replaceAll(persianDigits[i], String(i)).replaceAll(arabicDigits[i], String(i));
+        }
+        if (val !== otpInput.value) {
+          otpInput.value = val;
+        }
+      });
+    }
   }
 
   if (!resendButton || !resendForm) return;

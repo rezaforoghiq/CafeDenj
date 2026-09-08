@@ -13,20 +13,24 @@ class CustomerAuth
         return isset($_SESSION['customer_id']) ? (int) $_SESSION['customer_id'] : null;
     }
 
-    public static function register(string $phone, string $firstName, string $lastName, string $password): array
+    public static function register(string $phone, string $firstName, string $lastName, string $password = ''): array
     {
         $phone = self::normalizePhone($phone);
         $firstName = trim($firstName);
         $lastName = trim($lastName);
-        $errors = self::validateRegistration($phone, $firstName, $lastName, $password);
+        $errors = self::validateRegistrationData($phone, $firstName, $lastName);
+        if ($password !== '') {
+            $errors = array_merge($errors, self::validatePassword($password));
+        }
         if ($errors !== []) {
             throw new InvalidArgumentException(json_encode($errors, JSON_UNESCAPED_UNICODE));
         }
 
-        return self::registerWithPasswordHash($phone, $firstName, $lastName, password_hash($password, PASSWORD_DEFAULT));
+        $passwordHash = $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : bin2hex(random_bytes(32));
+        return self::registerWithPasswordHash($phone, $firstName, $lastName, $passwordHash);
     }
 
-    public static function registerWithPasswordHash(string $phone, string $firstName, string $lastName, string $passwordHash): array
+    public static function registerWithPasswordHash(string $phone, string $firstName, string $lastName, string $passwordHash = ''): array
     {
         $phone = self::normalizePhone($phone);
         $firstName = trim($firstName);
@@ -34,6 +38,10 @@ class CustomerAuth
         $errors = self::validateRegistrationData($phone, $firstName, $lastName);
         if ($errors !== []) {
             throw new InvalidArgumentException(json_encode($errors, JSON_UNESCAPED_UNICODE));
+        }
+
+        if ($passwordHash === '') {
+            $passwordHash = bin2hex(random_bytes(32));
         }
 
         $pdo = Database::getConnection();
@@ -71,6 +79,19 @@ class CustomerAuth
         }
     }
 
+    public static function loginWithOtp(string $phone): ?array
+    {
+        $normalizedPhone = self::normalizePhone($phone);
+        $account = self::findAccountByPhone($normalizedPhone);
+        if (!$account) {
+            return null;
+        }
+
+        $pdo = Database::getConnection();
+        $pdo->prepare('UPDATE customer_accounts SET last_login_at = NOW() WHERE id = :id')->execute(['id' => $account['account_id']]);
+        return $account;
+    }
+
     public static function attempt(string $identity, string $password): ?array
     {
         $identity = trim($identity);
@@ -100,10 +121,12 @@ class CustomerAuth
         return $account;
     }
 
-    public static function validateRegistration(string $phone, string $firstName, string $lastName, string $password): array
+    public static function validateRegistration(string $phone, string $firstName, string $lastName, string $password = ''): array
     {
         $errors = self::validateRegistrationData($phone, $firstName, $lastName);
-        $errors = array_merge($errors, self::validatePassword($password));
+        if ($password !== '') {
+            $errors = array_merge($errors, self::validatePassword($password));
+        }
         return $errors;
     }
 

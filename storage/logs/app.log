@@ -172,3 +172,8 @@ Stack trace:
 
 [07-Sep-2026 22:42:54 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\classes\public_html\admin\export.php on line 197
 [07-Sep-2026 22:46:57 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user ''@'localhost' (using password: NO)
+[08-Sep-2026 18:44:16 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user ''@'localhost' (using password: NO)
+[08-Sep-2026 18:46:43 Asia/Tehran] Melipayamak provider error: SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://api.payamak-panel.com/post/Send.asmx?wsdl' : failed to load external entity "http://api.payamak-panel.com/post/Send.asmx?wsdl"
+
+[08-Sep-2026 18:47:10 Asia/Tehran] Melipayamak provider error: SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://api.payamak-panel.com/post/Send.asmx?wsdl' : failed to load external entity "http://api.payamak-panel.com/post/Send.asmx?wsdl"
+

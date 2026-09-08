@@ -10,45 +10,9 @@ if (customerIsLoggedIn()) {
     exit;
 }
 
-$resetContext = passwordResetGetContext();
-if (!$resetContext) {
-    $_SESSION['otp_error'] = 'جلسه بازیابی رمز منقضی شده است. دوباره تلاش کنید.';
-    header('Location: forgot-password');
-    exit;
-}
-
-$error = null;
-$errors = [];
-$newPassword = '';
-$confirmPassword = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
-        $error = 'نشست شما منقضی شده است؛ صفحه را تازه‌سازی کنید.';
-    } else {
-        $newPassword = (string) ($_POST['password'] ?? '');
-        $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
-        $errors = CustomerAuth::validatePassword($newPassword, $confirmPassword);
-
-        if ($errors === []) {
-            try {
-                if (!CustomerAuth::updatePassword((int) $resetContext['customer_id'], $newPassword)) {
-                    throw new RuntimeException('Unable to update password.');
-                }
-
-                passwordResetClear();
-                unset($_SESSION['otp_context']);
-                $_SESSION['password_reset_success'] = 'رمز عبور شما با موفقیت تغییر کرد. اکنون می‌توانید وارد شوید.';
-                ActivityLog::record('password_reset_complete', 'customer', (int) $resetContext['customer_id'], $resetContext['phone'], null, 'رمز عبور با موفقیت تغییر کرد.');
-                header('Location: login');
-                exit;
-            } catch (Throwable $e) {
-                error_log('Password reset error: ' . $e->getMessage());
-                $error = 'رمز عبور تغییر نکرد. لطفاً دوباره تلاش کنید.';
-            }
-        }
-    }
-}
+$_SESSION['otp_notice'] = 'ورود به حساب کاربری بدون نیاز به رمز عبور انجام می‌شود.';
+header('Location: login');
+exit;
 ?>
 <!doctype html>
 <html lang="fa" dir="rtl">
