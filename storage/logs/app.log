@@ -154,3 +154,21 @@ Stack trace:
 Stack trace:
 #0 {main}
   thrown in C:\xampp\htdocs\classes\public_html\admin\menu-display.php on line 58
+[07-Sep-2026 19:44:47 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:44:53 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:44:59 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:05 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:11 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:15 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:19 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:24 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:28 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:32 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:36 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:40 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:44 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 19:45:45 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[07-Sep-2026 22:31:14 Asia/Tehran] Melipayamak provider error: SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://api.payamak-panel.com/post/Send.asmx?wsdl' : failed to load external entity "http://api.payamak-panel.com/post/Send.asmx?wsdl"
+
+[07-Sep-2026 22:42:54 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\classes\public_html\admin\export.php on line 197
+[07-Sep-2026 22:46:57 Asia/Tehran] Database connection error: SQLSTATE[HY000] [1045] Access denied for user ''@'localhost' (using password: NO)

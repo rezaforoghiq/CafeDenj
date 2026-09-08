@@ -173,56 +173,349 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   bindPrintInvoiceForms();
 
-  // Auto-refresh new orders via lightweight AJAX Polling (Order management page)
+  // --- Global Admin Order Notification & Live Polling System ---
   const ordersTableBody = document.getElementById('adminOrdersTableBody') || document.querySelector('.orders-table tbody');
-  if (ordersTableBody) {
-    let isPolling = false;
-    let pollIntervalTimer = null;
-    const POLL_INTERVAL = 2000; // 2 seconds
 
-    const getMaxOrderId = () => {
-      let max = 0;
+  let isPolling = false;
+  let pollIntervalTimer = null;
+  const POLL_INTERVAL = 2500; // 2.5 seconds
+
+  // 1. Audio System (Synthesized Web Audio chime + Audio element fallback)
+  let notificationAudio = null;
+  let audioContext = null;
+  let isAudioUnlocked = false;
+
+  const playSynthesizedChime = () => {
+    try {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtxClass) return false;
+      if (!audioContext) {
+        audioContext = new AudioCtxClass();
+      }
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().catch(() => {});
+      }
+
+      const now = audioContext.currentTime;
+
+      // Note 1: E5 (659.25 Hz) bell chime
+      const osc1 = audioContext.createOscillator();
+      const gain1 = audioContext.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(659.25, now);
+      gain1.gain.setValueAtTime(0.35, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      osc1.connect(gain1);
+      gain1.connect(audioContext.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.45);
+
+      // Note 2: B5 (987.77 Hz) higher harmonic chime
+      const osc2 = audioContext.createOscillator();
+      const gain2 = audioContext.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(987.77, now + 0.12);
+      gain2.gain.setValueAtTime(0.4, now + 0.12);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+      osc2.connect(gain2);
+      gain2.connect(audioContext.destination);
+      osc2.start(now + 0.12);
+      osc2.stop(now + 0.65);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const getNotificationAudio = () => {
+    if (!notificationAudio) {
+      notificationAudio = new Audio();
+      const primaryUrl = '/assets/audio/notification.mp3';
+      const fallbackUrl = '../assets/audio/notification.mp3';
+      notificationAudio.src = primaryUrl;
+      notificationAudio.preload = 'auto';
+
+      notificationAudio.addEventListener('error', () => {
+        if (!notificationAudio.dataset.retried) {
+          notificationAudio.dataset.retried = 'true';
+          notificationAudio.src = fallbackUrl;
+          try { notificationAudio.load(); } catch (_) {}
+        }
+      });
+    }
+    return notificationAudio;
+  };
+
+  // Robust browser user-gesture unlock for both AudioContext and HTML5 Audio
+  const unlockAudio = () => {
+    if (isAudioUnlocked) return;
+    isAudioUnlocked = true;
+
+    try {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) {
+        if (!audioContext) audioContext = new AudioCtxClass();
+        if (audioContext.state === 'suspended') {
+          audioContext.resume().catch(() => {});
+        }
+      }
+    } catch (_) {}
+
+    try {
+      const audio = getNotificationAudio();
+      if (audio) {
+        audio.muted = true;
+        const p = audio.play();
+        if (p !== undefined) {
+          p.then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.muted = false;
+          }).catch(() => {});
+        }
+      }
+    } catch (_) {}
+  };
+
+  ['click', 'keydown', 'touchstart', 'pointerdown'].forEach(evt => {
+    document.addEventListener(evt, unlockAudio, { passive: true });
+  });
+
+  // Cross-tab synchronization via BroadcastChannel & localStorage
+  let orderSoundChannel = null;
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      orderSoundChannel = new BroadcastChannel('cafe_orders_sound_channel');
+      orderSoundChannel.onmessage = (event) => {
+        if (event.data && event.data.type === 'ORDER_SOUND_PLAYED') {
+          try {
+            localStorage.setItem('cafe_last_sound_order_id', String(event.data.orderId));
+            localStorage.setItem('cafe_last_sound_time', String(event.data.time || Date.now()));
+          } catch (_) {}
+        }
+      };
+    } catch (_) {}
+  }
+
+  // Master Sound Trigger function with multi-tab deduplication
+  const playOrderNotificationSound = (maxNewOrderId = 0) => {
+    if (localStorage.getItem('cafe_admin_order_sound') === 'off') {
+      return;
+    }
+
+    const now = Date.now();
+    const lastSoundOrderId = parseInt(localStorage.getItem('cafe_last_sound_order_id') || '0', 10);
+    const lastSoundTime = parseInt(localStorage.getItem('cafe_last_sound_time') || '0', 10);
+
+    if (maxNewOrderId && maxNewOrderId <= lastSoundOrderId && (now - lastSoundTime) < 3500) {
+      return;
+    }
+
+    try {
+      if (maxNewOrderId) {
+        localStorage.setItem('cafe_last_sound_order_id', String(maxNewOrderId));
+        localStorage.setItem('cafe_last_sound_time', String(now));
+      }
+    } catch (_) {}
+
+    if (orderSoundChannel && maxNewOrderId) {
+      try {
+        orderSoundChannel.postMessage({
+          type: 'ORDER_SOUND_PLAYED',
+          orderId: maxNewOrderId,
+          time: now
+        });
+      } catch (_) {}
+    }
+
+    let webAudioPlayed = playSynthesizedChime();
+    try {
+      const audio = getNotificationAudio();
+      if (audio && !webAudioPlayed) {
+        audio.currentTime = 0;
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
+      }
+    } catch (_) {}
+  };
+
+  // Tab Background Title Flashing Alert (when tab is in background / minimized)
+  let originalDocumentTitle = document.title;
+  let titleNotificationTimer = null;
+
+  const notifyTabTitle = (alertText = 'سفارش جدید دریافت شد!') => {
+    if (!document.hidden) return;
+    if (!originalDocumentTitle) originalDocumentTitle = document.title;
+
+    if (titleNotificationTimer) clearInterval(titleNotificationTimer);
+    let toggle = false;
+    titleNotificationTimer = setInterval(() => {
+      if (!document.hidden) {
+        clearInterval(titleNotificationTimer);
+        titleNotificationTimer = null;
+        document.title = originalDocumentTitle;
+        return;
+      }
+      document.title = toggle ? `🔔 ${alertText}` : originalDocumentTitle;
+      toggle = !toggle;
+    }, 1000);
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && titleNotificationTimer) {
+      clearInterval(titleNotificationTimer);
+      titleNotificationTimer = null;
+      if (originalDocumentTitle) document.title = originalDocumentTitle;
+    }
+  });
+
+  // Sound Toggle Button Handler
+  const soundToggleBtn = document.getElementById('toggleOrderSoundBtn');
+  if (soundToggleBtn) {
+    const soundIcon = document.getElementById('orderSoundIcon');
+    const soundLabel = document.getElementById('orderSoundLabel');
+
+    const updateSoundToggleUI = () => {
+      const isOff = localStorage.getItem('cafe_admin_order_sound') === 'off';
+      if (soundIcon) soundIcon.textContent = isOff ? '🔕' : '🔔';
+      if (soundLabel) soundLabel.textContent = isOff ? 'صدای اعلان: غیرفعال' : 'صدای اعلان: فعال';
+      soundToggleBtn.style.color = isOff ? '#8fa0b5' : '#d4a373';
+      soundToggleBtn.title = isOff ? 'فعال‌سازی صدای سفارش جدید' : 'غیرفعال‌سازی صدای سفارش جدید (کلیک جهت تست صدا)';
+    };
+
+    updateSoundToggleUI();
+
+    soundToggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      unlockAudio();
+      const isOff = localStorage.getItem('cafe_admin_order_sound') === 'off';
+      if (isOff) {
+        localStorage.removeItem('cafe_admin_order_sound');
+        updateSoundToggleUI();
+        toast('صدای اعلان سفارش جدید فعال شد.', 'info');
+        playSynthesizedChime();
+      } else {
+        localStorage.setItem('cafe_admin_order_sound', 'off');
+        updateSoundToggleUI();
+        toast('صدای اعلان سفارش جدید غیرفعال شد.', 'info');
+      }
+    });
+
+    if (soundIcon) {
+      soundIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        unlockAudio();
+        playSynthesizedChime();
+        toast('تست صدا انجام شد 🔔', 'info');
+      });
+    }
+  }
+
+  // Polling URL Resolver (Preserves filters on orders page, falls back gracefully)
+  const resolveOrdersPollUrl = (afterId) => {
+    if (window.location.pathname.includes('orders')) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('poll', '1');
+      url.searchParams.set('after_id', String(afterId));
+      return url.toString();
+    }
+
+    const path = window.location.pathname;
+    const isPhp = path.endsWith('.php') || window.location.href.includes('.php');
+    const lastSlash = path.lastIndexOf('/');
+    const baseDir = lastSlash !== -1 ? path.substring(0, lastSlash + 1) : '/admin/';
+    const ext = isPhp ? '.php' : '';
+    const url = new URL(`${baseDir}orders${ext}`, window.location.origin);
+    url.searchParams.set('poll', '1');
+    url.searchParams.set('after_id', String(afterId));
+    return url.toString();
+  };
+
+  const fetchPollData = async (urlStr) => {
+    let res;
+    try {
+      res = await fetch(urlStr, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        cache: 'no-store'
+      });
+    } catch (err) {
+      return null;
+    }
+
+    // If 404, retry alternate format (.php vs clean URL)
+    if (res && res.status === 404) {
+      const altUrl = urlStr.includes('.php')
+        ? urlStr.replace('.php', '')
+        : urlStr.replace('/orders?', '/orders.php?');
+      if (altUrl !== urlStr) {
+        try {
+          const altRes = await fetch(altUrl, {
+            headers: {
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            cache: 'no-store'
+          });
+          if (altRes && altRes.ok) res = altRes;
+        } catch (_) {}
+      }
+    }
+
+    if (!res || !res.ok) return null;
+
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      return null;
+    }
+
+    try {
+      return await res.json();
+    } catch (_) {
+      return null;
+    }
+  };
+
+  // Order ID Tracking
+  const getMaxOrderId = () => {
+    let max = 0;
+    if (ordersTableBody) {
       const initMax = parseInt(ordersTableBody.dataset.maxOrderId || '0', 10);
       if (!isNaN(initMax) && initMax > max) max = initMax;
       ordersTableBody.querySelectorAll('tr[data-order-id]').forEach(tr => {
+        if (tr.dataset.removing === 'true') return;
         const id = parseInt(tr.dataset.orderId || '0', 10);
         if (!isNaN(id) && id > max) max = id;
       });
-      return max;
-    };
+    }
+    const stored = parseInt(localStorage.getItem('cafe_admin_latest_order_id') || '0', 10);
+    if (!isNaN(stored) && stored > max) max = stored;
+    return max;
+  };
 
-    let lastKnownOrderId = getMaxOrderId();
+  let lastKnownOrderId = getMaxOrderId();
 
-    const pollNewOrders = async () => {
-      if (isPolling) return;
-      if (document.hidden) return; // Pause polling when tab is not active
+  // Live Polling Worker
+  const pollNewOrders = async () => {
+    if (isPolling) return;
+    isPolling = true;
 
-      isPolling = true;
-      try {
-        const currentMaxId = Math.max(lastKnownOrderId, getMaxOrderId());
-        const pollUrl = new URL(window.location.href);
-        pollUrl.searchParams.set('poll', '1');
-        pollUrl.searchParams.set('after_id', String(currentMaxId));
+    try {
+      const currentMaxId = Math.max(lastKnownOrderId, getMaxOrderId());
+      const pollUrl = resolveOrdersPollUrl(currentMaxId);
+      const data = await fetchPollData(pollUrl);
 
-        const res = await fetch(pollUrl.toString(), {
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          cache: 'no-store'
-        });
+      if (!data || !data.success) {
+        return;
+      }
 
-        if (res.status === 401 || res.status === 403) {
-          // Session expired or unauthorized: halt polling
-          clearInterval(pollIntervalTimer);
-          return;
-        }
-
-        if (!res.ok) return;
-
-        const data = await res.json();
-        if (!data || !data.success) return;
-
+      // --- A: If on Orders Page with Table Body ---
+      if (ordersTableBody) {
         // 1. Remove deleted / cancelled orders instantly
         if (Array.isArray(data.active_ids)) {
           const activeSet = new Set(data.active_ids.map(Number));
@@ -230,8 +523,10 @@ document.addEventListener('DOMContentLoaded', () => {
           let removedCount = 0;
 
           currentRows.forEach(row => {
+            if (row.dataset.removing === 'true') return;
             const rowId = parseInt(row.dataset.orderId || '0', 10);
             if (rowId && !activeSet.has(rowId)) {
+              row.dataset.removing = 'true';
               let orderNum = '';
               if (Array.isArray(data.deleted_orders)) {
                 const found = data.deleted_orders.find(d => Number(d.id) === rowId);
@@ -242,8 +537,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 orderNum = boldEl ? boldEl.textContent.trim() : `شماره ${rowId}`;
               }
 
-              // Smooth fade-out and slide
-              row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+              // Smooth animation: fade out and slide
+              row.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
               row.style.opacity = '0';
               row.style.transform = 'translateX(20px)';
 
@@ -253,12 +548,12 @@ document.addEventListener('DOMContentLoaded', () => {
                   const noOrdersRow = document.getElementById('noOrdersRow') || document.createElement('tr');
                   noOrdersRow.id = 'noOrdersRow';
                   noOrdersRow.className = 'no-orders-row';
-                  noOrdersRow.innerHTML = '<td colspan="7" style="text-align:center; padding:24px; color:#8fa0b5;">هیچ سفارشی موجود نیست.</td>';
+                  noOrdersRow.innerHTML = '<td colspan="8" class="text-center py-4" style="color:var(--muted); text-align:center; padding:24px;">سفارشی یافت نشد.</td>';
                   if (!noOrdersRow.parentNode) {
                     ordersTableBody.appendChild(noOrdersRow);
                   }
                 }
-              }, 300);
+              }, 350);
 
               removedCount++;
               toast(`سفارش ${orderNum} توسط مشتری لغو و حذف شد`, 'danger');
@@ -273,13 +568,13 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // 2. Add new orders if any
+        // 2. Add newly arrived orders
         if (data.count > 0 && data.html) {
-          const temp = document.createElement('tbody');
-          temp.innerHTML = data.html;
-          const newRows = Array.from(temp.querySelectorAll('tr[data-order-id]'));
+          const template = document.createElement('template');
+          template.innerHTML = `<table><tbody>${data.html}</tbody></table>`;
+          const newRows = Array.from(template.content.querySelectorAll('tr[data-order-id]'));
 
-          // Sort new rows descending by ID (newest first)
+          // Sort descending by ID (newest at top)
           newRows.sort((a, b) => {
             const idA = parseInt(a.dataset.orderId || '0', 10);
             const idB = parseInt(b.dataset.orderId || '0', 10);
@@ -287,11 +582,10 @@ document.addEventListener('DOMContentLoaded', () => {
           });
 
           let addedCount = 0;
-          const labels = Array.from(ordersTableBody.closest('table')?.querySelectorAll('thead th') || []).map(th => th.textContent.trim());
+          const theadHeaders = Array.from(ordersTableBody.closest('table')?.querySelectorAll('thead th') || []).map(th => th.textContent.trim());
 
           newRows.forEach(row => {
             const orderId = row.dataset.orderId;
-            // Strict duplicate check:
             if (!orderId || ordersTableBody.querySelector(`tr[data-order-id="${orderId}"]`)) {
               return;
             }
@@ -302,21 +596,36 @@ document.addEventListener('DOMContentLoaded', () => {
               noOrdersRow.remove();
             }
 
-            // Set responsive data-labels for mobile view
-            if (labels.length > 0) {
+            // Responsive labels for mobile view
+            if (theadHeaders.length > 0) {
               row.querySelectorAll('td').forEach((cell, idx) => {
-                if (!cell.hasAttribute('colspan')) cell.dataset.label = labels[idx] || '';
+                if (!cell.hasAttribute('colspan')) cell.dataset.label = theadHeaders[idx] || '';
               });
             }
 
-            // Bind any dynamic form handlers
+            // Initial animation state
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(-10px)';
+            row.style.transition = 'opacity 0.4s ease, transform 0.4s ease, background-color 1.2s ease';
+            row.style.backgroundColor = 'rgba(212, 163, 115, 0.18)';
+
+            // Re-bind actions and handlers
             bindOrderStatusForms(row);
             bindCustomConfirm(row);
             bindPrintInvoiceForms(row);
 
-            // Prepend new row at top
+            // Prepend new row
             ordersTableBody.prepend(row);
             addedCount++;
+
+            // Enter animation trigger
+            requestAnimationFrame(() => {
+              row.style.opacity = '1';
+              row.style.transform = 'translateY(0)';
+              setTimeout(() => {
+                row.style.backgroundColor = '';
+              }, 2500);
+            });
 
             const numericId = parseInt(orderId, 10);
             if (numericId > lastKnownOrderId) {
@@ -325,32 +634,54 @@ document.addEventListener('DOMContentLoaded', () => {
           });
 
           if (addedCount > 0) {
-            // Update total orders counter if element exists
             const totalCountEl = document.getElementById('adminOrdersTotalCount');
             if (totalCountEl && data.total_count_display) {
               totalCountEl.textContent = `مجموع سفارش‌ها: ${data.total_count_display}`;
             }
 
             toast(`سفارش جدید دریافت شد (${addedCount} مورد)`, 'info');
+            notifyTabTitle(`سفارش جدید (${addedCount} مورد)`);
+            playOrderNotificationSound(lastKnownOrderId);
           }
         } else if (data.max_id && data.max_id > lastKnownOrderId) {
           lastKnownOrderId = data.max_id;
         }
-      } catch (e) {
-        // Network error handled gracefully: no UI disruption
-      } finally {
-        isPolling = false;
-      }
-    };
+      } else {
+        // --- B: On other Admin pages (Dashboard, Products, etc.) ---
+        if (data.count > 0) {
+          const newMax = data.max_id || (currentMaxId + data.count);
+          if (newMax > lastKnownOrderId) {
+            lastKnownOrderId = newMax;
+            try {
+              localStorage.setItem('cafe_admin_latest_order_id', String(newMax));
+            } catch (_) {}
 
-    pollIntervalTimer = setInterval(pollNewOrders, POLL_INTERVAL);
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        pollNewOrders();
+            toast(`سفارش جدید دریافت شد (${data.count} مورد)`, 'info');
+            notifyTabTitle(`سفارش جدید (${data.count} مورد)`);
+            playOrderNotificationSound(newMax);
+          }
+        } else if (data.max_id && data.max_id > lastKnownOrderId) {
+          lastKnownOrderId = data.max_id;
+          try {
+            localStorage.setItem('cafe_admin_latest_order_id', String(data.max_id));
+          } catch (_) {}
+        }
       }
-    });
-  }
+    } catch (e) {
+      // Graceful error handling: keep polling timer alive
+    } finally {
+      isPolling = false;
+    }
+  };
+
+  // Start continuous polling across all admin views
+  pollIntervalTimer = setInterval(pollNewOrders, POLL_INTERVAL);
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      pollNewOrders();
+    }
+  });
 
   document.querySelectorAll('form').forEach(form => form.addEventListener('submit', event => {
     // Delete forms are intentionally stopped once to show the confirmation

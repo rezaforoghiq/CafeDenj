@@ -487,6 +487,221 @@ header p {
   color: var(--gold);
   border-color: var(--gold);
 }
+
+/* Quantity Stepper Slot (Apple-style fluid motion & tactile feel) */
+.cart-control-slot {
+  position: relative;
+  width: 100%;
+  height: 42px;
+  min-height: 42px;
+  border-radius: 11px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.cart-control-slot .add-to-cart-btn {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gold);
+  border-radius: 11px;
+  background: var(--gold);
+  color: #17130d;
+  font: 600 12px Vazirmatn, Tahoma, sans-serif;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  transition: opacity 190ms cubic-bezier(0.23, 1, 0.32, 1),
+              transform 190ms cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 190ms cubic-bezier(0.23, 1, 0.32, 1),
+              background 190ms cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: opacity, transform;
+  z-index: 2;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cart-control-slot .add-to-cart-btn:hover {
+    box-shadow: 0 7px 15px rgba(201, 162, 77, 0.25);
+    transform: translateY(-1px);
+  }
+}
+
+.cart-control-slot .add-to-cart-btn:active {
+  transform: scale(0.97);
+  transition: transform 80ms ease-out;
+}
+
+.cart-control-slot.has-items .add-to-cart-btn,
+.cart-control-slot .add-to-cart-btn.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.95);
+  z-index: 1;
+}
+
+.cart-control-slot .stepper-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  direction: ltr;
+  background: rgba(201, 162, 77, 0.12);
+  border: 1px solid rgba(201, 162, 77, 0.42);
+  border-radius: 11px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 190ms cubic-bezier(0.23, 1, 0.32, 1),
+              transform 190ms cubic-bezier(0.23, 1, 0.32, 1),
+              background 190ms cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 190ms cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: opacity, transform;
+  z-index: 1;
+}
+
+.cart-control-slot.has-items .stepper-wrap,
+.cart-control-slot .stepper-wrap.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: scale(1);
+  z-index: 2;
+}
+
+.cart-control-slot .step-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 34px;
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gold-soft, #dfbd73);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  box-sizing: border-box;
+  transition: background 140ms cubic-bezier(0.23, 1, 0.32, 1),
+              color 140ms cubic-bezier(0.23, 1, 0.32, 1),
+              transform 80ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cart-control-slot .step-btn:hover {
+    background: rgba(201, 162, 77, 0.22);
+    color: var(--ivory, #fff);
+  }
+}
+
+.cart-control-slot .step-btn:active {
+  transform: scale(0.88);
+  background: rgba(201, 162, 77, 0.32);
+}
+
+.cart-control-slot .step-qty {
+  flex: 1;
+  text-align: center;
+  color: var(--ivory, #fdfbf7);
+  font: 700 14px/1.2 Vazirmatn, Tahoma, sans-serif;
+  user-select: none;
+  direction: ltr;
+  display: inline-block;
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.cart-control-slot .step-qty.pulse {
+  transform: scale(1.18);
+}
+
+/* Light Theme overrides */
+:root[data-theme="light"] .cart-control-slot .add-to-cart-btn {
+  background: #c9a24d;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(201, 162, 77, 0.32);
+}
+
+:root[data-theme="light"] .cart-control-slot .add-to-cart-btn:hover {
+  background: #b88d33;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(201, 162, 77, 0.4);
+}
+
+:root[data-theme="light"] .cart-control-slot .stepper-wrap {
+  background: #fff8eb;
+  border: 1.5px solid rgba(201, 162, 77, 0.55);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(201, 162, 77, 0.15);
+}
+
+:root[data-theme="light"] .cart-control-slot .step-btn {
+  color: #946f23;
+}
+
+:root[data-theme="light"] .cart-control-slot .step-btn:hover {
+  background: rgba(201, 162, 77, 0.18);
+  color: #725314;
+}
+
+:root[data-theme="light"] .cart-control-slot .step-qty {
+  color: #2b2214;
+}
+
+/* Responsive adjustments */
+@media (max-width: 560px) {
+  .cart-control-slot {
+    min-height: 40px;
+    height: 40px;
+  }
+  .cart-control-slot .add-to-cart-btn {
+    min-height: 40px;
+    font-size: 11.5px;
+  }
+  .cart-control-slot .step-btn {
+    width: 36px;
+    height: 32px;
+    min-height: 32px;
+    font-size: 18px;
+  }
+  .cart-control-slot .step-qty {
+    font-size: 13px;
+  }
+}
+
+/* Accessibility: prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .cart-control-slot .add-to-cart-btn,
+  .cart-control-slot .stepper-wrap,
+  .cart-control-slot .step-btn,
+  .cart-control-slot .step-qty {
+    transition: opacity 120ms ease !important;
+    transform: none !important;
+  }
+}
 .cart-toast {
   position: fixed;
   left: 18px;
@@ -1451,6 +1666,7 @@ header, .controls, .menu-grid, footer{position:relative;z-index:1}
   .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 12px; }
   .item-card .thumb { height: 122px; }
   .item-card .item-body { padding: 12px; }
+  .cart-login{margin-top: 15px;}
   .item-card .item-title { font-size: 14px; }
   .item-card .item-desc { min-height: 0; font-size: 11px; -webkit-line-clamp: 2; }
   .item-pricing { padding-top: 10px; }
@@ -1575,3 +1791,5 @@ a:focus-visible,
 @media (max-width: 560px) {
   .instagram-link { top: 15px; left: 70px; width: 48px; height: 42px; border-radius: 12px; }
 }
+
+.cart-login{margin-top: 15px;}

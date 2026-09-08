@@ -79,6 +79,14 @@ foreach ($categories as $cat) {
 }
 
 $productHtml = '';
+$cartQtyMap = [];
+if (isset($_SESSION['customer_id'])) {
+    $cartRows = Order::cart((int) $_SESSION['customer_id']);
+    foreach ($cartRows as $cr) {
+        $cartQtyMap[(int) $cr['product_id']] = (int) $cr['quantity'];
+    }
+}
+
 foreach ($products as $product) {
     $name = htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8');
 
@@ -115,7 +123,25 @@ foreach ($products as $product) {
         'DESCRIPTION_HTML'     => $descriptionHtml,
         'BADGE_HTML'           => $badgeHtml,
         'CART_ACTION'          => isset($_SESSION['customer_id'])
-            ? '<form method="post" action="cart-action" class="cart-add" data-cart-add><input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') . '"><input type="hidden" name="product_id" value="' . (int) $product['id'] . '"><button type="submit">افزودن به سبد</button></form>'
+            ? (function() use ($product, $cartQtyMap) {
+                $cQty = $cartQtyMap[(int) $product['id']] ?? 0;
+                $hasItems = $cQty > 0;
+                $displayQty = $hasItems ? $cQty : 1;
+                return '<form method="post" action="cart-action" class="cart-form cart-add" data-cart-add data-product-id="' . (int) $product['id'] . '" data-quantity="' . $cQty . '">
+                    <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') . '">
+                    <input type="hidden" name="product_id" value="' . (int) $product['id'] . '">
+                    <input type="hidden" name="action" value="' . ($hasItems ? 'update' : 'add') . '">
+                    <input type="hidden" name="quantity" value="' . $cQty . '" data-qty-input>
+                    <div class="cart-control-slot ' . ($hasItems ? 'has-items' : '') . '">
+                      <button type="submit" class="add-to-cart-btn ' . ($hasItems ? 'is-hidden' : '') . '" data-action="initial-add">افزودن به سبد</button>
+                      <div class="stepper-wrap ' . ($hasItems ? 'is-active' : '') . '" aria-label="مدیریت تعداد سفارش" role="group">
+                        <button type="button" class="step-btn step-minus" data-action="decrease" aria-label="کاهش تعداد">−</button>
+                        <span class="step-qty" data-step-qty>' . toPersianDigits((string) $displayQty) . '</span>
+                        <button type="button" class="step-btn step-plus" data-action="increase" aria-label="افزایش تعداد">+</button>
+                      </div>
+                    </div>
+                  </form>';
+              })()
             : '<a class="cart-login" href="login">برای سفارش وارد شوید</a>',
     ]);
 }

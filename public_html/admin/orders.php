@@ -223,12 +223,25 @@ function renderAdminOrderTableRow(array $order, array $statusLabels, array $bari
 
 if (isset($_GET['poll']) && $_GET['poll'] === '1') {
     header('Content-Type: application/json; charset=utf-8');
-    $afterId = (int) ($_GET['after_id'] ?? 0);
+    $afterId = isset($_GET['after_id']) ? (int) $_GET['after_id'] : 0;
+    $allCurrentOrders = Order::report($filters);
+    $activeIds = array_map(function($o) { return (int)$o['id']; }, $allCurrentOrders);
+
+    $maxId = 0;
+    foreach ($allCurrentOrders as $o) {
+        if ((int)$o['id'] > $maxId) {
+            $maxId = (int)$o['id'];
+        }
+    }
+
     $newOrders = [];
     if ($afterId > 0) {
         $pollFilters = $filters;
         $pollFilters['after_id'] = $afterId;
         $newOrders = Order::report($pollFilters);
+    } elseif ($afterId === 0 && count($allCurrentOrders) > 0) {
+        // If initial table was completely empty, all current orders are new
+        $newOrders = $allCurrentOrders;
     }
     $baristas = Barista::activeOnly();
 
@@ -237,16 +250,6 @@ if (isset($_GET['poll']) && $_GET['poll'] === '1') {
         renderAdminOrderTableRow($order, $statusLabels, $baristas);
     }
     $html = ob_get_clean();
-
-    $maxId = $afterId;
-    foreach ($newOrders as $o) {
-        if ((int)$o['id'] > $maxId) {
-            $maxId = (int)$o['id'];
-        }
-    }
-
-    $allCurrentOrders = Order::report($filters);
-    $activeIds = array_map(function($o) { return (int)$o['id']; }, $allCurrentOrders);
 
     echo json_encode([
         'success' => true,
@@ -280,7 +283,13 @@ $flashError = $_SESSION['flash_error'] ?? null;
 $manualPrint = $_SESSION['manual_print'] ?? null;
 unset($_SESSION['flash_success'], $_SESSION['flash_error'], $_SESSION['manual_print']);
 ?>
-<h4 class="mb-4">مدیریت و گزارش سفارش‌ها</h4>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h4 class="m-0">مدیریت و گزارش سفارش‌ها</h4>
+  <button id="toggleOrderSoundBtn" type="button" class="btn btn-sm btn-outline-light d-inline-flex align-items-center gap-1" style="border-color:var(--line); color:var(--gold-soft);" title="فعال/غیرفعال‌سازی صدای سفارش جدید">
+    <span id="orderSoundIcon">🔔</span>
+    <span id="orderSoundLabel">صدای اعلان: فعال</span>
+  </button>
+</div>
 <?php if ($flashSuccess): ?><div class="alert alert-success py-2 px-3" style="font-size:13.5px;"><?= htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
 <?php if ($flashError): ?><div class="alert alert-danger py-2 px-3" style="font-size:13.5px;"><?= htmlspecialchars($flashError, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
 <?php if ($manualPrint && !empty($manualPrint['id'])): ?>
