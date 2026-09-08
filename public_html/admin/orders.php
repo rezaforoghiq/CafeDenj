@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../classes/Order.php';
 require_once __DIR__ . '/../../classes/Barista.php';
 require_once __DIR__ . '/../../classes/Jalali.php';
 require_once __DIR__ . '/../../classes/PrintJob.php';
+require_once __DIR__ . '/../../classes/Setting.php';
 
 requireLogin();
 requirePermission('orders.view');
@@ -147,7 +148,7 @@ if (Auth::isBarista()) {
 
 function renderAdminOrderTableRow(array $order, array $statusLabels, array $baristas): void {
 ?>
-      <tr data-order-id="<?= (int) $order['id'] ?>">
+      <tr data-order-id="<?= (int) $order['id'] ?>" data-order-status="<?= htmlspecialchars($order['status'], ENT_QUOTES, 'UTF-8') ?>">
         <td data-label="شماره سفارش"><b>سفارش شماره <?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></b><small class="d-block mt-1" style="color:var(--muted);direction:ltr;text-align:right"><?= htmlspecialchars($order['order_number'], ENT_QUOTES, 'UTF-8') ?></small></td>
         <td data-label="مشتری"><?= htmlspecialchars($order['customer_name'] ?: $order['phone'], ENT_QUOTES, 'UTF-8') ?></td>
         <td data-label="باریستا">
@@ -228,9 +229,17 @@ if (isset($_GET['poll']) && $_GET['poll'] === '1') {
     $activeIds = array_map(function($o) { return (int)$o['id']; }, $allCurrentOrders);
 
     $maxId = 0;
+    $pendingIds = [];
+    $orderStatuses = [];
     foreach ($allCurrentOrders as $o) {
-        if ((int)$o['id'] > $maxId) {
-            $maxId = (int)$o['id'];
+        $oid = (int) $o['id'];
+        if ($oid > $maxId) {
+            $maxId = $oid;
+        }
+        $st = (string) ($o['status'] ?? '');
+        $orderStatuses[$oid] = $st;
+        if ($st === 'pending') {
+            $pendingIds[] = $oid;
         }
     }
 
@@ -245,11 +254,23 @@ if (isset($_GET['poll']) && $_GET['poll'] === '1') {
     }
     $baristas = Barista::activeOnly();
 
+    $origGet = $_GET;
+    unset($_GET['poll'], $_GET['after_id']);
     ob_start();
     foreach ($newOrders as $order) {
         renderAdminOrderTableRow($order, $statusLabels, $baristas);
     }
     $html = ob_get_clean();
+    $_GET = $origGet;
+
+    $reminderInterval = Setting::getInt('order_reminder_interval', 7);
+    if ($reminderInterval < 1 || $reminderInterval > 50) {
+        $reminderInterval = 7;
+    }
+
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
 
     echo json_encode([
         'success' => true,
@@ -259,6 +280,9 @@ if (isset($_GET['poll']) && $_GET['poll'] === '1') {
         'total_count' => count($allCurrentOrders),
         'total_count_display' => Jalali::digits((string)count($allCurrentOrders)),
         'active_ids' => $activeIds,
+        'pending_ids' => $pendingIds,
+        'order_statuses' => $orderStatuses,
+        'reminder_interval' => $reminderInterval,
         'html' => $html,
     ], JSON_UNESCAPED_UNICODE);
     exit;
@@ -386,7 +410,27 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error'], $_SESSION['manual_pr
     <thead>
       <tr><th>شماره سفارش</th><th>مشتری</th><th>باریستا</th><th>مبلغ (تومان)</th><th>وضعیت</th><th>تاریخ ثبت</th><th>تاریخ تأیید</th><th>عملیات</th></tr>
     </thead>
-    <tbody id="adminOrdersTableBody" data-max-order-id="<?= !empty($orders) ? (int)$orders[0]['id'] : 0 ?>">
+<?php
+  $initialPendingIds = [];
+  $maxInitialOrderId = 0;
+  foreach ($orders as $ord) {
+      $oid = (int) $ord['id'];
+      if ($oid > $maxInitialOrderId) {
+          $maxInitialOrderId = $oid;
+      }
+      if (($ord['status'] ?? '') === 'pending') {
+          $initialPendingIds[] = $oid;
+      }
+  }
+  $currentReminderInterval = Setting::getInt('order_reminder_interval', 7);
+  if ($currentReminderInterval < 1 || $currentReminderInterval > 50) {
+      $currentReminderInterval = 7;
+  }
+?>
+    <tbody id="adminOrdersTableBody" 
+           data-max-order-id="<?= (int) $maxInitialOrderId ?>"
+           data-pending-ids="<?= htmlspecialchars(json_encode($initialPendingIds), ENT_QUOTES, 'UTF-8') ?>"
+           data-reminder-interval="<?= (int) $currentReminderInterval ?>">
       <?php if (empty($orders)): ?>
         <tr id="noOrdersRow" class="no-orders-row"><td colspan="8" class="text-center py-4" style="color:var(--muted);">سفارشی یافت نشد.</td></tr>
       <?php endif; ?>

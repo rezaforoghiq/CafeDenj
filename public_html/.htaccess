@@ -56,7 +56,7 @@ Options -Indexes
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME}.php -f
-    RewriteRule ^(.*)$ $1.php [L]
+    RewriteRule ^(.*)$ $1.php [QSA,L]
 </IfModule>
 
 # اجبار HTTPS — بعد از فعال‌سازی SSL روی دامنه، کامنت این دو خط را بردارید

@@ -40,7 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
     item.querySelector('button').onclick = remove;
     setTimeout(remove, 5000);
   };
-  document.querySelectorAll('[data-toast]').forEach(btn => btn.addEventListener('click', () => toast(btn.dataset.toast, 'info')));
+
+  document.querySelectorAll('[data-toast]').forEach(btn => {
+    if (!btn.classList.contains('notification-button')) {
+      btn.addEventListener('click', () => toast(btn.dataset.toast, 'info'));
+    }
+  });
+
   document.querySelectorAll('table').forEach(table => {
     const labels = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
     table.querySelectorAll('tbody tr').forEach(row => row.querySelectorAll('td').forEach((cell, index) => {
@@ -54,47 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', closeModal));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeModal(); } });
 
-  const bindCustomConfirm = (root = document) => {
-    root.querySelectorAll('form[data-use-custom-confirm]').forEach(form => {
-      if (form.dataset.customConfirmBound) return;
-      form.dataset.customConfirmBound = 'true';
-      form.removeAttribute('onsubmit');
-      form.addEventListener('submit', e => {
-        if (form.dataset.confirmed) return;
-        e.preventDefault();
-        pendingForm = form;
-        const button = form.querySelector('button[type="submit"]');
-        const confirmText = form.dataset.confirmText?.trim();
-        const confirmTextEl = document.getElementById('confirmText');
-        if (confirmTextEl) {
-          confirmTextEl.textContent = confirmText || (button?.textContent.includes('حذف') ? 'آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.' : 'آیا از انجام این عملیات مطمئن هستید؟');
-        }
-        modal?.classList.add('is-open');
-        modal?.setAttribute('aria-hidden', 'false');
-      });
-    });
-  };
-  bindCustomConfirm();
-
-  document.getElementById('confirmAction')?.addEventListener('click', event => {
-    if (!pendingForm) return;
-
-    const form = pendingForm;
-    const sourceButton = form.querySelector('button[type="submit"]');
-    form.dataset.confirmed = 'true';
-    event.currentTarget.classList.add('is-loading');
-    event.currentTarget.disabled = true;
-    if (sourceButton) {
-      sourceButton.classList.add('is-loading');
-      sourceButton.disabled = true;
-    }
-
-    // Calling the native method avoids any possible collision with a form
-    // control named "submit" and reliably posts the original CSRF fields.
-    HTMLFormElement.prototype.submit.call(form);
-  });
-
-  // Printing Method Integration: Manual mode browser-direct printing
+  // Receipt printing helper
   const openReceiptWindow = (orderId, type = 'customer') => {
     const url = `../receipt.php?id=${encodeURIComponent(orderId)}&type=${encodeURIComponent(type)}&autoprint=1`;
     const win = window.open(url, `receipt_${type}_${orderId}`, 'width=460,height=680,scrollbars=yes,resizable=yes');
@@ -121,66 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const bindOrderStatusForms = (root = document) => {
-    root.querySelectorAll('form[data-order-status-form]').forEach(form => {
-      if (form.dataset.statusBound) return;
-      form.dataset.statusBound = 'true';
-      const statusSelect = form.querySelector('select[name="status"]');
-      const paymentSelect = form.querySelector('select[name="payment_method"]');
-      if (statusSelect && paymentSelect) {
-        const updateRequirement = () => {
-          paymentSelect.required = statusSelect.value === 'completed';
-        };
-        statusSelect.addEventListener('change', updateRequirement);
-        updateRequirement();
-      }
-
-      form.addEventListener('submit', () => {
-        const selectedStatus = statusSelect?.value;
-        const ordersTable = document.querySelector('.orders-table');
-        const printingMethod = ordersTable?.dataset?.printingMethod || 'manual';
-        const idInput = form.querySelector('input[name="id"]');
-        const orderId = idInput?.value;
-
-        if (selectedStatus === 'approved' && printingMethod === 'manual' && orderId) {
-          openReceiptWindow(orderId, 'barista');
-        }
-      });
-    });
-  };
-  bindOrderStatusForms();
-
-  const bindPrintInvoiceForms = (root = document) => {
-    const ordersTable = document.querySelector('.orders-table');
-    const method = ordersTable?.dataset?.printingMethod || 'automatic';
-
-    if (method === 'manual') {
-      root.querySelectorAll('form').forEach(form => {
-        const actionInput = form.querySelector('input[name="action"][value="print_invoice"]');
-        if (actionInput && !form.dataset.manualPrintBound) {
-          form.dataset.manualPrintBound = 'true';
-          form.addEventListener('submit', e => {
-            e.preventDefault();
-            const idInput = form.querySelector('input[name="id"]');
-            const orderId = idInput?.value;
-            if (orderId) {
-              openReceiptWindow(orderId, 'customer');
-            }
-          });
-        }
-      });
-    }
-  };
-  bindPrintInvoiceForms();
-
-  // --- Global Admin Order Notification & Live Polling System ---
-  const ordersTableBody = document.getElementById('adminOrdersTableBody') || document.querySelector('.orders-table tbody');
-
-  let isPolling = false;
-  let pollIntervalTimer = null;
-  const POLL_INTERVAL = 2500; // 2.5 seconds
-
-  // 1. Audio System (Synthesized Web Audio chime + Audio element fallback)
+  // =========================================================================
+  // AUDIO & ORDER NOTIFICATION CORE SYSTEM
+  // =========================================================================
   let notificationAudio = null;
   let audioContext = null;
   let isAudioUnlocked = false;
@@ -249,9 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Robust browser user-gesture unlock for both AudioContext and HTML5 Audio
   const unlockAudio = () => {
-    if (isAudioUnlocked) return;
-    isAudioUnlocked = true;
-
     try {
       const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
       if (AudioCtxClass) {
@@ -264,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const audio = getNotificationAudio();
-      if (audio) {
+      if (audio && !isAudioUnlocked) {
         audio.muted = true;
         const p = audio.play();
         if (p !== undefined) {
@@ -272,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             audio.pause();
             audio.currentTime = 0;
             audio.muted = false;
+            isAudioUnlocked = true;
           }).catch(() => {});
         }
       }
@@ -282,48 +189,105 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener(evt, unlockAudio, { passive: true });
   });
 
+  // Helper to read and clamp configured reminder interval (1-50s, default: 7s)
+  const getReminderIntervalSeconds = () => {
+    let interval = 7;
+    if (window.CAFE_SETTINGS && typeof window.CAFE_SETTINGS.reminderInterval === 'number') {
+      interval = window.CAFE_SETTINGS.reminderInterval;
+    } else {
+      const stored = parseInt(localStorage.getItem('cafe_order_reminder_interval') || '0', 10);
+      if (stored >= 1 && stored <= 50) {
+        interval = stored;
+      } else {
+        const meta = document.querySelector('meta[name="order-reminder-interval"]');
+        if (meta && meta.content) {
+          const parsed = parseInt(meta.content, 10);
+          if (!isNaN(parsed) && parsed >= 1 && parsed <= 50) {
+            interval = parsed;
+          }
+        }
+      }
+    }
+    const tableBody = document.getElementById('adminOrdersTableBody');
+    if (tableBody && tableBody.dataset.reminderInterval) {
+      const parsed = parseInt(tableBody.dataset.reminderInterval, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 50) {
+        interval = parsed;
+      }
+    }
+    return Math.max(1, Math.min(50, interval));
+  };
+
   // Cross-tab synchronization via BroadcastChannel & localStorage
   let orderSoundChannel = null;
   if (typeof BroadcastChannel !== 'undefined') {
     try {
       orderSoundChannel = new BroadcastChannel('cafe_orders_sound_channel');
       orderSoundChannel.onmessage = (event) => {
-        if (event.data && event.data.type === 'ORDER_SOUND_PLAYED') {
+        if (!event.data) return;
+        if (event.data.type === 'ORDER_SOUND_PLAYED') {
           try {
             localStorage.setItem('cafe_last_sound_order_id', String(event.data.orderId));
             localStorage.setItem('cafe_last_sound_time', String(event.data.time || Date.now()));
+            if (event.data.orderId) {
+              localStorage.setItem(`cafe_reminder_order_${event.data.orderId}_last`, String(event.data.time || Date.now()));
+              if (typeof PendingReminderManager !== 'undefined') {
+                PendingReminderManager.syncExternalChime(event.data.orderId, event.data.time);
+              }
+            }
           } catch (_) {}
+        } else if (event.data.type === 'ORDER_REMINDER_STOP') {
+          if (event.data.orderId && typeof PendingReminderManager !== 'undefined') {
+            PendingReminderManager.stopPendingOrder(event.data.orderId);
+          }
         }
       };
     } catch (_) {}
   }
 
+  // Cross-tab storage event listener for cross-tab sync fallback
+  window.addEventListener('storage', (e) => {
+    if (e.key && e.key.startsWith('cafe_reminder_order_') && e.key.endsWith('_last')) {
+      const match = e.key.match(/cafe_reminder_order_(\d+)_last/);
+      if (match && match[1]) {
+        const orderId = parseInt(match[1], 10);
+        const time = parseInt(e.newValue || '0', 10);
+        if (time > 0 && typeof PendingReminderManager !== 'undefined') {
+          PendingReminderManager.syncExternalChime(orderId, time);
+        }
+      }
+    }
+  });
+
+  // Acoustic throttle tracker (prevents overlapping/colliding audio waveforms within 600ms)
+  let lastGlobalSoundPlayedAt = 0;
+
   // Master Sound Trigger function with multi-tab deduplication
-  const playOrderNotificationSound = (maxNewOrderId = 0) => {
+  const playOrderNotificationSound = (orderId = 0, isReminder = false) => {
     if (localStorage.getItem('cafe_admin_order_sound') === 'off') {
       return;
     }
 
     const now = Date.now();
-    const lastSoundOrderId = parseInt(localStorage.getItem('cafe_last_sound_order_id') || '0', 10);
-    const lastSoundTime = parseInt(localStorage.getItem('cafe_last_sound_time') || '0', 10);
-
-    if (maxNewOrderId && maxNewOrderId <= lastSoundOrderId && (now - lastSoundTime) < 3500) {
+    if (now - lastGlobalSoundPlayedAt < 600) {
       return;
     }
+    lastGlobalSoundPlayedAt = now;
 
     try {
-      if (maxNewOrderId) {
-        localStorage.setItem('cafe_last_sound_order_id', String(maxNewOrderId));
-        localStorage.setItem('cafe_last_sound_time', String(now));
+      localStorage.setItem('cafe_last_sound_time', String(now));
+      if (orderId) {
+        localStorage.setItem('cafe_last_sound_order_id', String(orderId));
+        localStorage.setItem(`cafe_reminder_order_${orderId}_last`, String(now));
       }
     } catch (_) {}
 
-    if (orderSoundChannel && maxNewOrderId) {
+    if (orderSoundChannel && orderId) {
       try {
         orderSoundChannel.postMessage({
           type: 'ORDER_SOUND_PLAYED',
-          orderId: maxNewOrderId,
+          orderId: orderId,
+          isReminder: isReminder,
           time: now
         });
       } catch (_) {}
@@ -372,7 +336,278 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Sound Toggle Button Handler
+  // =========================================================================
+  // PENDING REMINDER MANAGER (Must be initialized before form binders!)
+  // =========================================================================
+  const PendingReminderManager = (() => {
+    const pendingOrders = new Map();
+    const getIntervalMs = () => getReminderIntervalSeconds() * 1000;
+
+    const registerPendingOrder = (orderId, isNewOrderArrival = false) => {
+      const numId = parseInt(orderId, 10);
+      if (!numId || isNaN(numId) || numId <= 0) return;
+
+      if (pendingOrders.has(numId)) {
+        return;
+      }
+
+      const orderKey = `cafe_reminder_order_${numId}_last`;
+      const intervalMs = getIntervalMs();
+      const now = Date.now();
+      let initialDelay = intervalMs;
+
+      if (isNewOrderArrival) {
+        playOrderNotificationSound(numId, false);
+        try {
+          localStorage.setItem(orderKey, String(now));
+        } catch (_) {}
+        initialDelay = intervalMs;
+      } else {
+        const storedLast = parseInt(localStorage.getItem(orderKey) || '0', 10);
+        if (storedLast > 0 && (now - storedLast) < intervalMs) {
+          initialDelay = Math.max(500, intervalMs - (now - storedLast));
+        } else {
+          initialDelay = intervalMs;
+          try {
+            localStorage.setItem(orderKey, String(now));
+          } catch (_) {}
+        }
+      }
+
+      const item = {
+        orderId: numId,
+        timer: null
+      };
+
+      const tick = () => {
+        if (!pendingOrders.has(numId)) {
+          return;
+        }
+
+        const currentNow = Date.now();
+        const currentIntervalMs = getIntervalMs();
+        const lastChimed = parseInt(localStorage.getItem(orderKey) || '0', 10);
+
+        if (!lastChimed || (currentNow - lastChimed) >= (currentIntervalMs - 400)) {
+          playOrderNotificationSound(numId, true);
+          notifyTabTitle(`سفارش شماره ${numId} در انتظار تأیید است`);
+          try {
+            localStorage.setItem(orderKey, String(currentNow));
+          } catch (_) {}
+        }
+
+        if (pendingOrders.has(numId)) {
+          item.timer = setTimeout(tick, getIntervalMs());
+        }
+      };
+
+      item.timer = setTimeout(tick, initialDelay);
+      pendingOrders.set(numId, item);
+    };
+
+    const stopPendingOrder = (orderId) => {
+      const numId = parseInt(orderId, 10);
+      if (!numId || isNaN(numId)) return;
+
+      const item = pendingOrders.get(numId);
+      if (item) {
+        if (item.timer) {
+          clearTimeout(item.timer);
+          item.timer = null;
+        }
+        pendingOrders.delete(numId);
+      }
+
+      try {
+        localStorage.removeItem(`cafe_reminder_order_${numId}_last`);
+      } catch (_) {}
+
+      if (orderSoundChannel) {
+        try {
+          orderSoundChannel.postMessage({
+            type: 'ORDER_REMINDER_STOP',
+            orderId: numId
+          });
+        } catch (_) {}
+      }
+
+      if (pendingOrders.size === 0 && titleNotificationTimer) {
+        clearInterval(titleNotificationTimer);
+        titleNotificationTimer = null;
+        if (originalDocumentTitle) {
+          document.title = originalDocumentTitle;
+        }
+      }
+    };
+
+    const syncPendingOrders = (activePendingIds) => {
+      if (!Array.isArray(activePendingIds)) return;
+      const validSet = new Set(activePendingIds.map(Number));
+
+      for (const trackedId of pendingOrders.keys()) {
+        if (!validSet.has(trackedId)) {
+          stopPendingOrder(trackedId);
+        }
+      }
+
+      for (const pid of validSet) {
+        if (pid > 0 && !pendingOrders.has(pid)) {
+          registerPendingOrder(pid, false);
+        }
+      }
+    };
+
+    const syncExternalChime = (orderId, chimeTime) => {
+      const numId = parseInt(orderId, 10);
+      if (!numId || !pendingOrders.has(numId)) return;
+
+      const item = pendingOrders.get(numId);
+      if (item) {
+        if (item.timer) clearTimeout(item.timer);
+        const intervalMs = getIntervalMs();
+        const elapsed = Date.now() - (chimeTime || Date.now());
+        const remaining = Math.max(500, intervalMs - elapsed);
+
+        const tick = () => {
+          if (!pendingOrders.has(numId)) return;
+          const currentNow = Date.now();
+          const currentIntervalMs = getIntervalMs();
+          const lastChimed = parseInt(localStorage.getItem(`cafe_reminder_order_${numId}_last`) || '0', 10);
+
+          if (!lastChimed || (currentNow - lastChimed) >= (currentIntervalMs - 400)) {
+            playOrderNotificationSound(numId, true);
+            notifyTabTitle(`سفارش شماره ${numId} در انتظار تأیید است`);
+            try {
+              localStorage.setItem(`cafe_reminder_order_${numId}_last`, String(currentNow));
+            } catch (_) {}
+          }
+
+          if (pendingOrders.has(numId)) {
+            item.timer = setTimeout(tick, getIntervalMs());
+          }
+        };
+
+        item.timer = setTimeout(tick, remaining);
+      }
+    };
+
+    const getActiveCount = () => pendingOrders.size;
+
+    return {
+      registerPendingOrder,
+      stopPendingOrder,
+      syncPendingOrders,
+      syncExternalChime,
+      getActiveCount
+    };
+  })();
+
+  // =========================================================================
+  // FORM BINDERS (Safe now that PendingReminderManager is initialized)
+  // =========================================================================
+  const bindCustomConfirm = (root = document) => {
+    root.querySelectorAll('form[data-use-custom-confirm]').forEach(form => {
+      if (form.dataset.customConfirmBound) return;
+      form.dataset.customConfirmBound = 'true';
+      form.removeAttribute('onsubmit');
+      form.addEventListener('submit', e => {
+        if (form.dataset.confirmed) return;
+        e.preventDefault();
+        pendingForm = form;
+        const button = form.querySelector('button[type="submit"]');
+        const confirmText = form.dataset.confirmText?.trim();
+        const confirmTextEl = document.getElementById('confirmText');
+        if (confirmTextEl) {
+          confirmTextEl.textContent = confirmText || (button?.textContent.includes('حذف') ? 'آیا از حذف این سفارش مطمئن هستید؟ این عملیات قابل بازگشت نیست.' : 'آیا از انجام این عملیات مطمئن هستید؟');
+        }
+        modal?.classList.add('is-open');
+        modal?.setAttribute('aria-hidden', 'false');
+      });
+    });
+  };
+  bindCustomConfirm();
+
+  document.getElementById('confirmAction')?.addEventListener('click', event => {
+    if (!pendingForm) return;
+
+    const form = pendingForm;
+    const sourceButton = form.querySelector('button[type="submit"]');
+    form.dataset.confirmed = 'true';
+    event.currentTarget.classList.add('is-loading');
+    event.currentTarget.disabled = true;
+    if (sourceButton) {
+      sourceButton.classList.add('is-loading');
+      sourceButton.disabled = true;
+    }
+
+    HTMLFormElement.prototype.submit.call(form);
+  });
+
+  const bindOrderStatusForms = (root = document) => {
+    root.querySelectorAll('form[data-order-status-form]').forEach(form => {
+      if (form.dataset.statusBound) return;
+      form.dataset.statusBound = 'true';
+      const statusSelect = form.querySelector('select[name="status"]');
+      const paymentSelect = form.querySelector('select[name="payment_method"]');
+      if (statusSelect && paymentSelect) {
+        const updateRequirement = () => {
+          paymentSelect.required = statusSelect.value === 'completed';
+          const idInput = form.querySelector('input[name="id"]');
+          const orderId = idInput?.value ? parseInt(idInput.value, 10) : 0;
+          if (orderId && statusSelect.value !== 'pending') {
+            PendingReminderManager.stopPendingOrder(orderId);
+          }
+        };
+        statusSelect.addEventListener('change', updateRequirement);
+        updateRequirement();
+      }
+
+      form.addEventListener('submit', () => {
+        const selectedStatus = statusSelect?.value;
+        const idInput = form.querySelector('input[name="id"]');
+        const orderId = idInput?.value ? parseInt(idInput.value, 10) : 0;
+
+        if (orderId && selectedStatus && selectedStatus !== 'pending') {
+          PendingReminderManager.stopPendingOrder(orderId);
+        }
+
+        const ordersTable = document.querySelector('.orders-table');
+        const printingMethod = ordersTable?.dataset?.printingMethod || 'manual';
+
+        if (selectedStatus === 'approved' && printingMethod === 'manual' && orderId) {
+          openReceiptWindow(orderId, 'barista');
+        }
+      });
+    });
+  };
+  bindOrderStatusForms();
+
+  const bindPrintInvoiceForms = (root = document) => {
+    const ordersTable = document.querySelector('.orders-table');
+    const method = ordersTable?.dataset?.printingMethod || 'automatic';
+
+    if (method === 'manual') {
+      root.querySelectorAll('form').forEach(form => {
+        const actionInput = form.querySelector('input[name="action"][value="print_invoice"]');
+        if (actionInput && !form.dataset.manualPrintBound) {
+          form.dataset.manualPrintBound = 'true';
+          form.addEventListener('submit', e => {
+            e.preventDefault();
+            const idInput = form.querySelector('input[name="id"]');
+            const orderId = idInput?.value;
+            if (orderId) {
+              openReceiptWindow(orderId, 'customer');
+            }
+          });
+        }
+      });
+    }
+  };
+  bindPrintInvoiceForms();
+
+  // =========================================================================
+  // SOUND TOGGLE & HEADER NOTIFICATION CONTROLS
+  // =========================================================================
   const soundToggleBtn = document.getElementById('toggleOrderSoundBtn');
   if (soundToggleBtn) {
     const soundIcon = document.getElementById('orderSoundIcon');
@@ -414,21 +649,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Polling URL Resolver (Preserves filters on orders page, falls back gracefully)
+  // Admin Header Notification Bell (Global on EVERY admin page)
+  const headerNotificationBtn = document.querySelector('.notification-button');
+  if (headerNotificationBtn) {
+    headerNotificationBtn.removeAttribute('data-toast');
+    headerNotificationBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      unlockAudio();
+      const isOff = localStorage.getItem('cafe_admin_order_sound') === 'off';
+      if (isOff) {
+        localStorage.removeItem('cafe_admin_order_sound');
+        playSynthesizedChime();
+        toast('اعلان صوتی سفارش جدید فعال شد 🔔', 'success');
+        const soundLabel = document.getElementById('orderSoundLabel');
+        if (soundLabel) soundLabel.textContent = 'صدای اعلان: فعال';
+        const soundIcon = document.getElementById('orderSoundIcon');
+        if (soundIcon) soundIcon.textContent = '🔔';
+      } else {
+        playSynthesizedChime();
+        const activeCount = PendingReminderManager.getActiveCount();
+        if (activeCount > 0) {
+          toast(`اعلان صوتی فعال است 🔔 (${activeCount} سفارش در انتظار تأیید)`, 'info');
+        } else {
+          toast('اعلان صوتی سفارش جدید فعال است 🔔 (تست صدا با موفقیت پخش شد)', 'info');
+        }
+      }
+    });
+  }
+
+  // =========================================================================
+  // LIVE POLLING SYSTEM
+  // =========================================================================
+  const ordersTableBody = document.getElementById('adminOrdersTableBody') || document.querySelector('.orders-table tbody');
+
+  let isPolling = false;
+  let pollIntervalTimer = null;
+  const POLL_INTERVAL = 2500; // 2.5 seconds
+
+  // Robust Polling URL Resolver across all admin views
   const resolveOrdersPollUrl = (afterId) => {
-    if (window.location.pathname.includes('orders')) {
-      const url = new URL(window.location.href);
+    const loc = window.location;
+    const pathname = loc.pathname || '';
+    const href = loc.href;
+
+    // If on orders page, preserve active search & filter query params
+    if (pathname.endsWith('/orders') || pathname.endsWith('/orders.php') || pathname.includes('/orders')) {
+      const url = new URL(href);
       url.searchParams.set('poll', '1');
       url.searchParams.set('after_id', String(afterId));
       return url.toString();
     }
 
-    const path = window.location.pathname;
-    const isPhp = path.endsWith('.php') || window.location.href.includes('.php');
-    const lastSlash = path.lastIndexOf('/');
-    const baseDir = lastSlash !== -1 ? path.substring(0, lastSlash + 1) : '/admin/';
+    // On other admin pages (e.g. /admin, /admin/dashboard, /admin/settings, /admin/products)
+    const isPhp = pathname.endsWith('.php') || href.includes('.php');
     const ext = isPhp ? '.php' : '';
-    const url = new URL(`${baseDir}orders${ext}`, window.location.origin);
+    let adminBase = '/admin/';
+
+    const adminIdx = pathname.lastIndexOf('/admin');
+    if (adminIdx !== -1) {
+      adminBase = pathname.substring(0, adminIdx) + '/admin/';
+    }
+
+    const url = new URL(`${adminBase}orders${ext}`, loc.origin);
     url.searchParams.set('poll', '1');
     url.searchParams.set('after_id', String(afterId));
     return url.toString();
@@ -492,9 +774,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = parseInt(tr.dataset.orderId || '0', 10);
         if (!isNaN(id) && id > max) max = id;
       });
+    } else {
+      const stored = parseInt(localStorage.getItem('cafe_admin_latest_order_id') || '0', 10);
+      if (!isNaN(stored) && stored > max) max = stored;
     }
-    const stored = parseInt(localStorage.getItem('cafe_admin_latest_order_id') || '0', 10);
-    if (!isNaN(stored) && stored > max) max = stored;
     return max;
   };
 
@@ -514,6 +797,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Synchronize reminder interval with server setting dynamically
+      if (typeof data.reminder_interval === 'number' && data.reminder_interval >= 1 && data.reminder_interval <= 50) {
+        window.CAFE_SETTINGS = window.CAFE_SETTINGS || {};
+        window.CAFE_SETTINGS.reminderInterval = data.reminder_interval;
+        try {
+          localStorage.setItem('cafe_order_reminder_interval', String(data.reminder_interval));
+        } catch (_) {}
+      }
+
+      // Authoritative sync: ensure all pending reminders match server state
+      if (Array.isArray(data.pending_ids)) {
+        PendingReminderManager.syncPendingOrders(data.pending_ids);
+      }
+
+      // Self-heal stale localStorage max_id if database was reset or has lower max
+      if (typeof data.max_id === 'number' && data.max_id > 0) {
+        if (lastKnownOrderId > data.max_id && !ordersTableBody) {
+          lastKnownOrderId = data.max_id;
+          try {
+            localStorage.setItem('cafe_admin_latest_order_id', String(data.max_id));
+          } catch (_) {}
+        }
+      }
+
       // --- A: If on Orders Page with Table Body ---
       if (ordersTableBody) {
         // 1. Remove deleted / cancelled orders instantly
@@ -527,6 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const rowId = parseInt(row.dataset.orderId || '0', 10);
             if (rowId && !activeSet.has(rowId)) {
               row.dataset.removing = 'true';
+              PendingReminderManager.stopPendingOrder(rowId);
               let orderNum = '';
               if (Array.isArray(data.deleted_orders)) {
                 const found = data.deleted_orders.find(d => Number(d.id) === rowId);
@@ -556,7 +864,7 @@ document.addEventListener('DOMContentLoaded', () => {
               }, 350);
 
               removedCount++;
-              toast(`سفارش ${orderNum} توسط مشتری لغو و حذف شد`, 'danger');
+              toast(`سفارش ${orderNum} حذف شد`, 'danger');
             }
           });
 
@@ -566,6 +874,43 @@ document.addEventListener('DOMContentLoaded', () => {
               totalCountEl.textContent = `مجموع سفارش‌ها: ${data.total_count_display}`;
             }
           }
+        }
+
+        // 1.5. Live status sync for existing rows if modified externally
+        if (data.order_statuses && typeof data.order_statuses === 'object') {
+          const statusLabels = {
+            pending: 'در انتظار تأیید',
+            approved: 'تأیید شده',
+            completed: 'تکمیل شده',
+            rejected: 'رد شده'
+          };
+          const statusBadgeClasses = {
+            pending: 'badge-pending',
+            approved: 'badge-approved',
+            completed: 'badge-completed',
+            rejected: 'badge-rejected'
+          };
+
+          ordersTableBody.querySelectorAll('tr[data-order-id]').forEach(row => {
+            if (row.dataset.removing === 'true') return;
+            const rowId = parseInt(row.dataset.orderId || '0', 10);
+            const newStatus = data.order_statuses[rowId];
+            if (newStatus && row.dataset.orderStatus && row.dataset.orderStatus !== newStatus) {
+              row.dataset.orderStatus = newStatus;
+              const statusBadge = row.querySelector('.badge');
+              if (statusBadge) {
+                statusBadge.textContent = statusLabels[newStatus] || newStatus;
+                statusBadge.className = `badge ${statusBadgeClasses[newStatus] || ''}`;
+              }
+              const statusSelect = row.querySelector('select[name="status"]');
+              if (statusSelect && statusSelect.value !== newStatus) {
+                statusSelect.value = newStatus;
+              }
+              if (newStatus !== 'pending') {
+                PendingReminderManager.stopPendingOrder(rowId);
+              }
+            }
+          });
         }
 
         // 2. Add newly arrived orders
@@ -630,6 +975,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const numericId = parseInt(orderId, 10);
             if (numericId > lastKnownOrderId) {
               lastKnownOrderId = numericId;
+              try {
+                localStorage.setItem('cafe_admin_latest_order_id', String(numericId));
+              } catch (_) {}
+            }
+
+            const rowStatus = row.dataset.orderStatus || row.querySelector('select[name="status"]')?.value || 'pending';
+            if (rowStatus === 'pending') {
+              PendingReminderManager.registerPendingOrder(numericId, true /* isNewOrderArrival */);
             }
           });
 
@@ -641,23 +994,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
             toast(`سفارش جدید دریافت شد (${addedCount} مورد)`, 'info');
             notifyTabTitle(`سفارش جدید (${addedCount} مورد)`);
-            playOrderNotificationSound(lastKnownOrderId);
+            if (PendingReminderManager.getActiveCount() === 0) {
+              playOrderNotificationSound(lastKnownOrderId);
+            }
           }
         } else if (data.max_id && data.max_id > lastKnownOrderId) {
           lastKnownOrderId = data.max_id;
+          try {
+            localStorage.setItem('cafe_admin_latest_order_id', String(data.max_id));
+          } catch (_) {}
         }
       } else {
-        // --- B: On other Admin pages (Dashboard, Products, etc.) ---
-        if (data.count > 0) {
-          const newMax = data.max_id || (currentMaxId + data.count);
-          if (newMax > lastKnownOrderId) {
-            lastKnownOrderId = newMax;
-            try {
-              localStorage.setItem('cafe_admin_latest_order_id', String(newMax));
-            } catch (_) {}
+        // --- B: On other Admin pages (Dashboard, Settings, Products, etc.) ---
+        // First poll initialization: establish baseline without false blast of sound
+        if (lastKnownOrderId === 0) {
+          lastKnownOrderId = data.max_id || 0;
+          try {
+            localStorage.setItem('cafe_admin_latest_order_id', String(lastKnownOrderId));
+          } catch (_) {}
+        } else if (data.count > 0 && data.max_id > lastKnownOrderId) {
+          const newMax = data.max_id;
+          const addedCount = data.count;
+          lastKnownOrderId = newMax;
+          try {
+            localStorage.setItem('cafe_admin_latest_order_id', String(newMax));
+          } catch (_) {}
 
-            toast(`سفارش جدید دریافت شد (${data.count} مورد)`, 'info');
-            notifyTabTitle(`سفارش جدید (${data.count} مورد)`);
+          toast(`سفارش جدید دریافت شد (${addedCount} مورد)`, 'info');
+          notifyTabTitle(`سفارش جدید (${addedCount} مورد)`);
+
+          // Register reminders for newly arrived pending orders
+          let chimed = false;
+          if (Array.isArray(data.pending_ids)) {
+            data.pending_ids.forEach(pid => {
+              if (pid > currentMaxId) {
+                PendingReminderManager.registerPendingOrder(pid, true /* isNewOrderArrival */);
+                chimed = true;
+              }
+            });
+          }
+          if (!chimed) {
             playOrderNotificationSound(newMax);
           }
         } else if (data.max_id && data.max_id > lastKnownOrderId) {
@@ -674,6 +1050,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Initialize existing pending orders from page table on initial load
+  if (ordersTableBody) {
+    try {
+      const rawPending = ordersTableBody.dataset.pendingIds;
+      if (rawPending) {
+        const initialPending = JSON.parse(rawPending);
+        if (Array.isArray(initialPending)) {
+          initialPending.forEach(id => {
+            PendingReminderManager.registerPendingOrder(id, false /* isNewOrderArrival */);
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
   // Start continuous polling across all admin views
   pollIntervalTimer = setInterval(pollNewOrders, POLL_INTERVAL);
 
@@ -684,8 +1075,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.querySelectorAll('form').forEach(form => form.addEventListener('submit', event => {
-    // Delete forms are intentionally stopped once to show the confirmation
-    // dialog; they must not look like a request has already started.
     if (event.defaultPrevented || form.dataset.confirmed || form.querySelector('[data-no-loading]')) return;
     const submit = form.querySelector('button[type="submit"]');
     if (submit) submit.classList.add('is-loading');

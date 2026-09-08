@@ -66,6 +66,7 @@ header {
    /* subtle warm gradient for header on light theme */
    background: linear-gradient(180deg, rgba(255,250,240,0.96), rgba(245,242,237,0.92));
 
+   -webkit-backdrop-filter: blur(18px);
    backdrop-filter:blur(18px);
 
    border-bottom:1px solid #ece2d5;
@@ -600,6 +601,7 @@ header p {
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -626,6 +628,7 @@ header p {
   text-align: center;
   color: var(--ivory, #fdfbf7);
   font: 700 14px/1.2 Vazirmatn, Tahoma, sans-serif;
+  -webkit-user-select: none;
   user-select: none;
   direction: ltr;
   display: inline-block;

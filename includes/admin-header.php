@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../classes/Setting.php';
+
 $activePage = $activePage ?? '';
 $navItems = [
     'dashboard'  => ['label' => 'داشبورد', 'icon' => 'grid', 'permission' => null],
@@ -63,6 +65,11 @@ function adminIcon(string $name): string {
   <link rel="stylesheet" href="../assets/css/fonts.css">
   <link rel="stylesheet" href="../assets/vendor/bootstrap/bootstrap.rtl.min.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
+  <meta name="order-reminder-interval" content="<?= max(1, min(50, Setting::getInt('order_reminder_interval', 7) ?: 7)) ?>">
+  <script>
+    window.CAFE_SETTINGS = window.CAFE_SETTINGS || {};
+    window.CAFE_SETTINGS.reminderInterval = <?= max(1, min(50, Setting::getInt('order_reminder_interval', 7) ?: 7)) ?>;
+  </script>
 </head>
 <body class="admin-body">
 <div class="admin-shell">

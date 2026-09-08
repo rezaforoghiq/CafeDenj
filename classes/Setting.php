@@ -35,6 +35,18 @@ class Setting
     }
 
     /**
+     * خواندن یک تنظیم عددی صحیح به‌صورت int.
+     */
+    public static function getInt(string $key, int $default = 0): int
+    {
+        $value = self::get($key);
+        if ($value === null || !is_numeric($value)) {
+            return $default;
+        }
+        return (int) $value;
+    }
+
+    /**
      * ذخیرهٔ (یا به‌روزرسانی) مقدار یک تنظیم.
      */
     public static function set(string $key, string $value): bool

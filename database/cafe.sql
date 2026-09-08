@@ -340,6 +340,8 @@ INSERT INTO `permissions` (`slug`, `label`) VALUES
 ('users.manage', 'مدیریت کاربران'),
 ('settings.view', 'مشاهده تنظیمات');
 
--- تنظیم پیش‌فرض: شمارهٔ تماس الزامی است (از پنل «تنظیمات» قابل تغییر است)
+-- تنظیمات پیش‌فرض: شمارهٔ تماس الزامی است، روش چاپ اتوماتیک است، و فاصله تکرار زنگ سفارش ۷ ثانیه است
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
-('phone_required', '1');
+('phone_required', '1'),
+('printing_method', 'automatic'),
+('order_reminder_interval', '7');

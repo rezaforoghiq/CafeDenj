@@ -54,6 +54,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['flash_success'] = 'روش چاپ فاکتور با موفقیت ذخیره شد.';
             header('Location: settings');
             exit;
+        } elseif (($_POST['action'] ?? '') === 'notification_settings') {
+            $rawInterval = trim((string)($_POST['order_reminder_interval'] ?? ''));
+            if ($rawInterval === '' || !ctype_digit($rawInterval)) {
+                $flashError = 'فاصله تکرار اعلان باید یک عدد صحیح معتبر باشد.';
+            } else {
+                $interval = (int) $rawInterval;
+                if ($interval < 1 || $interval > 50) {
+                    $flashError = 'فاصله تکرار اعلان باید بین ۱ تا ۵۰ ثانیه باشد.';
+                } else {
+                    Setting::set('order_reminder_interval', (string) $interval);
+                    $_SESSION['flash_success'] = 'فاصله تکرار اعلان سفارش با موفقیت ذخیره شد.';
+                    header('Location: settings');
+                    exit;
+                }
+            }
         }
     }
 }
@@ -142,6 +157,55 @@ require __DIR__ . '/../../includes/admin-header.php';
     </div>
 
     <button type="submit" class="btn btn-gold btn-sm">ذخیره روش چاپ</button>
+  </form>
+</div>
+
+<!-- Order Reminder Notification Interval Card -->
+<div class="card p-4 mt-4" style="max-width:640px;">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h6 class="mb-0" style="color:var(--ivory);">فاصله تکرار اعلان سفارش (Order Reminder Interval)</h6>
+    <?php
+      $currentInterval = Setting::getInt('order_reminder_interval', 7);
+      if ($currentInterval < 1 || $currentInterval > 50) {
+          $currentInterval = 7;
+      }
+    ?>
+    <span class="badge" style="background:var(--gold-soft); color:#000; font-size:12px;">
+      <?= (int) $currentInterval ?> ثانیه
+    </span>
+  </div>
+  
+  <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">
+    فاصله زمانی تکرار صدای زنگ هشدار برای سفارش‌های در انتظار تأیید (Pending). صدا تا زمانی که وضعیت سفارش تغییر نکند به این فاصله تکرار می‌شود (محدوده مجاز: ۱ تا ۵۰ ثانیه).
+  </p>
+
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+    <input type="hidden" name="action" value="notification_settings">
+
+    <div class="mb-3">
+      <label class="form-label" for="order_reminder_interval" style="color:var(--ivory); font-size:13.5px;">
+        فاصله تکرار اعلان سفارش (ثانیه)
+      </label>
+      <div class="input-group" style="max-width:220px;">
+        <input type="number" 
+               id="order_reminder_interval" 
+               name="order_reminder_interval" 
+               class="form-control" 
+               value="<?= (int) $currentInterval ?>" 
+               min="1" 
+               max="50" 
+               step="1" 
+               required
+               style="background:rgba(255,255,255,0.04); color:var(--ivory); border-color:var(--line); text-align:center; font-weight:600;">
+        <span class="input-group-text" style="background:rgba(255,255,255,0.06); color:var(--muted); border-color:var(--line);">ثانیه</span>
+      </div>
+      <div class="form-text" style="color:var(--muted); font-size:12px; margin-top:6px;">
+        محدوده: ۱ تا ۵۰ ثانیه (پیش‌فرض: ۷ ثانیه)
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-gold btn-sm">ذخیره تنظیمات اعلان</button>
   </form>
 </div>
 
