@@ -69,6 +69,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 }
             }
+        } elseif (($_POST['action'] ?? '') === 'table_settings') {
+            $rawTableCount = trim((string)($_POST['table_count'] ?? ''));
+            $tableCountInt = filter_var($rawTableCount, FILTER_VALIDATE_INT);
+            if ($tableCountInt === false) {
+                $flashError = 'تعداد میزها باید یک عدد صحیح معتبر باشد.';
+            } elseif ($tableCountInt < 1 || $tableCountInt > 100) {
+                $flashError = 'تعداد میزها باید بین ۱ تا ۱۰۰ باشد.';
+            } else {
+                Setting::set('table_count', (string) $tableCountInt);
+                $_SESSION['flash_success'] = 'تعداد میزهای کافه با موفقیت ذخیره شد.';
+                header('Location: settings');
+                exit;
+            }
         }
     }
 }
@@ -206,6 +219,55 @@ require __DIR__ . '/../../includes/admin-header.php';
     </div>
 
     <button type="submit" class="btn btn-gold btn-sm">ذخیره تنظیمات اعلان</button>
+  </form>
+</div>
+
+<!-- Table Settings Card -->
+<div class="card p-4 mt-4" style="max-width:640px;">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h6 class="mb-0" style="color:var(--ivory);">تعداد میزهای سالن (Table Count)</h6>
+    <?php
+      $currentTableCount = Setting::getInt('table_count', 10);
+      if ($currentTableCount < 1 || $currentTableCount > 100) {
+          $currentTableCount = 10;
+      }
+    ?>
+    <span class="badge" style="background:var(--gold-soft); color:#000; font-size:12px;">
+      <?= (int) $currentTableCount ?> میز
+    </span>
+  </div>
+  
+  <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">
+    تعداد میزهای فعال کافه را مشخص کنید. مشتریان در صفحه ثبت سفارش، شماره میز خود را از بین این تعداد انتخاب خواهند کرد.
+  </p>
+
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+    <input type="hidden" name="action" value="table_settings">
+
+    <div class="mb-3">
+      <label class="form-label" for="table_count" style="color:var(--ivory); font-size:13.5px;">
+        تعداد کل میزها
+      </label>
+      <div class="input-group" style="max-width:220px;">
+        <input type="number" 
+               id="table_count" 
+               name="table_count" 
+               class="form-control" 
+               value="<?= (int) $currentTableCount ?>" 
+               min="1" 
+               max="100" 
+               step="1" 
+               required
+               style="background:rgba(255,255,255,0.04); color:var(--ivory); border-color:var(--line); text-align:center; font-weight:600;">
+        <span class="input-group-text" style="background:rgba(255,255,255,0.06); color:var(--muted); border-color:var(--line);">میز</span>
+      </div>
+      <div class="form-text" style="color:var(--muted); font-size:12px; margin-top:6px;">
+        محدوده مجاز: ۱ تا ۱۰۰ میز (پیش‌فرض: ۱۰)
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-gold btn-sm">ذخیره تعداد میزها</button>
   </form>
 </div>
 

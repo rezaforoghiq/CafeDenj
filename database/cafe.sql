@@ -74,54 +74,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
   UNIQUE KEY `uq_customers_phone` (`phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
--- -------------------------------------------------------------------------
--- اطلاعات ورود مشتری (جدا از customers نگه داشته می‌شود)
--- اکنون حساب مشتری شامل نام کاربری نیست؛ ورود بر اساس شمارهٔ موبایل انجام می‌شود.
--- -------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `customer_accounts` (
-  `id`            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `customer_id`   INT UNSIGNED NOT NULL,
-  `password_hash` VARCHAR(255) NOT NULL,
-  `last_login_at` DATETIME NULL DEFAULT NULL,
-  `created_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY `uq_customer_accounts_customer` (`customer_id`),
-  CONSTRAINT `fk_customer_accounts_customer`
-    FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`)
-    ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
--- -------------------------------------------------------------------------
--- کدهای یک‌بار مصرف (OTP) برای ثبت‌نام و ورود مشتری
--- -------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `otp_codes` (
-  `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `phone` VARCHAR(20) NOT NULL,
-  `purpose` ENUM('registration','login','password_reset') NOT NULL,
-  `otp_hash` VARCHAR(255) NOT NULL,
-  `attempts` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-  `max_attempts` SMALLINT UNSIGNED NOT NULL DEFAULT 5,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `expires_at` DATETIME NOT NULL,
-  `resend_available_at` DATETIME NULL DEFAULT NULL,
-  `used_at` DATETIME NULL DEFAULT NULL,
-  `ip_address` VARCHAR(45) NULL DEFAULT NULL,
-  `last_error` VARCHAR(255) NULL DEFAULT NULL,
-  KEY `idx_otp_phone_purpose` (`phone`, `purpose`),
-  KEY `idx_otp_expires_at` (`expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
-
-CREATE TABLE IF NOT EXISTS `pending_registrations` (
-  `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `phone` VARCHAR(20) NOT NULL,
-  `first_name` VARCHAR(100) NULL DEFAULT NULL,
-  `last_name` VARCHAR(100) NULL DEFAULT NULL,
-  `password_hash` VARCHAR(255) NOT NULL,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `expires_at` DATETIME NOT NULL,
-  KEY `idx_pending_phone` (`phone`),
-  KEY `idx_pending_expires_at` (`expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 -- -------------------------------------------------------------------------
 -- کوپن‌های تخفیف (کدهای قابل استفاده در صفحهٔ پرداخت)
@@ -198,43 +151,47 @@ CREATE TABLE IF NOT EXISTS `barista_permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 -- -------------------------------------------------------------------------
--- سبد خرید هر مشتری
+-- سبد خرید مهمان (guest_token جایگزین customer_id به عنوان کلید اصلی شد)
 -- -------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `carts` (
   `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `customer_id` INT UNSIGNED NOT NULL,
+  `customer_id` INT UNSIGNED NULL DEFAULT NULL,   -- اختیاری؛ legacy — دیگر استفاده نمی‌شود
+  `guest_token` VARCHAR(64) NULL DEFAULT NULL,    -- توکن جلسهٔ مهمان
   `product_id`  INT UNSIGNED NOT NULL,
   `quantity`    SMALLINT UNSIGNED NOT NULL DEFAULT 1,
   `created_at`  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY `uq_cart_customer_product` (`customer_id`, `product_id`),
-  CONSTRAINT `fk_carts_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_carts_product`  FOREIGN KEY (`product_id`)  REFERENCES `products`(`id`)  ON DELETE CASCADE
+  UNIQUE KEY `uq_cart_guest_product` (`guest_token`, `product_id`),
+  KEY `idx_carts_guest_token` (`guest_token`),
+  CONSTRAINT `fk_carts_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 -- -------------------------------------------------------------------------
--- سفارش‌ها (شامل اتصال به باریستا و تاریخ تأیید)
+-- سفارش‌ها (شامل اتصال به باریستا، شماره میز، و توکن مهمان)
 -- -------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `orders` (
-  `id`            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `customer_id`   INT UNSIGNED NOT NULL,
-  `barista_id`    INT UNSIGNED NULL DEFAULT NULL,
-  `order_number`  VARCHAR(32) NOT NULL,
-  `total_price`   DECIMAL(12,0) UNSIGNED NOT NULL,
-  `customer_note` VARCHAR(500) NULL,
-  `status`        ENUM('pending','approved','rejected','completed') NOT NULL DEFAULT 'pending',
-  `created_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `approved_at`   DATETIME NULL DEFAULT NULL,
+  `id`             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `customer_id`    INT UNSIGNED NULL DEFAULT NULL,  -- اختیاری؛ پر می‌شود اگر مشتری اطلاعات CRM بدهد
+  `barista_id`     INT UNSIGNED NULL DEFAULT NULL,
+  `order_number`   VARCHAR(32) NOT NULL,
+  `total_price`    DECIMAL(12,0) UNSIGNED NOT NULL,
+  `customer_note`  VARCHAR(500) NULL,
+  `table_number`   VARCHAR(50) NOT NULL DEFAULT '',  -- شماره میز (الزامی هنگام ثبت سفارش)
+  `guest_token`    VARCHAR(64) NULL DEFAULT NULL,    -- توکن جلسهٔ مهمان برای دسترسی موقت
+  `status`         ENUM('pending','approved','rejected','completed') NOT NULL DEFAULT 'pending',
+  `created_at`     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `approved_at`    DATETIME NULL DEFAULT NULL,
   `payment_method` ENUM('card','cash','transfer') NULL DEFAULT NULL,
-  `coupon_code` VARCHAR(64) NULL DEFAULT NULL,
+  `coupon_code`    VARCHAR(64) NULL DEFAULT NULL,
   `coupon_percent` INT NULL DEFAULT NULL,
   `discount_amount` DECIMAL(12,0) UNSIGNED NOT NULL DEFAULT 0,
   UNIQUE KEY `uq_orders_number` (`order_number`),
   KEY `idx_orders_customer` (`customer_id`),
   KEY `idx_orders_status` (`status`),
   KEY `idx_orders_barista` (`barista_id`),
-  CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE RESTRICT,
+  KEY `idx_orders_guest_token` (`guest_token`),
+  CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_orders_barista`  FOREIGN KEY (`barista_id`)  REFERENCES `baristas`(`id`)  ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
@@ -340,8 +297,9 @@ INSERT INTO `permissions` (`slug`, `label`) VALUES
 ('users.manage', 'مدیریت کاربران'),
 ('settings.view', 'مشاهده تنظیمات');
 
--- تنظیمات پیش‌فرض: شمارهٔ تماس الزامی است، روش چاپ اتوماتیک است، و فاصله تکرار زنگ سفارش ۷ ثانیه است
+-- تنظیمات پیش‌فرض: شمارهٔ تماس الزامی است، روش چاپ اتوماتیک است، فاصله تکرار زنگ سفارش ۷ ثانیه است، و تعداد میزها ۱۰ عدد است
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
 ('phone_required', '1'),
 ('printing_method', 'automatic'),
-('order_reminder_interval', '7');
+('order_reminder_interval', '7'),
+('table_count', '10');

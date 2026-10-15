@@ -1796,3 +1796,10 @@ a:focus-visible,
 }
 
 .cart-login{margin-top: 15px;}
+
+
+@media (max-width: 560px) {
+  .user-menu-simple{
+    display: none !important;
+  }
+}

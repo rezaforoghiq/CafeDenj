@@ -65,7 +65,6 @@ require __DIR__ . '/../../includes/admin-header.php';
         <th>نام</th>
         <th>شماره تماس</th>
         <th>منبع ثبت</th>
-        <th>تخفیف اختصاصی</th>
         <th>تاریخ ثبت</th>
         <th>عملیات</th>
       </tr>
@@ -80,9 +79,6 @@ require __DIR__ . '/../../includes/admin-header.php';
           <td><?= htmlspecialchars(trim(($customer['first_name'] ?? '') . ' ' . ($customer['last_name'] ?? '')) ?: '—', ENT_QUOTES, 'UTF-8') ?></td>
           <td style="direction:ltr; text-align:right;"><?= htmlspecialchars($customer['phone'] ?? '—', ENT_QUOTES, 'UTF-8') ?></td>
           <td style="color:var(--muted);"><?= htmlspecialchars($customer['source'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td>
-            <span style="color:var(--muted); font-size:12.5px;">—</span>
-          </td>
           <td style="color:var(--muted); font-size:13px;"><?= htmlspecialchars($customer['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
           <td>
             <a href="coupons" class="btn btn-sm btn-outline-light" style="border-color:var(--line); color:var(--ivory);">مدیریت کوپن‌ها</a>

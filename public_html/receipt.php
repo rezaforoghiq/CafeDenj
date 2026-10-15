@@ -11,7 +11,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/customer-auth.php';
+require_once __DIR__ . '/../classes/GuestSession.php';
 require_once __DIR__ . '/../classes/Order.php';
 require_once __DIR__ . '/../classes/Setting.php';
 require_once __DIR__ . '/../classes/PrintJob.php';
@@ -39,13 +39,13 @@ if ($type === 'barista' || $type === 'preparation') {
         exit('دسترسی به برگه آماده‌سازی باریستا غیرمجاز است.');
     }
 } else {
-    // Customer receipt: Admin, Barista with orders.print permission, or the customer owner
-    $isAdmin = Auth::isAdmin();
+    // Customer receipt: Admin, permitted Barista, or the guest who placed the order
+    $isAdmin          = Auth::isAdmin();
     $isBaristaAllowed = Auth::isBarista() && Auth::can('orders.print');
-    $isOwnerCustomer = (function_exists('customerIsLoggedIn') && customerIsLoggedIn() && ((int) $order['customer_id'] === (int) ($_SESSION['customer_id'] ?? 0)))
-        || (class_exists('CustomerAuth') && method_exists('CustomerAuth', 'check') && CustomerAuth::check() && ((int) $order['customer_id'] === CustomerAuth::id()));
+    $guestToken       = GuestSession::getToken();
+    $isGuestOwner     = !empty($order['guest_token']) && hash_equals((string) $order['guest_token'], $guestToken);
 
-    if (!$isAdmin && !$isBaristaAllowed && !$isOwnerCustomer) {
+    if (!$isAdmin && !$isBaristaAllowed && !$isGuestOwner) {
         http_response_code(403);
         exit('دسترسی به این فاکتور غیرمجاز است.');
     }

@@ -226,6 +226,10 @@ class PrintJob
         $lines[] = "------------------------------";
         $lines[] = "سفارش:";
         $lines[] = $orderNumber;
+        if (!empty($order['table_number'])) {
+            $lines[] = "میز:";
+            $lines[] = (string) $order['table_number'];
+        }
         $lines[] = "تاریخ:";
         $lines[] = Jalali::formatDate($order['created_at']);
         $lines[] = "زمان:";
@@ -257,6 +261,7 @@ class PrintJob
             'time' => $time,
             'customer_name' => $customerName,
             'customer_phone' => $customerPhone,
+            'table_number' => !empty($order['table_number']) ? (string)$order['table_number'] : null,
             'items' => $itemsData,
             'total_amount' => (float) ($order['total_price'] ?? $total),
             'notes' => $customerNote !== '' ? $customerNote : null,
@@ -317,6 +322,10 @@ class PrintJob
         $lines[] = "------------------------------";
         $lines[] = "سفارش:";
         $lines[] = $orderNumber;
+        if (!empty($order['table_number'])) {
+            $lines[] = "میز:";
+            $lines[] = (string) $order['table_number'];
+        }
         $lines[] = "تاریخ:";
         $lines[] = $dateJalali;
         $lines[] = "زمان:";
@@ -356,6 +365,7 @@ class PrintJob
             'time' => $time,
             'customer_name' => $customerName,
             'customer_phone' => $customerPhone,
+            'table_number' => !empty($order['table_number']) ? (string)$order['table_number'] : null,
             'items' => $itemsData,
             'subtotal' => $subtotal,
             'discount_amount' => $discount,

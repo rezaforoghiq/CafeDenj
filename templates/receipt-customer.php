@@ -345,6 +345,12 @@ $cafeAddress = $cafeAddress ?? 'کرج، بلوار شهید مطهری، نبش
         <span class="meta-label">شماره سفارش:</span>
         <span class="meta-value meta-order-num"><?= htmlspecialchars((string)($payload['order_number'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
       </div>
+      <?php if (!empty($payload['table_number'])): ?>
+      <div class="meta-row">
+        <span class="meta-label">شماره میز:</span>
+        <span class="meta-value"><strong>میز <?= htmlspecialchars(toPersianDigits((string)$payload['table_number']), ENT_QUOTES, 'UTF-8') ?></strong></span>
+      </div>
+      <?php endif; ?>
       <div class="meta-row">
         <span class="meta-label">تاریخ و زمان:</span>
         <span class="meta-value"><?= htmlspecialchars((string)($payload['date_jalali'] ?? ''), ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars((string)($payload['time'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>

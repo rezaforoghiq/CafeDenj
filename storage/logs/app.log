@@ -177,3 +177,32 @@ Stack trace:
 
 [08-Sep-2026 18:47:10 Asia/Tehran] Melipayamak provider error: SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://api.payamak-panel.com/post/Send.asmx?wsdl' : failed to load external entity "http://api.payamak-panel.com/post/Send.asmx?wsdl"
 
+[08-Sep-2026 21:49:31 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY093]: Invalid parameter number in C:\xampp\htdocs\classes\classes\Customer.php:130
+Stack trace:
+#0 C:\xampp\htdocs\classes\classes\Customer.php(130): PDOStatement->execute(Array)
+#1 C:\xampp\htdocs\classes\public_html\admin\customers.php(29): Customer::delete(6)
+#2 {main}
+  thrown in C:\xampp\htdocs\classes\classes\Customer.php on line 130
+[20-Sep-2026 01:33:44 Asia/Tehran] Database connection error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it
+[21-Sep-2026 02:37:43 Asia/Tehran] PHP Fatal error:  Cannot declare class Product, because the name is already in use in C:\xampp\htdocs\classes\classes\Product.php on line 16
+[15-Oct-2026 20:40:29 Asia/Tehran] PHP Deprecated:  ctype_digit(): Argument of type int will be interpreted as string in the future in C:\xampp\htdocs\classes\temp_verify_tables.php on line 48
+[15-Oct-2026 20:40:29 Asia/Tehran] PHP Deprecated:  ctype_digit(): Argument of type int will be interpreted as string in the future in C:\xampp\htdocs\classes\temp_verify_tables.php on line 48
+[15-Oct-2026 20:40:29 Asia/Tehran] PHP Deprecated:  ctype_digit(): Argument of type int will be interpreted as string in the future in C:\xampp\htdocs\classes\temp_verify_tables.php on line 48
+[15-Oct-2026 20:40:29 Asia/Tehran] PHP Deprecated:  ctype_digit(): Argument of type int will be interpreted as string in the future in C:\xampp\htdocs\classes\temp_verify_tables.php on line 48
+[15-Oct-2026 20:40:29 Asia/Tehran] PHP Deprecated:  ctype_digit(): Argument of type int will be interpreted as string in the future in C:\xampp\htdocs\classes\temp_verify_tables.php on line 48
+[15-Oct-2026 20:40:29 Asia/Tehran] PHP Fatal error:  Uncaught AssertionError: Validation failed for input: '1' in C:\xampp\htdocs\classes\temp_verify_tables.php:49
+Stack trace:
+#0 C:\xampp\htdocs\classes\temp_verify_tables.php(49): assert(false, 'Validation fail...')
+#1 {main}
+  thrown in C:\xampp\htdocs\classes\temp_verify_tables.php on line 49
+[15-Oct-2026 20:41:44 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'cafe_db_1.cart' doesn't exist in C:\xampp\htdocs\classes\temp_verify_tables.php:60
+Stack trace:
+#0 C:\xampp\htdocs\classes\temp_verify_tables.php(60): PDO->prepare('INSERT INTO car...')
+#1 {main}
+  thrown in C:\xampp\htdocs\classes\temp_verify_tables.php on line 60
+[15-Oct-2026 20:42:11 Asia/Tehran] PHP Fatal error:  Uncaught PDOException: There is already an active transaction in C:\xampp\htdocs\classes\classes\Order.php:166
+Stack trace:
+#0 C:\xampp\htdocs\classes\classes\Order.php(166): PDO->beginTransaction()
+#1 C:\xampp\htdocs\classes\temp_verify_tables.php(62): Order::place('test_table_toke...', '4', 'Test order for ...', NULL, '09123456789', '\xD8\xAA\xD8\xB3\xD8\xAA', '\xD9\x85\xDB\x8C\xD8\xB2\xD9\x87\xD8\xA7')
+#2 {main}
+  thrown in C:\xampp\htdocs\classes\classes\Order.php on line 166

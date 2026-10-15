@@ -320,6 +320,9 @@ $cafeTitle = $cafeTitle ?? 'کافه دنج';
       <div class="order-number-box">
         <span class="order-num-label">شماره سفارش</span>
         <span class="order-num-val"><?= htmlspecialchars((string)($payload['order_number'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+        <?php if (!empty($payload['table_number'])): ?>
+          <span style="display:block; font-size:16px; font-weight:700; margin-top:4px; color:#111;">میز <?= htmlspecialchars(toPersianDigits((string)$payload['table_number']), ENT_QUOTES, 'UTF-8') ?></span>
+        <?php endif; ?>
       </div>
     </div>
 

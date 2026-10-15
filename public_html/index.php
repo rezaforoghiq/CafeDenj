@@ -23,36 +23,35 @@ require_once __DIR__ . '/../classes/Product.php';
 require_once __DIR__ . '/../classes/Event.php';
 require_once __DIR__ . '/../classes/Order.php';
 
+require_once __DIR__ . '/../classes/GuestSession.php';
+
 $categories  = Category::all();
-$products    = Product::all(['status' => 'active']);
+$products    = Product::all();
 $activeEvent = Event::getActive();
 
-$isLoggedIn = isset($_SESSION['customer_id'], $_SESSION['customer_display_name']);
-$desktopAccountActions = '';
-$mobileAccountActions = '';
+// بازیابی تعداد آیتم‌های سبد خرید بر اساس guest_token
+$guestToken  = GuestSession::getToken();
+$cartCount   = array_sum(array_column(Order::cart($guestToken), 'quantity'));
+$cartBadgeClass = $cartCount > 0 ? '' : ' is-empty';
+$cartCountDisplay = $cartCount > 0 ? toPersianDigits((string) $cartCount) : '';
 
-if ($isLoggedIn) {
-    $customerId = (int) $_SESSION['customer_id'];
-    $cartCount = array_sum(array_column(Order::cart($customerId), 'quantity'));
-    $pendingOrdersCount = count(array_filter(Order::mine($customerId), fn($o) => ($o['status'] ?? '') === 'pending'));
-    $cartBadge = $cartCount > 0 ? '<span class="action-count" data-cart-count>' . toPersianDigits((string) $cartCount) . '</span>' : '<span class="action-count is-empty" data-cart-count></span>';
-    $ordersBadge = $pendingOrdersCount > 0 ? '<span class="action-count">' . toPersianDigits((string) $pendingOrdersCount) . '</span>' : '';
-    $displayName = htmlspecialchars((string) $_SESSION['customer_display_name'], ENT_QUOTES, 'UTF-8');
-    $initial = htmlspecialchars(mb_substr((string) $_SESSION['customer_display_name'], 0, 1), ENT_QUOTES, 'UTF-8');
-    $actionLinks = '<a class="user-menu-link" href="orders"><span>سفارش‌ها</span>' . $ordersBadge . '</a>' . '<a class="user-menu-link" href="cart"><span>سبد خرید</span>' . $cartBadge . '</a>' . '<a class="user-menu-link" href="profile"><span>پروفایل</span></a>' . '<a class="user-menu-link user-menu-logout" href="customer-logout"><span>خروج</span></a>';
-    $headerCartBtn = '<a class="header-cart-btn' . ($cartCount > 0 ? '' : ' is-hidden') . '" id="headerCartBtn" href="cart" aria-label="سبد خرید" title="سبد خرید">'
-        . '<svg viewBox="0 0 24 24" aria-hidden="true" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
-        . '<circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>'
-        . '<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>'
-        . '</svg>'
-        . '<span class="header-cart-badge' . ($cartCount > 0 ? '' : ' is-empty') . '" id="headerCartBadge" data-cart-count>' . ($cartCount > 0 ? toPersianDigits((string) $cartCount) : '') . '</span>'
-        . '</a>';
-    $desktopAccountActions = '<div class="user-menu"><button class="profile-trigger" id="profileTrigger" type="button" aria-label="منوی حساب کاربری" aria-haspopup="true" aria-controls="profileMenu" aria-expanded="false"><span class="profile-avatar" aria-hidden="true">' . $initial . '</span><span class="profile-label">' . $displayName . '</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="profile-menu" id="profileMenu"><div class="profile-menu-head"><span class="profile-avatar" aria-hidden="true">' . $initial . '</span><div><b>' . $displayName . '</b><small>حساب کاربری</small></div></div>' . $actionLinks . '</div></div>' . $headerCartBtn;
-    $mobileAccountActions = '<span class="account-welcome">سلام، ' . $displayName . '</span>' . $actionLinks;
-} else {
-    $desktopAccountActions = '<a class="account-link" href="login">ورود</a><a class="account-link account-link-primary" href="register">ثبت‌نام</a>';
-    $mobileAccountActions = $desktopAccountActions;
-}
+$cartBadge = '<span class="action-count' . ($cartCount > 0 ? '' : ' is-empty') . '" data-cart-count>'
+    . ($cartCount > 0 ? toPersianDigits((string) $cartCount) : '') . '</span>';
+
+$headerCartBtn = '<a class="header-cart-btn' . ($cartCount > 0 ? '' : ' is-hidden') . '" id="headerCartBtn" href="cart" aria-label="سبد خرید" title="سبد خرید">'
+    . '<svg viewBox="0 0 24 24" aria-hidden="true" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+    . '<circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>'
+    . '<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>'
+    . '</svg>'
+    . '<span class="header-cart-badge' . $cartBadgeClass . '" id="headerCartBadge" data-cart-count>' . $cartCountDisplay . '</span>'
+    . '</a>';
+
+// ناوبار: لینک‌های سبد خرید و سفارش‌ها (بدون نیاز به لاگین)
+$actionLinks = '<a class="user-menu-link" href="orders"><span>سفارش‌های من</span></a>'
+    . '<a class="user-menu-link" href="cart"><span>سبد خرید</span>' . $cartBadge . '</a>';
+
+$desktopAccountActions = '<div class="user-menu-simple">' . $actionLinks . '</div>' . $headerCartBtn;
+$mobileAccountActions  = $actionLinks;
 $html = Template::load(__DIR__ . '/../templates/menu.html');
 
 // ---------------------------------------------------------------
@@ -79,12 +78,10 @@ foreach ($categories as $cat) {
 }
 
 $productHtml = '';
-$cartQtyMap = [];
-if (isset($_SESSION['customer_id'])) {
-    $cartRows = Order::cart((int) $_SESSION['customer_id']);
-    foreach ($cartRows as $cr) {
-        $cartQtyMap[(int) $cr['product_id']] = (int) $cr['quantity'];
-    }
+// سبد خرید از قبل بارگذاری شده (برای نمایش تعداد هر محصول در کارت‌ها)
+$cartQtyMap  = [];
+foreach (Order::cart($guestToken) as $cr) {
+    $cartQtyMap[(int) $cr['product_id']] = (int) $cr['quantity'];
 }
 
 foreach ($products as $product) {
@@ -122,27 +119,28 @@ foreach ($products as $product) {
         'DISCOUNT_BADGE_HTML'  => $discountBadgeHtml,
         'DESCRIPTION_HTML'     => $descriptionHtml,
         'BADGE_HTML'           => $badgeHtml,
-        'CART_ACTION'          => isset($_SESSION['customer_id'])
-            ? (function() use ($product, $cartQtyMap) {
-                $cQty = $cartQtyMap[(int) $product['id']] ?? 0;
-                $hasItems = $cQty > 0;
-                $displayQty = $hasItems ? $cQty : 1;
-                return '<form method="post" action="cart-action" class="cart-form cart-add" data-cart-add data-product-id="' . (int) $product['id'] . '" data-quantity="' . $cQty . '">
-                    <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') . '">
-                    <input type="hidden" name="product_id" value="' . (int) $product['id'] . '">
-                    <input type="hidden" name="action" value="' . ($hasItems ? 'update' : 'add') . '">
-                    <input type="hidden" name="quantity" value="' . $cQty . '" data-qty-input>
-                    <div class="cart-control-slot ' . ($hasItems ? 'has-items' : '') . '">
-                      <button type="submit" class="add-to-cart-btn ' . ($hasItems ? 'is-hidden' : '') . '" data-action="initial-add">افزودن به سبد</button>
-                      <div class="stepper-wrap ' . ($hasItems ? 'is-active' : '') . '" aria-label="مدیریت تعداد سفارش" role="group">
-                        <button type="button" class="step-btn step-minus" data-action="decrease" aria-label="کاهش تعداد">−</button>
-                        <span class="step-qty" data-step-qty>' . toPersianDigits((string) $displayQty) . '</span>
-                        <button type="button" class="step-btn step-plus" data-action="increase" aria-label="افزایش تعداد">+</button>
-                      </div>
-                    </div>
-                  </form>';
-              })()
-            : '<a class="cart-login" href="login">برای سفارش وارد شوید</a>',
+        'CART_ACTION'          => (function() use ($product, $cartQtyMap) {
+            if (($product['status'] ?? 'active') !== 'active') {
+                return '<button type="button" class="add-to-cart-btn is-disabled" disabled style="background:var(--surface);color:var(--muted);border-color:var(--line);cursor:not-allowed;width:100%;">ناموجود</button>';
+            }
+            $cQty = $cartQtyMap[(int) $product['id']] ?? 0;
+            $hasItems = $cQty > 0;
+            $displayQty = $hasItems ? $cQty : 1;
+            return '<form method="post" action="cart-action" class="cart-form cart-add" data-cart-add data-product-id="' . (int) $product['id'] . '" data-quantity="' . $cQty . '">
+                <input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') . '">
+                <input type="hidden" name="product_id" value="' . (int) $product['id'] . '">
+                <input type="hidden" name="action" value="' . ($hasItems ? 'update' : 'add') . '">
+                <input type="hidden" name="quantity" value="' . $cQty . '" data-qty-input>
+                <div class="cart-control-slot ' . ($hasItems ? 'has-items' : '') . '">
+                  <button type="submit" class="add-to-cart-btn ' . ($hasItems ? 'is-hidden' : '') . '" data-action="initial-add">افزودن به سبد</button>
+                  <div class="stepper-wrap ' . ($hasItems ? 'is-active' : '') . '" aria-label="مدیریت تعداد سفارش" role="group">
+                    <button type="button" class="step-btn step-minus" data-action="decrease" aria-label="کاهش تعداد">−</button>
+                    <span class="step-qty" data-step-qty>' . toPersianDigits((string) $displayQty) . '</span>
+                    <button type="button" class="step-btn step-plus" data-action="increase" aria-label="افزایش تعداد">+</button>
+                  </div>
+                </div>
+              </form>';
+        })(),
     ]);
 }
 

@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/CustomerAuth.php';
+require_once __DIR__ . '/Customer.php';
 require_once __DIR__ . '/Permission.php';
 
 class Barista
@@ -48,7 +48,7 @@ class Barista
         if (mb_strlen(trim($data['full_name'] ?? '')) < 3) {
             $errors['full_name'] = 'نام و نام خانوادگی را کامل وارد کنید.';
         }
-        if (!preg_match('/^09[0-9]{9}$/', CustomerAuth::normalizePhone(trim($data['phone'] ?? '')))) {
+        if (!preg_match('/^09[0-9]{9}$/', Customer::normalizePhone(trim($data['phone'] ?? '')))) {
             $errors['phone'] = 'شماره موبایل را به‌صورت ۰۹xxxxxxxxx وارد کنید.';
         }
         if (!preg_match('/^[a-zA-Z0-9_.-]{3,50}$/', trim($data['username'] ?? ''))) {
@@ -81,7 +81,7 @@ class Barista
         );
         $s->execute([
             'n'  => trim($data['full_name']),
-            'p'  => CustomerAuth::normalizePhone(trim($data['phone'])),
+            'p'  => Customer::normalizePhone(trim($data['phone'])),
             'u'  => trim($data['username']),
             'h'  => password_hash((string) $data['password'], PASSWORD_DEFAULT),
             'st' => ($data['status'] ?? 'active') === 'inactive' ? 'inactive' : 'active',
@@ -96,7 +96,7 @@ class Barista
         $sql = 'UPDATE baristas SET full_name = :n, phone = :p, username = :u, status = :st';
         $params = [
             'n'  => trim($data['full_name']),
-            'p'  => CustomerAuth::normalizePhone(trim($data['phone'])),
+            'p'  => Customer::normalizePhone(trim($data['phone'])),
             'u'  => trim($data['username']),
             'st' => ($data['status'] ?? 'active') === 'inactive' ? 'inactive' : 'active',
             'id' => $id,

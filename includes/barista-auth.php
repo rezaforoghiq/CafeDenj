@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../classes/CustomerAuth.php';
+require_once __DIR__ . '/../classes/Customer.php';
 require_once __DIR__ . '/../classes/ActivityLog.php';
 require_once __DIR__ . '/../classes/Barista.php';
 require_once __DIR__ . '/../classes/BaristaAuth.php';
