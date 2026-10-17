@@ -56,10 +56,32 @@ body {
 
 }
 header {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   text-align: center;
   padding: 48px 20px 28px;
   border-bottom: 1px solid var(--line);
+  transition:
+    padding 0.28s ease,
+    background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.account-actions,
+.theme-switch,
+.instagram-link,
+.mobile-menu-toggle {
+  transition:
+    top 0.28s ease,
+    transform 0.28s ease,
+    opacity 0.2s ease;
+}
+.logo-mark {
+  transition:
+    height 0.28s ease,
+    width 0.28s ease,
+    margin 0.28s ease;
 }
 :root[data-theme="light"] header{
 
@@ -97,6 +119,145 @@ header p {
   color: var(--muted);
   font-size: 14px;
   letter-spacing: 2px;
+}
+
+/* =========================================================================
+   Sticky Liquid Glass Header (Scrolled State)
+   ========================================================================= */
+
+header.is-scrolled {
+  padding: 10px 20px !important;
+  background: rgba(20, 17, 13, 0.68) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(190%) !important;
+  backdrop-filter: blur(22px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(232, 206, 139, 0.2) !important;
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+:root[data-theme="light"] header.is-scrolled {
+  background: rgba(255, 255, 255, 0.72) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(190%) !important;
+  backdrop-filter: blur(22px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(201, 162, 77, 0.28) !important;
+  box-shadow:
+    0 8px 32px 0 rgba(45, 33, 18, 0.08),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Hide big title and subtitle on scroll */
+header.is-scrolled h1,
+header.is-scrolled p {
+  display: none !important;
+}
+
+/* Centered compact logo on scroll */
+header.is-scrolled .logo-mark {
+  width: auto !important;
+  height: 38px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+header.is-scrolled .logo-mark img {
+  width: auto !important;
+  height: 38px !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+}
+
+/* Vertically center all controls when header is scrolled */
+header.is-scrolled .account-actions {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  right: 20px !important;
+}
+
+header.is-scrolled .account-actions .user-menu-simple {
+  display: none !important;
+}
+
+header.is-scrolled .theme-switch {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  left: 20px !important;
+}
+
+header.is-scrolled .instagram-link {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  left: 98px !important;
+}
+
+header.is-scrolled .mobile-menu-toggle {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  right: 14px !important;
+}
+
+@media (max-width: 560px) {
+  header.is-scrolled {
+    padding: 8px 12px !important;
+  }
+  header.is-scrolled .logo-mark {
+    height: 32px !important;
+  }
+  header.is-scrolled .logo-mark img {
+    height: 32px !important;
+  }
+  header.is-scrolled .mobile-menu-toggle {
+    display: flex !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    right: 12px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+  }
+  header.is-scrolled .account-actions {
+    display: flex !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    right: 56px !important;
+  }
+  header.is-scrolled .header-cart-btn {
+    width: 38px !important;
+    height: 38px !important;
+  }
+  header.is-scrolled .theme-switch {
+    display: flex !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    left: 12px !important;
+    width: 56px !important;
+    height: 30px !important;
+    padding: 3px !important;
+  }
+  header.is-scrolled .theme-switch-thumb {
+    width: 22px !important;
+    height: 22px !important;
+    top: 3px !important;
+    right: 3px !important;
+  }
+  header.is-scrolled .thumb-icon {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  :root[data-theme="light"] header.is-scrolled .theme-switch-thumb {
+    transform: translateX(-26px) !important;
+  }
+  header.is-scrolled .instagram-link {
+    display: grid !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    left: 74px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+  }
 }
 .account-actions {
   position: absolute;
@@ -164,23 +325,6 @@ header p {
 .theme-switch:active {
   transform: scale(0.93);
 }
-.theme-switch-icon {
-  width: 27px;
-  height: 27px;
-  display: grid;
-  place-items: center;
-  position: relative;
-  z-index: 1;
-}
-.theme-switch-icon svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 .theme-switch-thumb {
   position: absolute;
   top: 3px;
@@ -189,22 +333,43 @@ header p {
   height: 26px;
   border-radius: 50%;
   background: var(--gold);
-  transition: transform 0.3s;
+  color: #17130d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
 }
-.theme-sun {
-  color: #fff;
+.thumb-icon {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 0.25s ease, transform 0.3s ease;
 }
-.theme-moon {
-  color: var(--muted);
+.icon-moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+.icon-sun {
+  opacity: 0;
+  transform: scale(0.5) rotate(-90deg);
 }
 :root[data-theme="light"] .theme-switch-thumb {
-  transform: translateX(-32px);
+  transform: translateX(-34px);
+  color: #17130d;
 }
-:root[data-theme="light"] .theme-sun {
-  color: var(--gold);
+:root[data-theme="light"] .icon-moon {
+  opacity: 0;
+  transform: scale(0.5) rotate(90deg);
 }
-:root[data-theme="light"] .theme-moon {
-  color: #fff;
+:root[data-theme="light"] .icon-sun {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
 }
 .controls {
   max-width: 960px;
@@ -242,15 +407,30 @@ header p {
   stroke: var(--muted);
   pointer-events: none;
 }
+.categories-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
 .categories {
   display: flex;
   gap: 10px;
   overflow-x: auto;
-  padding-bottom: 6px;
+  padding: 4px 2px 10px;
   scrollbar-width: none;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  cursor: grab;
+  user-select: none;
 }
 .categories::-webkit-scrollbar {
   display: none;
+}
+.categories.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
 }
 .cat-btn {
   flex: 0 0 auto;
@@ -264,6 +444,8 @@ header p {
   cursor: pointer;
   white-space: nowrap;
   transition: 0.2s;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 .cat-btn:hover {
   border-color: var(--gold);
@@ -275,15 +457,104 @@ header p {
   color: #17130d;
   font-weight: 600;
 }
-:root[data-theme="light"] .cat-btn.active{
+:root[data-theme="light"] .cat-btn.active {
+  background: #c9a24d;
+  color: white;
+  box-shadow: 0 10px 25px rgba(201, 162, 77, 0.35);
+}
 
-    background:#c9a24d;
+/* Gradient fade indicators on overflow */
+.cat-fade {
+  position: absolute;
+  top: 0;
+  bottom: 10px;
+  width: 55px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.cat-fade-right {
+  right: 0;
+  background: linear-gradient(to left, var(--bg) 20%, transparent 100%);
+}
+.cat-fade-left {
+  left: 0;
+  background: linear-gradient(to right, var(--bg) 20%, transparent 100%);
+}
+.cat-fade.is-visible {
+  opacity: 1;
+}
 
-    color:white;
+/* Navigation arrow triggers */
+.cat-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(calc(-50% - 5px));
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  transition: opacity 0.25s ease, transform 0.2s ease, background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+:root[data-theme="light"] .cat-nav-btn {
+  background: #ffffff;
+  border-color: var(--line);
+  color: #8c6e2d;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+.cat-nav-btn.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.cat-nav-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--gold);
+  color: var(--gold-soft);
+  transform: translateY(calc(-50% - 5px)) scale(1.1);
+  box-shadow: 0 6px 18px rgba(201, 162, 77, 0.3);
+}
+:root[data-theme="light"] .cat-nav-btn:hover {
+  background: #fffdf9;
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.cat-nav-btn:active {
+  transform: translateY(calc(-50% - 5px)) scale(0.93);
+}
+.cat-nav-right {
+  right: -12px;
+}
+.cat-nav-left {
+  left: -12px;
+}
 
-    box-shadow:
-        0 10px 25px rgba(201,162,77,.35);
-
+@media (max-width: 600px) {
+  .cat-nav-btn {
+    width: 30px;
+    height: 30px;
+  }
+  .cat-nav-right {
+    right: -4px;
+  }
+  .cat-nav-left {
+    left: -4px;
+  }
+  .cat-fade {
+    width: 36px;
+  }
 }
 .menu-grid {
   max-width: 960px;
@@ -808,7 +1079,7 @@ footer {
 @keyframes drift{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(-120vh) rotate(360deg)}}
 
 /* Ensure main content stacks above beans */
-header, .controls, .menu-grid, footer{position:relative;z-index:1}
+.controls, .menu-grid, footer{position:relative;z-index:1}
 .event-overlay {
   position: fixed;
   inset: 0;
@@ -896,10 +1167,10 @@ header, .controls, .menu-grid, footer{position:relative;z-index:1}
     position: absolute;
     top: 16px;
     right: 14px;
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border: 1px solid var(--line);
-    border-radius: 11px;
+    border-radius: 50%;
     background: var(--surface);
     align-items: center;
     justify-content: center;
@@ -1175,42 +1446,25 @@ header, .controls, .menu-grid, footer{position:relative;z-index:1}
 @media (max-width: 560px) {
   .theme-switch {
     display: flex;
-    top: 15px;
+    top: 19px;
     left: 14px;
-    width: 48px;
-    height: 42px;
+    width: 56px;
+    height: 34px;
     padding: 3px;
-    border-radius: 12px;
-    justify-content: center;
+    border-radius: 999px;
   }
   .theme-switch-thumb {
-    top: 7px;
-    right: 11px;
+    top: 3px;
+    right: 3px;
     width: 26px;
     height: 26px;
   }
-  .theme-switch-icon {
-    width: 25px;
-    height: 25px;
-    position: absolute;
-  }
-  .theme-moon {
-    opacity: 0;
-  }
-  .theme-sun {
-    color: #fff;
+  .thumb-icon {
+    width: 14px;
+    height: 14px;
   }
   :root[data-theme="light"] .theme-switch-thumb {
-    transform: none;
-    left: 11px;
-    right: auto;
-  }
-  :root[data-theme="light"] .theme-sun {
-    opacity: 0;
-  }
-  :root[data-theme="light"] .theme-moon {
-    opacity: 1;
-    color: #fff;
+    transform: translateX(-24px);
   }
   .item-card {
     border-radius: 18px;
@@ -1310,7 +1564,8 @@ header, .controls, .menu-grid, footer{position:relative;z-index:1}
      چون Drawer داخل Header قرار دارد.
   */
   .mobile-menu-open header {
-    position: relative !important;
+    position: sticky !important;
+    top: 0 !important;
     z-index: 100000 !important;
   }
 
@@ -1441,7 +1696,8 @@ header, .controls, .menu-grid, footer{position:relative;z-index:1}
 
   /* Header باید بالاتر از محتوای صفحه باشد */
   .mobile-menu-open header {
-    position: relative !important;
+    position: sticky !important;
+    top: 0 !important;
     z-index: 100000 !important;
   }
 
@@ -1663,7 +1919,7 @@ header, .controls, .menu-grid, footer{position:relative;z-index:1}
 :root[data-theme="light"] .header-cart-btn{background:#fffdfa;border-color:#e5dccf;color:#2d241e}
 :root[data-theme="light"] .header-cart-btn:hover,:root[data-theme="light"] .header-cart-btn:focus-visible{background:#fbf7ee;border-color:var(--gold);color:#885f1b;box-shadow:0 8px 22px rgba(65,48,28,.12)}
 :root[data-theme="light"] .header-cart-badge{border-color:#fffdfa;color:#1a1309}
-@media (max-width:560px){.account-actions{display:flex!important;position:absolute;top:16px;right:64px;gap:0;z-index:4}.account-actions .user-menu,.account-actions .account-link{display:none!important}.header-cart-btn{width:42px;height:42px}.mobile-menu-actions .account-welcome{display:block;padding:4px 5px 12px;color:var(--muted);font-size:12px}.mobile-menu-actions .user-menu-link{min-height:48px;padding:12px;border:1px solid var(--line);background:var(--surface-2);font-size:13px}.mobile-menu-actions .user-menu-link+.user-menu-link{margin-top:8px}.mobile-menu-actions .action-count{min-width:21px;height:21px}:root[data-theme="light"] .mobile-menu-actions .user-menu-link{background:#fff}}
+@media (max-width:560px){.account-actions{display:flex!important;position:absolute;top:16px;right:62px;gap:0;z-index:4}.account-actions .user-menu,.account-actions .account-link{display:none!important}.header-cart-btn{width:40px;height:40px;flex:0 0 40px}.mobile-menu-actions .account-welcome{display:block;padding:4px 5px 12px;color:var(--muted);font-size:12px}.mobile-menu-actions .user-menu-link{min-height:48px;padding:12px;border:1px solid var(--line);background:var(--surface-2);font-size:13px}.mobile-menu-actions .user-menu-link+.user-menu-link{margin-top:8px}.mobile-menu-actions .action-count{min-width:21px;height:21px}:root[data-theme="light"] .mobile-menu-actions .user-menu-link{background:#fff}}
 /* Mobile menu: show two compact products per row without changing cart behavior. */
 @media (max-width: 560px) {
   .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 12px; }
@@ -1700,7 +1956,9 @@ header, .controls, .menu-grid, footer{position:relative;z-index:1}
     linear-gradient(150deg, #f8fafc 0%, #eef2f6 100%);
 }
 :root[data-theme="light"] header {
-  background: rgba(255,255,255,.86);
+  background: rgba(255,255,255,.88);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border-bottom-color: #dfe6ee;
   box-shadow: 0 8px 28px rgba(37,53,76,.06);
 }
@@ -1792,14 +2050,87 @@ a:focus-visible,
 .instagram-link:hover, .instagram-link:focus-visible { color: var(--gold-soft); border-color: var(--gold); background: var(--surface-2); outline: none; }
 .instagram-link:active { transform: scale(.94); }
 @media (max-width: 560px) {
-  .instagram-link { top: 15px; left: 70px; width: 48px; height: 42px; border-radius: 12px; }
+  .instagram-link {
+    top: 16px;
+    left: 78px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+  .instagram-link svg {
+    width: 21px;
+    height: 21px;
+  }
 }
 
-.cart-login{margin-top: 15px;}
+.cart-login {
+  margin-top: 15px;
+}
 
+/* Desktop header action buttons (side-by-side capsule chips) */
+.user-menu-simple {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.user-menu-simple .user-menu-link {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ivory);
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.user-menu-simple .user-menu-link svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  display: block;
+}
+.user-menu-simple .user-menu-link:hover,
+.user-menu-simple .user-menu-link:focus-visible {
+  border-color: var(--gold);
+  background: var(--surface-2);
+  color: var(--gold-soft);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  outline: none;
+}
+.user-menu-simple .user-menu-link:active {
+  transform: scale(0.96);
+}
+:root[data-theme="light"] .user-menu-simple .user-menu-link {
+  background: #ffffff;
+  border-color: var(--line);
+  color: #2d2721;
+}
+:root[data-theme="light"] .user-menu-simple .user-menu-link:hover {
+  background: #fffdf9;
+  border-color: var(--gold);
+  color: #8c6e2d;
+  box-shadow: 0 4px 14px rgba(65, 48, 28, 0.1);
+}
+
+/* On desktop when top of page, user-menu-simple is active so standalone cart button is hidden to prevent duplicate */
+@media (min-width: 561px) {
+  header:not(.is-scrolled) .header-cart-btn {
+    display: none !important;
+  }
+}
 
 @media (max-width: 560px) {
-  .user-menu-simple{
+  .user-menu-simple {
     display: none !important;
   }
 }

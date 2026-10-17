@@ -38,7 +38,7 @@ $cartCountDisplay = $cartCount > 0 ? toPersianDigits((string) $cartCount) : '';
 $cartBadge = '<span class="action-count' . ($cartCount > 0 ? '' : ' is-empty') . '" data-cart-count>'
     . ($cartCount > 0 ? toPersianDigits((string) $cartCount) : '') . '</span>';
 
-$headerCartBtn = '<a class="header-cart-btn' . ($cartCount > 0 ? '' : ' is-hidden') . '" id="headerCartBtn" href="cart" aria-label="سبد خرید" title="سبد خرید">'
+$headerCartBtn = '<a class="header-cart-btn" id="headerCartBtn" href="cart" aria-label="سبد خرید" title="سبد خرید">'
     . '<svg viewBox="0 0 24 24" aria-hidden="true" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
     . '<circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>'
     . '<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>'
@@ -47,11 +47,18 @@ $headerCartBtn = '<a class="header-cart-btn' . ($cartCount > 0 ? '' : ' is-hidde
     . '</a>';
 
 // ناوبار: لینک‌های سبد خرید و سفارش‌ها (بدون نیاز به لاگین)
-$actionLinks = '<a class="user-menu-link" href="orders"><span>سفارش‌های من</span></a>'
+$mobileActionLinks = '<a class="user-menu-link" href="orders"><span>سفارش‌های من</span></a>'
     . '<a class="user-menu-link" href="cart"><span>سبد خرید</span>' . $cartBadge . '</a>';
 
-$desktopAccountActions = '<div class="user-menu-simple">' . $actionLinks . '</div>' . $headerCartBtn;
-$mobileAccountActions  = $actionLinks;
+$desktopActionLinks = '<a class="user-menu-link" href="orders">'
+    . '<svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>'
+    . '<span>سفارش‌های من</span></a>'
+    . '<a class="user-menu-link" href="cart">'
+    . '<svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>'
+    . '<span>سبد خرید</span>' . $cartBadge . '</a>';
+
+$desktopAccountActions = '<div class="user-menu-simple">' . $desktopActionLinks . '</div>' . $headerCartBtn;
+$mobileAccountActions  = $mobileActionLinks;
 $html = Template::load(__DIR__ . '/../templates/menu.html');
 
 // ---------------------------------------------------------------

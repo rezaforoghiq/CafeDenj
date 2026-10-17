@@ -206,3 +206,5 @@ Stack trace:
 #1 C:\xampp\htdocs\classes\temp_verify_tables.php(62): Order::place('test_table_toke...', '4', 'Test order for ...', NULL, '09123456789', '\xD8\xAA\xD8\xB3\xD8\xAA', '\xD9\x85\xDB\x8C\xD8\xB2\xD9\x87\xD8\xA7')
 #2 {main}
   thrown in C:\xampp\htdocs\classes\classes\Order.php on line 166
+[16-Oct-2026 01:06:41 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\classes\public_html\admin\export.php on line 197
+[16-Oct-2026 01:07:12 Asia/Tehran] PHP Deprecated:  ZipArchive::open(): Using empty file as ZipArchive is deprecated in C:\xampp\htdocs\classes\public_html\admin\export.php on line 197

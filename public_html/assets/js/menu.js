@@ -57,9 +57,136 @@ document.addEventListener('DOMContentLoaded', function () {
   const cards = document.querySelectorAll('.item-card');
   const emptyState = document.getElementById('emptyState');
   let activeCat = 'all';
-  function applyFilters() { const term = searchInput?.value.trim().toLowerCase() || ''; let visibleCount = 0; cards.forEach(card => { const visible = (activeCat === 'all' || card.dataset.cat === activeCat) && card.dataset.name.toLowerCase().includes(term); card.classList.toggle('hidden', !visible); if (visible) visibleCount++; }); if (emptyState) emptyState.style.display = visibleCount === 0 ? 'block' : 'none'; }
-  catButtons.forEach(button => button.addEventListener('click', function () { catButtons.forEach(item => item.classList.remove('active')); button.classList.add('active'); activeCat = button.dataset.cat || 'all'; applyFilters(); }));
+
+  function applyFilters() {
+    const term = searchInput?.value.trim().toLowerCase() || '';
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const visible = (activeCat === 'all' || card.dataset.cat === activeCat) && card.dataset.name.toLowerCase().includes(term);
+      card.classList.toggle('hidden', !visible);
+      if (visible) visibleCount++;
+    });
+    if (emptyState) emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  // --- Category Carousel Navigation & Drag (Desktop & Mobile) ---
+  const categoryBar = document.getElementById('categoryBar');
+  const catNavLeft = document.getElementById('catNavLeft');
+  const catNavRight = document.getElementById('catNavRight');
+  const catFadeLeft = document.getElementById('catFadeLeft');
+  const catFadeRight = document.getElementById('catFadeRight');
+  let dragThresholdPassed = false;
+
+  catButtons.forEach(button => button.addEventListener('click', function () {
+    if (dragThresholdPassed) return;
+    catButtons.forEach(item => item.classList.remove('active'));
+    button.classList.add('active');
+    activeCat = button.dataset.cat || 'all';
+    applyFilters();
+    try {
+      button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    } catch (e) {}
+  }));
+
   searchInput?.addEventListener('input', applyFilters);
+
+  if (categoryBar) {
+    function updateCategoryNav() {
+      const scrollWidth = categoryBar.scrollWidth;
+      const clientWidth = categoryBar.clientWidth;
+      const maxScroll = scrollWidth - clientWidth;
+
+      if (maxScroll <= 4) {
+        catNavLeft?.classList.remove('is-visible');
+        catNavRight?.classList.remove('is-visible');
+        catFadeLeft?.classList.remove('is-visible');
+        catFadeRight?.classList.remove('is-visible');
+        return;
+      }
+
+      // In RTL: 0 is the start (right edge).
+      // Scrolling left yields negative values (0 -> -maxScroll) in modern standards.
+      const currentScroll = Math.abs(categoryBar.scrollLeft);
+
+      const canScrollRight = currentScroll > 6;
+      const canScrollLeft = currentScroll < (maxScroll - 6);
+
+      catNavRight?.classList.toggle('is-visible', canScrollRight);
+      catFadeRight?.classList.toggle('is-visible', canScrollRight);
+
+      catNavLeft?.classList.toggle('is-visible', canScrollLeft);
+      catFadeLeft?.classList.toggle('is-visible', canScrollLeft);
+    }
+
+    function scrollCategoryBar(direction) {
+      const step = Math.max(180, Math.round(categoryBar.clientWidth * 0.65));
+      const delta = direction === 'left' ? -step : step;
+      categoryBar.scrollBy({ left: delta, behavior: 'smooth' });
+    }
+
+    catNavLeft?.addEventListener('click', function () {
+      scrollCategoryBar('left');
+    });
+
+    catNavRight?.addEventListener('click', function () {
+      scrollCategoryBar('right');
+    });
+
+    let scrollTicking = false;
+    categoryBar.addEventListener('scroll', function () {
+      if (!scrollTicking) {
+        window.requestAnimationFrame(function () {
+          updateCategoryNav();
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', updateCategoryNav, { passive: true });
+
+    updateCategoryNav();
+    setTimeout(updateCategoryNav, 100);
+
+    // Mouse drag-to-scroll for desktop
+    let isMouseDown = false;
+    let startX = 0;
+    let scrollStart = 0;
+
+    categoryBar.addEventListener('mousedown', function (e) {
+      if (e.button !== 0) return;
+      isMouseDown = true;
+      dragThresholdPassed = false;
+      startX = e.pageX;
+      scrollStart = categoryBar.scrollLeft;
+      categoryBar.classList.add('is-dragging');
+    });
+
+    window.addEventListener('mousemove', function (e) {
+      if (!isMouseDown) return;
+      const walk = e.pageX - startX;
+      if (Math.abs(walk) > 5) {
+        dragThresholdPassed = true;
+      }
+      categoryBar.scrollLeft = scrollStart - walk;
+    });
+
+    window.addEventListener('mouseup', function () {
+      if (!isMouseDown) return;
+      isMouseDown = false;
+      categoryBar.classList.remove('is-dragging');
+      setTimeout(function () {
+        dragThresholdPassed = false;
+      }, 50);
+    });
+
+    categoryBar.addEventListener('click', function (e) {
+      if (dragThresholdPassed) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    }, true);
+  }
   function toPersianDigits(n) {
     if (n === null || n === undefined) return '';
     const str = String(n);
@@ -72,9 +199,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-cart-count]').forEach(function (badge) {
       badge.textContent = num > 0 ? toPersianDigits(num) : '';
       badge.classList.toggle('is-empty', num === 0);
-    });
-    document.querySelectorAll('.header-cart-btn').forEach(function (btn) {
-      btn.classList.toggle('is-hidden', num === 0);
     });
     document.querySelectorAll('.header-cart-badge, [data-cart-count]').forEach(function (el) {
       el.classList.remove('pulse');
@@ -347,6 +471,25 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('pageshow', function () {
     CartCoordinator.refreshAllFromServer();
   });
+
+  // Sticky Liquid Glass header on scroll
+  const headerEl = document.querySelector('header');
+  if (headerEl) {
+    let ticking = false;
+    const updateHeaderScroll = function () {
+      const isScrolled = window.scrollY > 25;
+      headerEl.classList.toggle('is-scrolled', isScrolled);
+      ticking = false;
+    };
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        window.requestAnimationFrame(updateHeaderScroll);
+        ticking = true;
+      }
+    }, { passive: true });
+    updateHeaderScroll();
+  }
+
   const overlay = document.getElementById('eventOverlay'); if (!overlay) return;
   const eventKey = 'eventPopupShown'; if (!sessionStorage.getItem(eventKey)) { overlay.classList.add('open'); sessionStorage.setItem(eventKey, '1'); }
   const closePopup = () => overlay.classList.remove('open'); document.getElementById('eventCloseBtn')?.addEventListener('click', closePopup); overlay.addEventListener('click', event => { if (event.target === overlay) closePopup(); });
